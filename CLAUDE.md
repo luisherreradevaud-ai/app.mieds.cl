@@ -206,6 +206,63 @@ $.ajax({
   - Create `Media` object with file path
   - Link via many-to-many table (e.g., `media_batches`)
 
+### Traceability System (Production Flow)
+The system tracks the complete lifecycle from production to delivery:
+
+#### Barrel Flow (Cerveza en Barriles)
+```
+Batch → BatchActivo (Fermentación/Maduración) → Barril → Despacho → Entrega → Devolución
+```
+- **Key Classes**: `Batch`, `BatchActivo`, `Barril`, `BarrilEstado`, `Despacho`, `DespachoProducto`, `Entrega`, `EntregaProducto`
+- **Key Files**:
+  - `templates/inventario-de-productos.php` - Central inventory management (2172 lines)
+  - `ajax/ajax_llenarBarriles.php` - Fill barrels from fermenters
+  - `ajax/ajax_guardarDespacho.php` - Create dispatch
+  - `ajax/ajax_guardarEntrega.php` - Process delivery
+
+#### Container Flow (Latas y Botellas)
+```
+BatchActivo/Barril → BatchDeEnvases → Envase (N units) → CajaDeEnvases → Despacho → Entrega
+```
+- **Key Classes**: `BatchDeEnvases`, `Envase`, `FormatoDeEnvases`, `CajaDeEnvases`
+- **Key Files**:
+  - `templates/formatos-de-envases.php` - Container format configuration
+  - `ajax/ajax_envasar.php` - Create containers from fermenters/barrels
+  - `ajax/ajax_crearCajaDeEnvases.php` - Create boxes of containers
+  - `ajax/ajax_revertirEnvasado.php` - Revert packaging operation
+
+#### Barrel States
+| State | Description |
+|-------|-------------|
+| `En planta` | Empty, available for filling |
+| `En despacho` | Loaded on truck, in transit |
+| `En terreno` | Delivered to customer |
+| `Pinchado` | Damaged/defective |
+| `Perdido` | Lost |
+| `Devuelto a planta` | Returned, awaiting cleaning |
+
+#### Container States
+| State | Description |
+|-------|-------------|
+| `Envasado` | Individual container created |
+| `En caja` | Assigned to a box |
+| `En despacho` | Box loaded on truck |
+| `Entregada` | Delivered to customer |
+
+#### Box States
+| State | Description |
+|-------|-------------|
+| `En planta` | Available for dispatch |
+| `En despacho` | Loaded on truck |
+| `Entregada` | Delivered to customer |
+| `eliminado` | Soft deleted |
+
+### Packaging System (Envases)
+- **Formats**: Configurable container formats (Lata 473ml, Botella 330ml, etc.)
+- **Mixed Boxes**: Support for boxes with containers from multiple recipes
+- **Traceability**: Each individual container (`Envase`) tracks origin batch
+- **Box Codes**: Auto-generated format `CAJA-YYMMDD-XXXX`
+
 ## Common Patterns & Best Practices
 
 ### AJAX Response Format
@@ -339,7 +396,7 @@ calcularDV($rut)                  # Calculate Chilean RUT verification digit
 
 **Production:**
 - `Batch` - Beer production batch
-- `BatchActivo` - Active batch state
+- `BatchActivo` - Active batch state (fermentation/maturation)
 - `BatchCaja` - Batch boxing/packaging
 - `BatchEnfriado` - Batch cooling stage
 - `BatchInsumo` - Batch ingredients (many-to-many)
@@ -350,12 +407,18 @@ calcularDV($rut)                  # Calculate Chilean RUT verification digit
 - `TipoDeInsumo` - Ingredient type
 - `CompraDeInsumo` - Ingredient purchase
 - `Barril` - Keg/barrel tracking
-- `BarrilEstado` - Barrel state/status
+- `BarrilEstado` - Barrel state/status history
 - `BarrilReemplazo` - Barrel replacement tracking
-- `Producto` - Finished product
+- `Producto` - Finished product (barrels, cans, bottles)
 - `Caja` - Box/case for packaging
 - `Accesorio` - Accessory/equipment
-- `Activo` - Fixed asset
+- `Activo` - Fixed asset (fermenters, tanks)
+
+**Container Packaging (Envases):**
+- `FormatoDeEnvases` - Container format definition (473ml can, 330ml bottle, etc.)
+- `BatchDeEnvases` - Packaging batch (N containers from single source)
+- `Envase` - Individual container unit with full traceability
+- `CajaDeEnvases` - Box containing N containers (may be mixed)
 
 **Sales/Distribution:**
 - `Cliente` - Customer
@@ -474,12 +537,16 @@ console.error('Error:', error);
 
 ## Additional Documentation
 
+- **QA Traceability**: `/QA_FLUJO_TRAZABILIDAD.md` - Complete QA analysis of production flow
+- **Traceability Analysis**: `/ANALISIS_TRAZABILIDAD_ENVASES.md` - Container traceability analysis
+- **System Traceability**: `/TRAZABILIDAD_SISTEMA.md` - System traceability documentation
+- **Mixed Boxes Plan**: `/PLAN_CAJAS_MIXTAS.md` - Mixed boxes implementation plan
 - Kanban system: `/tareas-php/README.md`
 - Internal conversations: `/CONVERSACION_INTERNA_README.md`
 - Agent/AI context: `/agent.md` (comprehensive technical documentation)
 - Database schema: `/context/barrcl_cocholg.sql`
 
-## Recent Changes & Updates (as of 2025-11-27)
+## Recent Changes & Updates (as of 2025-11-29)
 
 ### Calendar System Integration
 - **New Feature**: Unified calendar view integrating expenses, tasks, and batch timelines
@@ -491,6 +558,31 @@ console.error('Error:', error);
 - **Library**: FullCalendar 6.1.10 with Spanish localization
 - **Features**: Drag & drop date updates, quick event creation, responsive design
 
+### Container Packaging System (2025-11-29)
+- **New Feature**: Complete container packaging and traceability system
+- **New Classes**:
+  - `php/classes/FormatoDeEnvases.php` - Container format definitions
+  - `php/classes/BatchDeEnvases.php` - Packaging batch tracking
+  - `php/classes/Envase.php` - Individual container traceability
+  - `php/classes/CajaDeEnvases.php` - Box management (including mixed boxes)
+- **New AJAX Endpoints**:
+  - `ajax/ajax_envasar.php` - Create containers from fermenters/barrels
+  - `ajax/ajax_crearCajaDeEnvases.php` - Create boxes of containers
+  - `ajax/ajax_eliminarCajaDeEnvases.php` - Delete/revert boxes
+  - `ajax/ajax_revertirEnvasado.php` - Revert packaging operation
+  - `ajax/ajax_guardarFormatoDeEnvases.php` - Save container formats
+  - `ajax/ajax_eliminarFormatoDeEnvases.php` - Delete container formats
+  - `ajax/ajax_revertirTraspaso.php` - Revert vessel transfer
+  - `ajax/ajax_revertirLlenadoBarril.php` - Revert barrel filling
+- **New Templates**:
+  - `templates/formatos-de-envases.php` - Container format configuration
+  - `templates/detalle-despachos.php` - Dispatch details
+- **Modified Files**:
+  - `templates/inventario-de-productos.php` - Added packaging and box creation UI
+  - `templates/nuevo-despachos.php` - Added container box dispatch
+  - `ajax/ajax_guardarDespacho.php` - Support for CajaEnvases
+  - `ajax/ajax_guardarEntrega.php` - Support for container box delivery
+
 ### Modified Files
 - `ajax/ajax_getTarea.php` - Enhanced task retrieval
 - `ajax/ajax_guardarTarea.php` - Improved task saving with user assignment
@@ -499,9 +591,9 @@ console.error('Error:', error);
 - `templates/detalle-gastos.php` - Enhanced expense details
 
 ### Statistics
-- **98 entity classes** (Base.php + 97 models)
-- **176 templates** (including components)
-- **92 AJAX endpoints**
+- **102 entity classes** (Base.php + 101 models)
+- **177 templates** (including components)
+- **101 AJAX endpoints**
 - **286 JavaScript files**
 - **2 CSS files**
 
