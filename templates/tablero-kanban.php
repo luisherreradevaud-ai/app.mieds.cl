@@ -225,10 +225,6 @@
                 <div class="dropdown-menu dropdown-menu-wide p-3" id="dates-dropdown">
                   <h6 class="dropdown-header px-0">Fechas</h6>
                   <div class="mb-2">
-                    <label class="form-label small">Fecha de Inicio</label>
-                    <input type="date" id="task-start-date-inline" class="form-control form-control-sm">
-                  </div>
-                  <div class="mb-2">
                     <label class="form-label small">Fecha de Vencimiento</label>
                     <input type="date" id="task-due-date-inline" class="form-control form-control-sm">
                   </div>
@@ -2850,18 +2846,12 @@ function displayTaskDates() {
   var container = $('#task-dates-display');
   container.empty();
 
-  if ((!currentTask.fecha_inicio || currentTask.fecha_inicio === '0000-00-00') &&
-      (!currentTask.fecha_vencimiento || currentTask.fecha_vencimiento === '0000-00-00')) {
+  if (!currentTask.fecha_vencimiento || currentTask.fecha_vencimiento === '0000-00-00') {
     console.log('   No dates to display');
     return;
   }
 
   var datesDiv = $('<div>').addClass('small text-muted mb-2');
-
-  if (currentTask.fecha_inicio && currentTask.fecha_inicio !== '0000-00-00') {
-    console.log('   Start date:', currentTask.fecha_inicio);
-    datesDiv.append($('<div>').text('Inicio: ' + formatDate(currentTask.fecha_inicio)));
-  }
 
   if (currentTask.fecha_vencimiento && currentTask.fecha_vencimiento !== '0000-00-00') {
     console.log('   Due date:', currentTask.fecha_vencimiento);
@@ -5190,4 +5180,50 @@ function deleteFile(fileId) {
 }
 
 console.log('✅ [INIT] All functions loaded');
+
+// ============================================
+// AUTO-OPEN TASK FROM URL
+// ============================================
+// Check if id_tarea is in URL and open task modal automatically
+$(document).ready(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tareaIdFromUrl = urlParams.get('id_tarea');
+
+  if (tareaIdFromUrl) {
+    console.log('🔗 [AUTO-OPEN] Task ID from URL:', tareaIdFromUrl);
+
+    // Wait for tablero to load and DOM to be ready
+    const checkTableroLoaded = setInterval(function() {
+      // Check if tablero is loaded by looking for task cards in the DOM
+      const taskCards = document.querySelectorAll('.kanban-task:not(.new-task-card)');
+
+      console.log('⏳ [AUTO-OPEN] Checking... currentTableroId:', currentTableroId, 'taskCards:', taskCards.length);
+
+      if (currentTableroId && taskCards.length > 0) {
+        clearInterval(checkTableroLoaded);
+
+        console.log('🔍 [AUTO-OPEN] Tablero loaded with', taskCards.length, 'tasks, opening task ID:', tareaIdFromUrl);
+
+        // Simply call openTaskModal with the task ID
+        // The function will handle loading the task data via AJAX
+        setTimeout(function() {
+          openTaskModal(tareaIdFromUrl);
+
+          // Remove id_tarea from URL to avoid re-opening on refresh
+          const newUrl = new URL(window.location);
+          newUrl.searchParams.delete('id_tarea');
+          window.history.replaceState({}, document.title, newUrl);
+
+          console.log('🎯 [AUTO-OPEN] Task modal opened and URL cleaned');
+        }, 500);
+      }
+    }, 200); // Check every 200ms
+
+    // Safety timeout: stop checking after 10 seconds
+    setTimeout(function() {
+      clearInterval(checkTableroLoaded);
+      console.log('⏱️ [AUTO-OPEN] Timeout - stopped checking for tablero load');
+    }, 10000);
+  }
+});
 </script>

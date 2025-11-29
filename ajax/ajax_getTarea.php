@@ -13,7 +13,7 @@
   if(!isset($_GET['id'])) {
     $response["status"] = "ERROR";
     $response["mensaje"] = "ID de tarea requerido";
-    print json_encode($response, JSON_PRETTY_PRINT);
+    print json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     die();
   }
 
@@ -31,7 +31,7 @@
       }
 
       // Get all users
-      $usuarios_arr = Usuario::getAll("ORDER BY nombre ASC");
+      $usuarios_arr = Usuario::getAll("WHERE nivel!='Cliente' ORDER BY nombre ASC");
       $usuarios = array();
       foreach($usuarios_arr as $user) {
         $usuarios[] = array(
@@ -83,6 +83,6 @@
     error_log("Error en ajax_getTarea.php: " . $e->getMessage());
   }
 
-  print json_encode($response, JSON_PRETTY_PRINT);
+  print json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
 ?>

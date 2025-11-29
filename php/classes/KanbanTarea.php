@@ -37,14 +37,14 @@ class KanbanTarea extends Base {
   }
 
   public function save() {
-    // Convert arrays to JSON before saving
+    // Convert arrays to JSON before saving (with UTF-8 support for accents)
     if(is_array($this->checklist)) {
       $checklist_backup = $this->checklist;
-      $this->checklist = json_encode($this->checklist);
+      $this->checklist = json_encode($this->checklist, JSON_UNESCAPED_UNICODE);
     }
     if(is_array($this->links)) {
       $links_backup = $this->links;
-      $this->links = json_encode($this->links);
+      $this->links = json_encode($this->links, JSON_UNESCAPED_UNICODE);
     }
 
     $this->actualizada = date('Y-m-d H:i:s');

@@ -23,7 +23,7 @@
     header("Location: ../?s=central-clientes-completa");
   } else
   {
-    header("Location: ../?s=planificacion");
+    header("Location: ../?s=calendar");
   }
 
 ?>

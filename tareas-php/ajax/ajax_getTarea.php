@@ -13,7 +13,7 @@
   if(!isset($_GET['id'])) {
     $response["status"] = "ERROR";
     $response["mensaje"] = "ID de tarea requerido";
-    print json_encode($response, JSON_PRETTY_PRINT);
+    print json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     die();
   }
 
@@ -59,6 +59,6 @@
     error_log("Error en ajax_getTarea.php: " . $e->getMessage());
   }
 
-  print json_encode($response, JSON_PRETTY_PRINT);
+  print json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
 ?>

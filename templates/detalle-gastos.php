@@ -427,7 +427,7 @@ $(document).on('click','#eliminar-obj-aceptar',function(e){
       alert("Algo fallo");
       return false;
     } else {
-      window.location.href = "./?s=" + response.table_name + "&msg=2";
+      window.location.href = "<?= $usuario->getReturnLink(); ?>";
     }
   }).fail(function(){
     alert("No funciono");
