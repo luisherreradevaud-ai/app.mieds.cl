@@ -37,6 +37,13 @@
     <div class="col-md-6">
     <div class="row">
     <div class="col-6 mb-1">
+        C&oacute;digo:
+      </div>
+      <div class="col-6 mb-1">
+        <input type="text" class="form-control bg-light" value="Se generar&aacute; al guardar" readonly>
+        <small class="text-muted">Basado en la l&iacute;nea productiva (ALC/SNA/GEN-XXX)</small>
+      </div>
+    <div class="col-6 mb-1">
         Nombre:
       </div>
       <div class="col-6 mb-1">
@@ -107,6 +114,16 @@
             <option>Kombucha</option>
             <option>Agua saborizada</option>
             <option>Agua fermentada</option>
+        </select>
+      </div>
+      <div class="col-6 mb-1">
+        L&iacute;nea Productiva:
+      </div>
+      <div class="col-6 mb-1">
+        <select class="form-control" name="linea_productiva">
+            <option value="general">General</option>
+            <option value="alcoholica">L&iacute;nea Alcoh&oacute;lica</option>
+            <option value="analcoholica">L&iacute;nea Sin Alcohol</option>
         </select>
       </div>
       <div id="config-receta">
@@ -406,17 +423,15 @@ $(document).on('click','#guardar-btn',function(e){
   console.log(data);
 
 
-  $.post(url,data,function(raw){
-    console.log(raw);
-    //return false;
-    var response = JSON.parse(raw);
+  $.post(url,data,function(response){
+    console.log(response);
     if(response.mensaje!="OK") {
       alert("Algo fallo");
       return false;
     } else {
       window.location.href = "./?s=detalle-productos&id=" + response.obj.id + "&msg=1";
     }
-  }).fail(function(){
+  },'json').fail(function(){
     alert("No funciono");
   });
 });
@@ -433,18 +448,15 @@ $(document).on('click','#guardar-y-agregar-btn',function(e){
 
   console.log(data);
 
-
-  $.post(url,data,function(raw){
-    console.log(raw);
-    //return false;
-    var response = JSON.parse(raw);
+  $.post(url,data,function(response){
+    console.log(response);
     if(response.mensaje!="OK") {
       alert("Algo fallo");
       return false;
     } else {
       window.location.href = "./?s=nuevo-productos&msg=1";
     }
-  }).fail(function(){
+  },'json').fail(function(){
     alert("No funciono");
   });
 });

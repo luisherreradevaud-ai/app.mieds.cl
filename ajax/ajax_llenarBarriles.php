@@ -41,8 +41,16 @@
     $barril->id_batches = $batch_activo->id_batches;
     $barril->id_activos = $batch_activo->id_activos;
     $barril->id_batches_activos = $batch_activo->id;
+    $barril->fecha_llenado = date('Y-m-d H:i:s');
 
     $batch_activo->save();
+
+    // Si el fermentador quedó vacío, liberarlo
+    if($batch_activo->litraje <= 0) {
+        $activo->id_batches = 0;
+        $activo->save();
+    }
+
     $barril->save();
 
     $batch = new Batch($batch_activo->id_batches);

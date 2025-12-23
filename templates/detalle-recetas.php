@@ -98,6 +98,9 @@
       <div class="col-12 mt-3 mb-1 d-flex justify-content-between">
         <button class="btn btn-sm btn-primary" id="agregar-insumos-btn"><i class="fas fa-fw fa-plus"></i> Agregar Insumos</button>
         <div>
+          <a href="./ajax/ajax_generarRecetaPDF.php?id=<?= htmlspecialchars($obj->id); ?>" target="_blank" class="btn btn-sm btn-outline-secondary me-2">
+            <i class="fas fa-fw fa-file-pdf"></i> PDF Instrucciones
+          </a>
           <button class="btn btn-sm btn-danger eliminar-obj-btn">Eliminar Receta</button>
           <button class="btn btn-sm btn-primary" id="guardar-recetas-aceptar">Guardar</button>
         </div>

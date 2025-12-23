@@ -13,6 +13,11 @@
 10. [Puntos Críticos de Trazabilidad](#puntos-críticos-de-trazabilidad)
 11. [Archivos Clave por Proceso](#archivos-clave-por-proceso)
 12. [Interfaz de Inventario de Productos](#interfaz-de-inventario-de-productos)
+13. [Generación de PDF de Trazabilidad](#generación-de-pdf-de-trazabilidad)
+14. [Sistema de Certificación Halal](#sistema-de-certificación-halal)
+15. [Sistema de Limpiezas de Activos](#sistema-de-limpiezas-de-activos)
+16. [Campos ML para Machine Learning](#campos-ml-para-machine-learning)
+17. [Líneas Productivas](#líneas-productivas)
 
 ---
 
@@ -1531,5 +1536,892 @@ Los botones de acción almacenan datos en atributos `data-*` para evitar consult
 
 ---
 
-*Documento generado el 2025-11-29*
-*Versión del sistema: Barril.cl ERP v1.0*
+## Generación de PDF de Trazabilidad
+
+### Descripción General
+
+El sistema permite generar un **Certificado de Trazabilidad PDF** para cada producto entregado (barril o caja de envases). Este documento acredita la trazabilidad completa del producto desde su producción hasta la entrega al cliente.
+
+### Archivos Implementados
+
+| Archivo | Tipo | Descripción |
+|---------|------|-------------|
+| `php/classes/TrazabilidadPDF.php` | Clase PHP | Generador de PDF de trazabilidad |
+| `ajax/ajax_generarPDFTrazabilidad.php` | Endpoint AJAX | Endpoint para descargar el PDF |
+| `db/migrations/008_trazabilidad_pdf.sql` | Migración SQL | Campos adicionales para trazabilidad |
+| `vendor_php/dompdf/` | Librería | DOMPDF para generación de PDF |
+| `vendor_php/dompdf_autoload.php` | Autoloader | Carga automática de DOMPDF |
+
+### Campos de Base de Datos Agregados
+
+#### Tabla `activos`
+```sql
+ALTER TABLE activos
+ADD COLUMN linea_productiva ENUM('alcoholica', 'analcoholica', 'general')
+DEFAULT 'general' AFTER clase;
+```
+
+**Propósito:** Indica si el activo (fermentador, tanque) pertenece a la línea de producción alcohólica, sin alcohol, o general.
+
+**Valores:**
+- `alcoholica` - Línea Alcohólica
+- `analcoholica` - Línea Sin Alcohol
+- `general` - General (default)
+
+#### Tabla `barriles`
+```sql
+ALTER TABLE barriles
+ADD COLUMN fecha_llenado DATETIME DEFAULT NULL AFTER litros_cargados;
+```
+
+**Propósito:** Registra la fecha exacta cuando se llenó el barril con cerveza.
+
+### Clase TrazabilidadPDF
+
+**Ubicación:** `php/classes/TrazabilidadPDF.php`
+
+#### Constructor
+```php
+public function __construct($id_entregas_productos)
+```
+Recibe el ID de un `EntregaProducto` y recopila automáticamente todos los datos de trazabilidad.
+
+#### Métodos Principales
+
+| Método | Descripción |
+|--------|-------------|
+| `recopilarDatos()` | Recopila todos los datos necesarios para el PDF |
+| `recopilarDatosBarril()` | Obtiene trazabilidad específica para barriles |
+| `recopilarDatosCajaEnvases()` | Obtiene trazabilidad para cajas de envases |
+| `obtenerGranos($batch_id)` | Obtiene los granos/maltas utilizados en el batch |
+| `obtenerTraspasos($batch_id)` | Obtiene los traspasos de fermentación/maduración |
+| `calcularTiempos($fecha_coccion, $fecha_empaque, $fecha_entrega)` | Calcula tiempos del proceso |
+| `generarHTML()` | Genera el HTML del certificado |
+| `generar($output)` | Genera y descarga el PDF |
+| `getDatos()` | Retorna los datos recopilados (para debug) |
+
+#### Flujo de Datos para Barriles
+```
+EntregaProducto.id_barriles → Barril
+    ├── Barril.id_batches → Batch (cocción, receta)
+    ├── Barril.id_batches_activos → BatchActivo (fermentación)
+    ├── Barril.fecha_llenado → Fecha de embarrilado
+    └── Batch → BatchInsumo → Insumo (ingredientes)
+              → BatchTraspaso (traspasos fermentación/maduración)
+              → Receta (nombre, código)
+```
+
+#### Flujo de Datos para Cajas de Envases
+```
+EntregaProducto.id_cajas_de_envases → CajaDeEnvases
+    └── CajaDeEnvases → Envase → BatchDeEnvases
+                            ├── id_batches → Batch (cocción)
+                            ├── id_activos → Activo (origen fermentador)
+                            ├── id_barriles → Barril (origen barril)
+                            └── creada (fecha envasado)
+```
+
+### Estructura del PDF
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ [LOGO]          CERTIFICADO DE TRAZABILIDAD DE PRODUCTO    │
+│                 Cerveza Cocholgue                           │
+├─────────────────────────────────────────────────────────────┤
+│ DATOS DE LA ENTREGA                                         │
+│ ─────────────────────                                       │
+│ Cliente: [Nombre / Razón Social]                            │
+│ Fecha de Entrega: [DD/MM/YYYY HH:MM]                        │
+│ Documento: Factura #[Folio] / Sin documento                 │
+│ Receptor: [Nombre receptor]                                 │
+├─────────────────────────────────────────────────────────────┤
+│ DATOS DEL PRODUCTO                                          │
+│ ─────────────────                                           │
+│ Tipo: [Barril 30L / Caja 24 Latas 473ml]                   │
+│ Código: [B-001 / CAJA-241129-ABC1]                         │
+│ Receta: [IPA - Código: REC-001]                            │
+├─────────────────────────────────────────────────────────────┤
+│ LÍNEA DE TIEMPO DEL PROCESO                                 │
+│ ─────────────────────────────                               │
+│                                                             │
+│ ● COCCIÓN                                                   │
+│   Fecha: [DD/MM/YYYY]                                       │
+│   Granos: Malta Pilsen, Malta Caramelo, ...                │
+│                    ↓                                        │
+│ ● FERMENTACIÓN                                              │
+│   Inicio: [DD/MM/YYYY HH:MM]                               │
+│   Fermentador: [FER-001 (60L)]                             │
+│   Línea: [Alcohólica / Sin Alcohol / General]              │
+│                    ↓                                        │
+│ ● MADURACIÓN / TRASPASOS                                    │
+│   [DD/MM/YYYY] FER-001 → MAD-002                           │
+│   [DD/MM/YYYY] MAD-002 → MAD-003                           │
+│                    ↓                                        │
+│ ● EMPAQUE                                                   │
+│   Fecha: [DD/MM/YYYY HH:MM]                                │
+│   Tipo: [Barril B-001 (30L) / Caja 24 Latas]              │
+│   Línea: [Alcohólica]                                      │
+│                    ↓                                        │
+│ ● ENTREGA                                                   │
+│   Fecha: [DD/MM/YYYY HH:MM]                                │
+│   Cliente: [Nombre]                                         │
+├─────────────────────────────────────────────────────────────┤
+│ RESUMEN DE TIEMPOS                                          │
+│ ─────────────────                                           │
+│ Cocción → Empaque:    [X] días, [Y] horas                  │
+│ Empaque → Entrega:    [X] días, [Y] horas                  │
+│ ────────────────────────────────────────                   │
+│ TOTAL:                [X] días, [Y] horas                  │
+├─────────────────────────────────────────────────────────────┤
+│ OBSERVACIONES (si aplica)                                   │
+└─────────────────────────────────────────────────────────────┘
+│ Documento generado el [fecha] - Sistema Barril.cl          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Endpoint AJAX
+
+**Archivo:** `ajax/ajax_generarPDFTrazabilidad.php`
+
+**Método:** GET
+
+**Parámetros:**
+| Parámetro | Tipo | Requerido | Descripción |
+|-----------|------|-----------|-------------|
+| `id` | int | Sí | ID del EntregaProducto |
+
+**Permisos:** Administrador, Jefe de Planta, Jefe de Cocina, Operario, Repartidor
+
+**Respuesta:** Descarga directa del archivo PDF
+
+**Ejemplo de uso:**
+```
+GET /ajax/ajax_generarPDFTrazabilidad.php?id=123
+```
+
+**Nombre del archivo generado:** `Trazabilidad_[CODIGO]_[YYYYMMDD].pdf`
+
+### Integración en Detalle de Entregas
+
+**Archivo modificado:** `templates/detalle-entregas.php`
+
+Se agregó una columna "Trazabilidad" en la tabla de productos entregados con un botón para descargar el PDF:
+
+```php
+<?php if($tiene_trazabilidad): ?>
+<a href="./ajax/ajax_generarPDFTrazabilidad.php?id=<?= $ep->id; ?>"
+   class="btn btn-sm btn-outline-primary"
+   target="_blank"
+   title="Descargar PDF de Trazabilidad">
+  <i class="fas fa-file-pdf"></i>
+</a>
+<?php else: ?>
+<span class="text-muted" title="Sin trazabilidad disponible">-</span>
+<?php endif; ?>
+```
+
+**Condición para mostrar botón:**
+```php
+$tiene_trazabilidad = ($ep->id_barriles > 0 || $ep->id_cajas_de_envases > 0);
+```
+
+### Modificaciones en Clases Existentes
+
+#### Activo.php
+
+**Archivo:** `php/classes/Activo.php`
+
+**Cambios:**
+1. Nueva propiedad: `$linea_productiva = 'general'`
+2. Nuevo método estático: `getLineasProductivas()`
+3. Nuevo método de instancia: `getLineaProductivaLabel()`
+
+```php
+public static function getLineasProductivas() {
+  return [
+    'alcoholica' => 'Línea Alcohólica',
+    'analcoholica' => 'Línea Sin Alcohol',
+    'general' => 'General'
+  ];
+}
+
+public function getLineaProductivaLabel() {
+  $lineas = self::getLineasProductivas();
+  return isset($lineas[$this->linea_productiva]) ? $lineas[$this->linea_productiva] : 'General';
+}
+```
+
+#### Barril.php
+
+**Archivo:** `php/classes/Barril.php`
+
+**Cambios:**
+1. Nueva propiedad: `$fecha_llenado = null`
+
+```php
+public $fecha_llenado = null;
+```
+
+#### ajax_llenarBarriles.php
+
+**Archivo:** `ajax/ajax_llenarBarriles.php`
+
+**Cambios:**
+Se registra la fecha de llenado al cargar un barril:
+
+```php
+$barril->fecha_llenado = date('Y-m-d H:i:s');
+```
+
+### Integración en Formularios de Activos
+
+#### detalle-activos.php y nuevo-activos.php
+
+Se agregó el campo "Línea Productiva" en los formularios de activos:
+
+```php
+$lineas_productivas = Activo::getLineasProductivas();
+
+// En el formulario:
+<div class="col-6 mb-1">
+  L&iacute;nea Productiva:
+</div>
+<div class="col-6 mb-1">
+  <select class="form-control" name="linea_productiva">
+    <?php foreach($lineas_productivas as $key => $label): ?>
+    <option value="<?= $key; ?>"><?= $label; ?></option>
+    <?php endforeach; ?>
+  </select>
+</div>
+```
+
+### Librería PDF: DOMPDF
+
+**Ubicación:** `vendor_php/dompdf/`
+
+DOMPDF convierte HTML a PDF. Se eligió por su simplicidad de uso y porque no requiere dependencias externas complejas.
+
+**Configuración:**
+```php
+$options = new \Dompdf\Options();
+$options->set('isHtml5ParserEnabled', false);
+$options->set('isRemoteEnabled', false);
+
+$dompdf = new \Dompdf\Dompdf($options);
+$dompdf->loadHtml($html);
+$dompdf->setPaper('Letter', 'portrait');
+$dompdf->render();
+```
+
+### Validaciones de Fechas
+
+La clase `TrazabilidadPDF` incluye validaciones robustas para fechas:
+
+1. **Fechas vacías o nulas:** Se muestran como "N/A"
+2. **Fechas inválidas de MySQL:** `0000-00-00` y `0000-00-00 00:00:00` se detectan
+3. **Años inválidos:** Se valida que el año sea >= 2020
+4. **Orden cronológico:** Se verifica que fecha_fin > fecha_inicio
+
+```php
+private function calcularDiferenciaTiempo($fecha_inicio, $fecha_fin) {
+  $fechas_invalidas = array('0000-00-00', '0000-00-00 00:00:00', '', null);
+  if(in_array($fecha_inicio, $fechas_invalidas) || in_array($fecha_fin, $fechas_invalidas)) {
+    return 'N/A';
+  }
+  // ... validaciones adicionales
+}
+```
+
+### Soporte para Cajas Mixtas
+
+El PDF soporta cajas con envases de múltiples recetas:
+
+```php
+// Si es caja mixta, obtener resumen de recetas
+$resumen_recetas = $caja->getResumenRecetas();
+
+// En el PDF se muestra:
+// Contenido mixto: IPA x12, Pale Ale x12
+```
+
+### Estilos del PDF
+
+El PDF utiliza estilos CSS inline para garantizar compatibilidad:
+
+- **Color corporativo:** `#c9a227` (dorado/cerveza)
+- **Badges de línea productiva:**
+  - Alcohólica: `#e74c3c` (rojo)
+  - Sin Alcohol: `#27ae60` (verde)
+  - General: `#3498db` (azul)
+- **Fuente:** DejaVu Sans (incluida en DOMPDF)
+- **Tamaño papel:** Letter (carta), orientación vertical
+
+---
+
+## Sistema de Certificación Halal
+
+### Descripción General
+
+El sistema soporta la certificación Halal para productos de línea sin alcohol (Kombucha, aguas fermentadas, etc.). Esto incluye:
+
+1. **Certificación de Insumos**: Registro de certificados Halal para cada insumo
+2. **Limpiezas Certificadas**: Registro de limpiezas Halal en activos
+3. **Trazabilidad Halal en PDF**: Generación de certificados con información Halal
+
+### Campos de Certificación en Insumos
+
+**Tabla:** `insumos`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `url_ficha_tecnica` | VARCHAR(500) | URL a ficha técnica del insumo |
+| `url_certificado_halal` | VARCHAR(500) | URL a certificado Halal |
+| `certificado_halal_numero` | VARCHAR(100) | Número del certificado |
+| `certificado_halal_vencimiento` | DATE | Fecha de vencimiento |
+| `certificado_halal_emisor` | VARCHAR(200) | Entidad certificadora |
+| `es_halal_certificado` | TINYINT(1) | Flag de certificación Halal |
+
+### Clase Insumo - Métodos Halal
+
+```php
+class Insumo extends Base {
+    // Verificar certificado vigente
+    public function tieneCertificadoHalalVigente() { ... }
+
+    // Obtener insumos Halal vigentes
+    public static function getInsumosHalalVigentes() { ... }
+
+    // Obtener certificados por vencer
+    public static function getInsumosHalalPorVencer($dias = 30) { ... }
+
+    // Badge HTML de estado
+    public function getEstadoCertificadoHalalBadge() { ... }
+}
+```
+
+### Estados de Certificado Halal
+
+| Estado | Badge | Condición |
+|--------|-------|-----------|
+| Sin certificar | `bg-secondary` | `es_halal_certificado = 0` |
+| Vigente | `bg-success` | Vencimiento > 30 días |
+| Por vencer | `bg-warning` | Vencimiento <= 30 días |
+| Vencido | `bg-danger` | Vencimiento < hoy |
+
+### Validación Halal en Producción
+
+Antes de iniciar producción en línea sin alcohol, el sistema puede validar:
+
+1. **Todos los insumos tienen certificación Halal vigente**
+2. **Los activos (fermentadores) tienen limpieza Halal reciente**
+
+**Endpoint:** `ajax/ajax_validarLimpiezaHalal.php`
+
+```php
+// Ejemplo de respuesta
+{
+    "status": "OK",
+    "valido": true,
+    "mensaje": "Limpieza Halal válida",
+    "requiere_limpieza": false,
+    "activo": {
+        "id": 123,
+        "nombre": "Fermentador 1",
+        "linea_productiva": "general",
+        "fecha_ultima_limpieza_halal": "2025-12-06 10:30:00"
+    }
+}
+```
+
+---
+
+## Sistema de Limpiezas de Activos
+
+### Descripción General
+
+El sistema permite registrar y gestionar las limpiezas de activos (fermentadores, tanques, etc.), incluyendo limpiezas certificadas Halal para producción sin alcohol.
+
+### Campos de Limpieza en Activos
+
+**Tabla:** `activos`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `fecha_ultima_limpieza` | DATETIME | Última limpieza general |
+| `proxima_limpieza` | DATE | Próxima limpieza programada |
+| `limpieza_procedimiento` | MEDIUMTEXT | Procedimiento estándar |
+| `limpieza_periodicidad` | VARCHAR(100) | Frecuencia requerida |
+| `fecha_ultima_limpieza_halal` | DATETIME | Última limpieza Halal |
+| `certificado_limpieza_halal` | VARCHAR(100) | Certificado de limpieza |
+| `uso_exclusivo_halal` | TINYINT(1) | Uso exclusivo Halal |
+
+### Tabla: registros_limpiezas (Historial)
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | INT | ID autoincremental |
+| `id_activos` | INT | FK al activo |
+| `fecha` | DATETIME | Fecha/hora de limpieza |
+| `tipo_limpieza` | ENUM | General, Profunda, Halal, Sanitizacion, CIP |
+| `procedimiento_utilizado` | VARCHAR(255) | Referencia al procedimiento |
+| `productos_utilizados` | TEXT | Lista de productos |
+| `id_usuarios` | INT | Usuario que realizó |
+| `id_usuarios_supervisor` | INT | Supervisor (para Halal) |
+| `es_limpieza_halal` | TINYINT(1) | Flag limpieza Halal |
+| `certificado_numero` | VARCHAR(100) | Certificado Halal |
+| `certificado_emisor` | VARCHAR(200) | Entidad certificadora |
+
+### Tabla: procedimientos_limpieza (Catálogo)
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | INT | ID autoincremental |
+| `codigo` | VARCHAR(50) | Código único (PROC-LIM-XXX) |
+| `nombre` | VARCHAR(200) | Nombre del procedimiento |
+| `tipo` | ENUM | Tipo de limpieza |
+| `descripcion` | TEXT | Descripción detallada |
+| `pasos` | TEXT | Pasos en JSON |
+| `productos_requeridos` | TEXT | Productos en JSON |
+| `tiempo_estimado_minutos` | INT | Duración estimada |
+| `es_halal_certificado` | TINYINT(1) | Procedimiento Halal |
+
+### Procedimientos Predefinidos
+
+| Código | Nombre | Tipo | Halal |
+|--------|--------|------|-------|
+| PROC-LIM-001 | Limpieza General de Fermentador | General | No |
+| PROC-LIM-002 | Limpieza Profunda de Fermentador | Profunda | No |
+| PROC-LIM-003 | Sanitización CIP | CIP | No |
+| PROC-LIM-004 | Limpieza Halal Certificada | Halal | Sí |
+| PROC-LIM-005 | Limpieza Halal Post-Alcohol | Halal | Sí |
+
+### Clases PHP
+
+#### RegistroLimpieza.php
+
+```php
+class RegistroLimpieza extends Base {
+    // Registrar limpieza y actualizar activo
+    public function registrar() { ... }
+
+    // Obtener tipos de limpieza
+    public static function getTiposLimpieza() { ... }
+
+    // Última limpieza de activo
+    public static function getUltimaPorActivo($id_activos, $tipo = null) { ... }
+
+    // Validar limpieza Halal para producción
+    public static function validarLimpiezaHalalParaProduccion($id_activos, $horas = 24) { ... }
+
+    // Historial para exportar
+    public static function getHistorialParaExportar($id_activos, $limit = 50) { ... }
+}
+```
+
+#### ProcedimientoLimpieza.php
+
+```php
+class ProcedimientoLimpieza extends Base {
+    // Obtener tipos
+    public static function getTipos() { ... }
+
+    // Obtener por tipo
+    public static function getByTipo($tipo) { ... }
+
+    // Obtener procedimientos Halal
+    public static function getProcedimientosHalal() { ... }
+
+    // Generar código automático
+    public static function generarSiguienteCodigo() { ... }
+}
+```
+
+### Endpoints AJAX
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `ajax_registrarLimpieza.php` | POST | Registrar nueva limpieza |
+| `ajax_obtenerHistorialLimpiezas.php` | GET | Obtener historial de limpieza |
+| `ajax_validarLimpiezaHalal.php` | GET | Validar limpieza Halal |
+
+### Periodicidades Disponibles
+
+- Diaria
+- Cada 2 días
+- Semanal
+- Quincenal
+- Mensual
+- Después de cada uso
+
+### Flujo de Registro de Limpieza
+
+```
+1. Usuario abre detalle de activo
+2. Click en "Registrar Limpieza"
+3. Completa formulario (tipo, procedimiento, productos)
+4. Si es Halal: agrega certificado y supervisor
+5. Sistema:
+   - Crea RegistroLimpieza
+   - Actualiza fecha_ultima_limpieza en Activo
+   - Si es Halal: actualiza fecha_ultima_limpieza_halal
+   - Calcula proxima_limpieza según periodicidad
+```
+
+### Interfaz en Detalle de Activos
+
+La sección de limpiezas en `templates/detalle-activos.php` incluye:
+
+1. **Configuración:**
+   - Periodicidad
+   - Última limpieza
+   - Próxima limpieza
+   - Procedimiento estándar
+
+2. **Campos Halal:**
+   - Uso exclusivo Halal (checkbox)
+   - Última limpieza Halal
+   - Certificado de limpieza
+
+3. **Historial:**
+   - Tabla con últimas 10 limpiezas
+   - Botón "Registrar Limpieza"
+   - Modal de registro
+   - Modal de detalle
+
+---
+
+## Campos ML para Machine Learning
+
+### Descripción General
+
+El sistema almacena métricas opcionales en cada batch para permitir análisis de Machine Learning orientado a optimización de producción y predicción de calidad.
+
+### Campos ML en Batches
+
+**Tabla:** `batches`
+
+#### Métricas de Producto Final
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `abv_final` | DECIMAL(4,2) | Alcohol by volume final (%) |
+| `ibu_final` | INT | IBU medido del producto final |
+| `color_ebc` | INT | Color en escala EBC |
+
+#### Métricas de Rendimiento
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `rendimiento_litros_final` | FLOAT | Volumen final real producido (L) |
+| `merma_total_litros` | FLOAT | Total de pérdida en proceso (L) |
+| `densidad_final_verificada` | DECIMAL(5,3) | Gravedad final verificada |
+
+#### Métricas de Calidad Sensorial
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `calificacion_sensorial` | TINYINT | Calificación 1-10 |
+| `notas_cata` | TEXT | Notas descriptivas de cata |
+
+#### Condiciones Ambientales
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `temperatura_ambiente_promedio` | DECIMAL(4,1) | Temperatura durante fermentación (°C) |
+| `humedad_relativa_promedio` | DECIMAL(4,1) | Humedad relativa promedio (%) |
+
+### Métodos en Clase Batch
+
+```php
+class Batch extends Base {
+    // Calcular eficiencia de producción
+    public function calcularEficiencia() {
+        if($this->batch_litros > 0 && $this->rendimiento_litros_final > 0) {
+            return round(($this->rendimiento_litros_final / $this->batch_litros) * 100, 2);
+        }
+        return null;
+    }
+
+    // Calcular porcentaje de merma
+    public function calcularMermaPorcentual() {
+        if($this->batch_litros > 0 && $this->merma_total_litros !== null) {
+            return round(($this->merma_total_litros / $this->batch_litros) * 100, 2);
+        }
+        return null;
+    }
+}
+```
+
+### Interfaz en Nuevo Batches
+
+La sección "Métricas de Calidad (ML)" en `templates/nuevo-batches.php` está ubicada en el **paso "Finalización"** del wizard de batches. Incluye:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Métricas de Calidad (ML)                                    │
+│ Datos opcionales para análisis y Machine Learning           │
+├─────────────────────────────────────────────────────────────┤
+│ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────┐ │
+│ │ ABV Final % │ │ IBU Final   │ │ Color EBC   │ │ Cal 1-10│ │
+│ │ [5.5      ] │ │ [45       ] │ │ [12       ] │ │ [8     ]│ │
+│ └─────────────┘ └─────────────┘ └─────────────┘ └─────────┘ │
+│ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ │
+│ │ Rendimiento (L) │ │ Merma Total (L) │ │ Densidad Final  │ │
+│ │ [180          ] │ │ [20           ] │ │ [1.012        ] │ │
+│ └─────────────────┘ └─────────────────┘ └─────────────────┘ │
+│ ┌─────────────────────────────────────────────────────────┐ │
+│ │ Notas de Cata:                                          │ │
+│ │ [Notas cítricas, cuerpo medio, finish seco...         ] │ │
+│ └─────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Casos de Uso ML
+
+1. **Predicción de Calidad:**
+   - Correlacionar insumos + tiempos con calificación sensorial
+   - Predecir puntuación antes de cata
+
+2. **Optimización de Rendimiento:**
+   - Analizar factores que afectan merma
+   - Optimizar proceso para maximizar rendimiento
+
+3. **Control de Calidad:**
+   - Detectar anomalías en ABV/IBU/Color
+   - Alertar desviaciones del estándar de receta
+
+4. **Análisis de Condiciones:**
+   - Correlacionar temperatura/humedad con calidad
+   - Recomendar condiciones óptimas
+
+---
+
+## Líneas Productivas
+
+### Descripción General
+
+El sistema soporta múltiples líneas de producción para segregar productos alcohólicos y sin alcohol, especialmente importante para certificación Halal.
+
+### Líneas Disponibles
+
+| Valor | Etiqueta | Descripción |
+|-------|----------|-------------|
+| `alcoholica` | Línea Alcohólica | Cervezas y productos con alcohol |
+| `analcoholica` | Línea Sin Alcohol | Kombucha, aguas fermentadas, productos Halal |
+| `general` | General | Sin restricción específica |
+
+### Entidades con Línea Productiva
+
+#### Productos (productos)
+
+```php
+class Producto extends Base {
+    public $linea_productiva = "general";
+
+    // Obtener label
+    public function getLineaProductivaLabel() { ... }
+
+    // Obtener opciones
+    public static function getLineasProductivas() { ... }
+
+    // Filtrar por línea
+    public static function getByLineaProductiva($linea) { ... }
+}
+```
+
+#### Activos (activos)
+
+```php
+class Activo extends Base {
+    public $linea_productiva = "general";
+
+    // Verificar si puede usarse para Halal
+    public function puedeUsarseParaHalal() { ... }
+
+    // Verificar limpieza Halal reciente
+    public function tieneLimpiezaHalalReciente($horas = 24) { ... }
+}
+```
+
+#### Batches (inferido)
+
+```php
+class Batch extends Base {
+    // Determinar línea desde activos o receta
+    public function getLineaProductiva() { ... }
+
+    // Label legible
+    public function getLineaProductivaLabel() { ... }
+
+    // Verificar si es sin alcohol
+    public function esLineaSinAlcohol() { ... }
+}
+```
+
+### Lógica de Determinación de Línea
+
+Para un Batch, la línea productiva se determina en orden de prioridad:
+
+1. **Desde el activo asignado:** Si el fermentador tiene línea específica
+2. **Desde la receta:** Inferida de la clasificación
+   - Cerveza, Cerveza Artesanal → `alcoholica`
+   - Kombucha, Agua saborizada, Agua fermentada → `analcoholica`
+3. **Default:** `general`
+
+### Flujo de Producción Halal
+
+```
+1. PREPARACIÓN
+   ├── Verificar insumos tienen certificación Halal vigente
+   ├── Seleccionar activo de línea 'analcoholica' o 'general'
+   └── Si es 'general': verificar limpieza Halal < 24 horas
+
+2. PRODUCCIÓN
+   ├── Crear batch con receta de línea sin alcohol
+   ├── Fermentación en activo validado
+   └── Registrar métricas de proceso
+
+3. EMPAQUE
+   ├── Envasar en condiciones controladas
+   └── Generar cajas con trazabilidad
+
+4. ENTREGA
+   ├── Generar PDF de trazabilidad
+   └── PDF incluye: certificación insumos + limpiezas Halal
+```
+
+### PDF de Trazabilidad Halal
+
+Cuando el producto es de línea sin alcohol (`analcoholica`), el PDF incluye:
+
+1. **Título extendido:**
+   - "Cerveza Cocholgue - ISO 22000 / HALAL"
+   - "Producto de Línea Sin Alcohol - Apto Halal"
+
+2. **Sección de Insumos:**
+   - Lista completa de insumos
+   - Columna "Halal" con check/cross
+   - Links a fichas técnicas
+   - Indicador de certificación completa
+
+3. **Sección de Limpiezas Halal:**
+   - Historial de limpiezas certificadas
+   - Activo, fecha, certificado, procedimiento
+
+4. **Footer:**
+   - "Certificado de Trazabilidad Halal"
+
+### Validación de Compatibilidad
+
+#### Activo → Producción Halal
+
+```php
+// Un activo puede usarse para producción Halal si:
+$activo->puedeUsarseParaHalal() === true
+
+// Esto es true cuando:
+// 1. uso_exclusivo_halal = 1, O
+// 2. linea_productiva = 'analcoholica', O
+// 3. Tiene limpieza Halal en últimas 24 horas
+```
+
+#### Endpoint de Validación
+
+```bash
+curl "http://localhost/app.barril.cl/ajax/ajax_validarLimpiezaHalal.php?id_activos=123"
+```
+
+**Respuestas posibles:**
+
+| Caso | valido | mensaje |
+|------|--------|---------|
+| Uso exclusivo Halal | true | "Activo de uso exclusivo Halal" |
+| Línea sin alcohol | true | "Activo de línea sin alcohol" |
+| Limpieza Halal reciente | true | "Limpieza Halal válida" |
+| Sin limpieza Halal | false | "No hay registro de limpieza Halal..." |
+| Limpieza expirada | false | "La última limpieza Halal fue hace X horas..." |
+
+---
+
+## Migraciones de Base de Datos (REQ2)
+
+### Resumen de Migraciones
+
+| Migración | Descripción |
+|-----------|-------------|
+| `009_productos_linea_productiva.sql` | Agrega campo linea_productiva a productos |
+| `010_batches_ml_fields.sql` | Agrega campos ML a batches |
+| `011_insumos_fichas_certificados.sql` | Agrega campos Halal a insumos |
+| `012_sistema_limpiezas.sql` | Crea sistema completo de limpiezas |
+
+### Ejecutar Migraciones
+
+```bash
+mysql -u barrcl_cocholg -p barrcl_cocholg < db/migrations/009_productos_linea_productiva.sql
+mysql -u barrcl_cocholg -p barrcl_cocholg < db/migrations/010_batches_ml_fields.sql
+mysql -u barrcl_cocholg -p barrcl_cocholg < db/migrations/011_insumos_fichas_certificados.sql
+mysql -u barrcl_cocholg -p barrcl_cocholg < db/migrations/012_sistema_limpiezas.sql
+```
+
+### Verificar Migraciones
+
+```sql
+-- Verificar productos
+DESCRIBE productos;
+-- Debe incluir: linea_productiva
+
+-- Verificar batches
+DESCRIBE batches;
+-- Debe incluir: abv_final, ibu_final, color_ebc, etc.
+
+-- Verificar insumos
+DESCRIBE insumos;
+-- Debe incluir: es_halal_certificado, certificado_halal_numero, etc.
+
+-- Verificar activos
+DESCRIBE activos;
+-- Debe incluir: fecha_ultima_limpieza_halal, uso_exclusivo_halal, etc.
+
+-- Verificar nuevas tablas
+SHOW TABLES LIKE '%limpieza%';
+-- Debe mostrar: registros_limpiezas, procedimientos_limpieza
+
+-- Verificar procedimientos predefinidos
+SELECT codigo, nombre, es_halal_certificado FROM procedimientos_limpieza;
+```
+
+---
+
+## Changelog REQ2 (2025-12-06)
+
+### Archivos Creados
+
+| Archivo | Tipo | Descripción |
+|---------|------|-------------|
+| `db/migrations/009_productos_linea_productiva.sql` | SQL | Migración línea productiva |
+| `db/migrations/010_batches_ml_fields.sql` | SQL | Migración campos ML |
+| `db/migrations/011_insumos_fichas_certificados.sql` | SQL | Migración Halal insumos |
+| `db/migrations/012_sistema_limpiezas.sql` | SQL | Migración sistema limpiezas |
+| `php/classes/RegistroLimpieza.php` | PHP | Clase registro de limpieza |
+| `php/classes/ProcedimientoLimpieza.php` | PHP | Clase procedimiento de limpieza |
+| `ajax/ajax_registrarLimpieza.php` | PHP | Endpoint registrar limpieza |
+| `ajax/ajax_obtenerHistorialLimpiezas.php` | PHP | Endpoint historial limpiezas |
+| `ajax/ajax_validarLimpiezaHalal.php` | PHP | Endpoint validar Halal |
+
+### Archivos Modificados
+
+| Archivo | Cambios |
+|---------|---------|
+| `php/classes/Producto.php` | Campo `linea_productiva`, métodos helper |
+| `php/classes/Insumo.php` | Campos Halal, métodos de certificación |
+| `php/classes/Batch.php` | Campos ML, métodos de línea productiva |
+| `php/classes/Activo.php` | Campos limpieza, métodos Halal |
+| `php/classes/TrazabilidadPDF.php` | Soporte Halal, insumos, limpiezas |
+| `templates/detalle-activos.php` | Sección limpiezas con modales |
+| `templates/nuevo-batches.php` | Sección métricas ML |
+
+---
+
+*Documento actualizado el 2025-12-06*
+*Versión del sistema: Barril.cl ERP v1.2*
+*REQ2: Sistema Halal, Limpiezas y Campos ML*

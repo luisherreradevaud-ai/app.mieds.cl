@@ -2,6 +2,7 @@
 
   class Producto extends Base {
 
+    public $codigo_producto = "";
     public $nombre = "";
     public $id_recetas = 0;
     public $productos_items;
@@ -15,6 +16,7 @@
     public $cantidad_de_envases = 0;
     public $tipo_envase = "Lata";
     public $es_mixto = 0;
+    public $linea_productiva = "general";
 
     public function __construct($id = null) {
       $this->tableName("productos");
@@ -134,6 +136,107 @@
       }
       $where .= " ORDER BY nombre ASC";
       return self::getAll($where);
+    }
+
+    /**
+     * Obtiene el label legible de la línea productiva
+     * @return string
+     */
+    public function getLineaProductivaLabel() {
+      $lineas = [
+        'alcoholica' => 'Línea Alcohólica',
+        'analcoholica' => 'Línea Sin Alcohol',
+        'general' => 'General'
+      ];
+      return isset($lineas[$this->linea_productiva])
+        ? $lineas[$this->linea_productiva]
+        : 'General';
+    }
+
+    /**
+     * Obtiene opciones de líneas productivas para selectores
+     * @return array
+     */
+    public static function getLineasProductivas() {
+      return [
+        'alcoholica' => 'Línea Alcohólica',
+        'analcoholica' => 'Línea Sin Alcohol',
+        'general' => 'General'
+      ];
+    }
+
+    /**
+     * Obtiene productos por línea productiva
+     * @param string $linea
+     * @return array
+     */
+    public static function getByLineaProductiva($linea) {
+      return self::getAll("WHERE linea_productiva='" . addslashes($linea) . "' ORDER BY nombre ASC");
+    }
+
+    /**
+     * Genera el código de producto para la línea productiva
+     * @param string $linea Línea productiva
+     * @return string Código generado (ej: ALC-001)
+     */
+    public static function generarCodigoProducto($linea) {
+      global $mysqli;
+
+      $prefijos = [
+        'alcoholica' => 'ALC',
+        'analcoholica' => 'SNA',
+        'general' => 'GEN'
+      ];
+
+      $prefijo = isset($prefijos[$linea]) ? $prefijos[$linea] : 'GEN';
+
+      // Obtener y actualizar secuencia atómicamente
+      $sql = "UPDATE productos_secuencias
+              SET ultimo_numero = ultimo_numero + 1
+              WHERE linea_productiva = '" . addslashes($linea) . "'";
+      $mysqli->query($sql);
+
+      // Obtener el número actual
+      $sql = "SELECT ultimo_numero FROM productos_secuencias
+              WHERE linea_productiva = '" . addslashes($linea) . "'";
+      $result = $mysqli->query($sql);
+
+      if($result && $row = $result->fetch_assoc()) {
+        $numero = $row['ultimo_numero'];
+      } else {
+        // Fallback: contar productos existentes
+        $sql = "SELECT COUNT(*) as total FROM productos
+                WHERE linea_productiva = '" . addslashes($linea) . "'";
+        $result = $mysqli->query($sql);
+        $numero = $result->fetch_assoc()['total'] + 1;
+      }
+
+      return $prefijo . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Override del save para generar código automáticamente
+     */
+    public function save() {
+      // Si es nuevo y no tiene código, generar uno
+      if(empty($this->id) && empty($this->codigo_producto)) {
+        $this->codigo_producto = self::generarCodigoProducto($this->linea_productiva);
+      }
+      // Si cambió la línea productiva y ya tenía código, regenerar
+      // (solo si es producto existente que cambió de línea)
+
+      return parent::save();
+    }
+
+    /**
+     * Obtiene el código formateado para mostrar
+     * @return string
+     */
+    public function getCodigoFormateado() {
+      if(!empty($this->codigo_producto)) {
+        return $this->codigo_producto;
+      }
+      return '-';
     }
 
   }

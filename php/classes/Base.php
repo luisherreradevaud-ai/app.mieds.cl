@@ -70,15 +70,28 @@ abstract class Base {
       $value = "''";
 
       if(property_exists($this,$fields['name'])) {
-        if( $fields['data_type']=="int" ) {
-          if(!filter_var($this->{$fields['name']},FILTER_VALIDATE_INT)) {
+        if( $fields['data_type']=="int" || $fields['data_type']=="tinyint" ) {
+          if($this->{$fields['name']} === '' || $this->{$fields['name']} === null) {
+            $this->{$fields['name']} = NULL;
+          } else if(filter_var($this->{$fields['name']}, FILTER_VALIDATE_INT) === false && $this->{$fields['name']} !== 0 && $this->{$fields['name']} !== '0') {
             $this->{$fields['name']} = 0;
+          } else {
+            $this->{$fields['name']} = intval($this->{$fields['name']});
+          }
+        } else
+        if($fields['data_type']=="decimal" || $fields['data_type']=="float" || $fields['data_type']=="double") {
+          if($this->{$fields['name']} === '' || $this->{$fields['name']} === null) {
+            $this->{$fields['name']} = NULL;
+          } else if(!is_numeric($this->{$fields['name']})) {
+            $this->{$fields['name']} = NULL;
           }
         } else
         if($fields['data_type']=="text"||$fields['data_type']=="varchar") {
-          $this->{$fields['name']} = addslashes($this->{$fields['name']});
-          if(strlen($this->{$fields['name']})>intval($fields['length'])) {
-            $this->{$fields['name']} = substr($this->{$fields['name']},0,$fields['length']);
+          if($this->{$fields['name']} !== null) {
+            $this->{$fields['name']} = addslashes($this->{$fields['name']});
+            if($fields['length'] !== null && strlen($this->{$fields['name']})>intval($fields['length'])) {
+              $this->{$fields['name']} = substr($this->{$fields['name']},0,$fields['length']);
+            }
           }
         } else
         if($fields['data_type']=="date" && $this->{$fields['name']} == '') {
@@ -103,12 +116,9 @@ abstract class Base {
               ." WHERE id='"
               .$this->id
               ."'";
-              //print $query;
-    $this->runQuery($query);
 
-    if($this->table_name == "batches") {
-      //print $query;
-    } 
+    $mysqli = $GLOBALS['mysqli'];
+    $result = $mysqli->query($query);
 
   }
 
@@ -162,9 +172,20 @@ abstract class Base {
       $keys[] = $fields['name'];
 
       if(property_exists($this,$fields['name'])) {
-        if( $fields['data_type']=="int" ) {
-          if(!filter_var($this->{$fields['name']},FILTER_VALIDATE_INT)) {
+        if( $fields['data_type']=="int" || $fields['data_type']=="tinyint" ) {
+          if($this->{$fields['name']} === '' || $this->{$fields['name']} === null) {
+            $this->{$fields['name']} = NULL;
+          } else if(filter_var($this->{$fields['name']}, FILTER_VALIDATE_INT) === false && $this->{$fields['name']} !== 0 && $this->{$fields['name']} !== '0') {
             $this->{$fields['name']} = 0;
+          } else {
+            $this->{$fields['name']} = intval($this->{$fields['name']});
+          }
+        } else
+        if($fields['data_type']=="decimal" || $fields['data_type']=="float" || $fields['data_type']=="double") {
+          if($this->{$fields['name']} === '' || $this->{$fields['name']} === null) {
+            $this->{$fields['name']} = NULL;
+          } else if(!is_numeric($this->{$fields['name']})) {
+            $this->{$fields['name']} = NULL;
           }
         } else
         if($fields['data_type']=="text"||$fields['data_type']=="varchar") {
@@ -197,13 +218,11 @@ abstract class Base {
     .implode(",",$keys)
     .") VALUES ("
     .implode(",",$values)
-    .")";   
+    .")";
 
     if($this->table_name == "usuarios") {
       //print $query;
-    } 
-
-    
+    }
 
     $return = $mysqli->query($query);
     if(!$return) {
@@ -434,7 +453,7 @@ abstract class Base {
       return $media_header;
     }
 
-    if(!$this->id_media_header == 0) {
+    if($this->id_media_header != 0) {
       $media_header = new Media($this->id_media_header);
     }
 

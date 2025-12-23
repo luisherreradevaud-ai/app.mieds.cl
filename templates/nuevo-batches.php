@@ -45,6 +45,18 @@
     $enfriados = BatchEnfriado::getAll("WHERE id_batches='".$batch->id."'");
     $traspasos = BatchTraspaso::getAll("WHERE id_batches='".$batch->id."'");
 
+    // Fermentadores para traspasos (solo los que tienen cerveza de este batch)
+    $batch_activos_para_traspaso = BatchActivo::getAll("WHERE id_batches='".$batch->id."' AND litraje>0 AND estado='Fermentación'");
+    $activos_disponibles_traspaso = Activo::getAll("WHERE clase='Fermentador' AND id_batches='0' ORDER BY codigo asc");
+
+    // Cargar traspasos para poder revertirlos
+    $traspasos_por_destino = array();
+    foreach($traspasos as $tr) {
+        if(!isset($traspasos_por_destino[$tr->id_fermentadores_final])) {
+            $traspasos_por_destino[$tr->id_fermentadores_final] = $tr;
+        }
+    }
+
     $ultimo_batch = Batch::getAll("ORDER BY id desc LIMIT 1");
 
 ?>
@@ -654,12 +666,87 @@
                         <div class="row">
                             <div class="col-12 mb-2">
                                 <button class="btn btn-primary btn-sm" id="finalizar-btn" data-bs-toggle="modal" data-bs-target="#finalizar-modal"><i class="bi bi-check"></i> Finalizar Batch</button>
+                                <?php if(!empty($batch->id)): ?>
+                                <a href="./ajax/ajax_generarBatchPDF.php?id=<?= htmlspecialchars($batch->id); ?>" target="_blank" class="btn btn-outline-secondary btn-sm ms-2">
+                                    <i class="bi bi-file-earmark-pdf"></i> PDF Informe
+                                </a>
+                                <a href="./ajax/ajax_generarBatchInstruccionesPDF.php?id=<?= htmlspecialchars($batch->id); ?>" target="_blank" class="btn btn-outline-info btn-sm ms-2">
+                                    <i class="bi bi-file-earmark-text"></i> PDF Instrucciones
+                                </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- SECCIÓN: Métricas de Calidad (ML) -->
+                <div class="card shadow mt-3">
+                    <div class="card-body">
+                        <div class="card-title mb-3">
+                            <h3><i class="bi bi-graph-up"></i> Métricas de Calidad (ML)</h3>
+                            <small class="text-muted">Datos opcionales para análisis y Machine Learning</small>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">ABV Final (%):</label>
+                                <input type="number" class="form-control ml-field" name="abv_final" step="0.01" min="0" max="99.99"
+                                       placeholder="Ej: 5.5" data-max="99.99" data-label="ABV Final">
+                                <small class="text-muted">M&aacute;x: 99.99%</small>
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">IBU Final:</label>
+                                <input type="number" class="form-control ml-field" name="ibu_final" min="0" max="2147483647"
+                                       placeholder="Ej: 45" data-label="IBU Final">
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Color EBC:</label>
+                                <input type="number" class="form-control ml-field" name="color_ebc" min="0" max="2147483647"
+                                       placeholder="Ej: 12" data-label="Color EBC">
+                            </div>
+
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Calificaci&oacute;n Sensorial (1-10):</label>
+                                <input type="number" class="form-control ml-field" name="calificacion_sensorial" min="1" max="127"
+                                       placeholder="1-10" data-max="127" data-label="Calificaci&oacute;n Sensorial">
+                                <small class="text-muted">Rango: 1-10 recomendado</small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Rendimiento Final (L):</label>
+                                <input type="number" class="form-control ml-field" name="rendimiento_litros_final" step="0.1" min="0"
+                                       placeholder="Volumen final producido" data-label="Rendimiento Final">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Merma Total (L):</label>
+                                <input type="number" class="form-control ml-field" name="merma_total_litros" step="0.1" min="0"
+                                       placeholder="P&eacute;rdida total" data-label="Merma Total">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Densidad Final Verificada:</label>
+                                <input type="number" class="form-control ml-field" name="densidad_final_verificada" step="0.001" min="0" max="99.999"
+                                       placeholder="Ej: 1.012" data-max="99.999" data-label="Densidad Final">
+                                <small class="text-muted">Formato: X.XXX (ej: 1.012)</small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Notas de Cata:</label>
+                                <textarea class="form-control" name="notas_cata" rows="2"
+                                          placeholder="Describir características sensoriales: aroma, sabor, cuerpo, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- FIN SECCIÓN Métricas ML -->
             </div>
-            
+
         </div>
 
         <div class="card shadow">
@@ -684,7 +771,7 @@
   
 
 <div class="modal modal-fade" tabindex="-1" role="dialog" id="agregar-insumos-modal">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -718,6 +805,70 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Campos específicos de Levadura (ocultos por defecto) -->
+                <div id="campos-levadura-modal" style="display: none;">
+                    <hr>
+                    <h6 class="text-info"><i class="fas fa-flask"></i> Datos Espec&iacute;ficos de Levadura</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Generaci&oacute;n:</label>
+                            <input type="number" class="form-control form-control-sm" name="lev_generacion" min="1" max="20" value="1">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Tasa Inoculaci&oacute;n:</label>
+                            <input type="number" class="form-control form-control-sm" name="lev_tasa_inoculacion" step="0.01" min="0" placeholder="M c&eacute;l/ml/&deg;P">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Viabilidad (%):</label>
+                            <input type="number" class="form-control form-control-sm" name="lev_viabilidad" step="0.1" min="0" max="100">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Vitalidad (%):</label>
+                            <input type="number" class="form-control form-control-sm" name="lev_vitalidad" step="0.1" min="0" max="100">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Tiempo Lag (h):</label>
+                            <input type="number" class="form-control form-control-sm" name="lev_tiempo_lag" step="0.5" min="0">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label small">Atenuaci&oacute;n Real (%):</label>
+                            <input type="number" class="form-control form-control-sm" name="lev_atenuacion" step="0.1" min="0" max="100">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" name="lev_uso_starter" id="lev_uso_starter_modal" value="1">
+                                <label class="form-check-label small" for="lev_uso_starter_modal">
+                                    &iquest;Us&oacute; Starter?
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-2" id="lev-starter-volumen-modal" style="display:none;">
+                            <label class="form-label small">Volumen Starter (ml):</label>
+                            <input type="number" class="form-control form-control-sm" name="lev_volumen_starter" min="0">
+                        </div>
+                        <div class="col-md-12 mb-2">
+                            <label class="form-label small">Batch de Origen (si reutilizada):</label>
+                            <select class="form-control form-control-sm" name="lev_origen_batch">
+                                <option value="">-- Nueva / No reutilizada --</option>
+                                <?php
+                                $batches_anteriores = Batch::getAll("ORDER BY batch_date DESC LIMIT 50");
+                                foreach($batches_anteriores as $ba) {
+                                    if($ba->id == $batch->id) continue;
+                                    $receta_ba = new Receta($ba->id_recetas);
+                                    echo "<option value='{$ba->id}'>#{$ba->batch_nombre} - {$receta_ba->nombre} ({$ba->batch_date})</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="col-12 mb-2">
+                            <label class="form-label small">Observaciones:</label>
+                            <textarea class="form-control form-control-sm" name="lev_observaciones" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <!-- Fin campos levadura -->
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="agregar-insumos-aceptar" data-bs-dismiss="modal">Agregar</button>
@@ -806,7 +957,7 @@
                         pH:
                     </div>
                     <div class="col-6 mb-1">
-                        <input type="number" class="form-control" name="nuevo-enfriado-ph" id="nuevo-enfriado-ph">
+                        <input type="number" class="form-control acero-float" name="nuevo-enfriado-ph" id="nuevo-enfriado-ph" step="0.01" min="0" max="14">
                     </div>
                     <div class="col-6 mb-1">
                         Densidad:
@@ -818,7 +969,7 @@
                         pH enfriado:
                     </div>
                     <div class="col-6 mb-1">
-                        <input type="number" class="form-control" name="nuevo-enfriado-ph-enfriado" id="nuevo-enfriado-ph-enfriado">
+                        <input type="number" class="form-control acero-float" name="nuevo-enfriado-ph-enfriado" id="nuevo-enfriado-ph-enfriado" step="0.01" min="0" max="14">
                     </div>
                 </div>
             </div>
@@ -831,68 +982,111 @@
 
 
 <div class="modal modal-fade" tabindex="-1" role="dialog" id="nuevo-traspasos-modal">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    Agregar Traspaso
+                    Traspaso
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-6 mb-1">
-                        Cantidad:
+                        Desde:
                     </div>
                     <div class="col-6 mb-1">
-                        <input type="number" name="cantidad" id="nuevo-traspasos-cantidad-input" class="form-control">
-                    </div>
-                    <div class="col-6 mb-1">
-                        Fermentador Inicio:
-                    </div>
-                    <div class="col-6 mb-1">
-                        <select class="form-control" name="id_fermentadores_inicio" id="nuevo-traspasos-id_fermentadores_inicio-select">
+                        <select class="form-control" id="nuevo-traspasos-desde-select">
                             <?php
-                            foreach($fermentadores as $fermentador) {
+                            foreach($batch_activos_para_traspaso as $ba) {
+                                $activo_traspaso = new Activo($ba->id_activos);
                             ?>
-                            <option value="<?= $fermentador->id; ?>"><?= $fermentador->codigo; ?></option>
+                            <option value="<?= $activo_traspaso->id; ?>" data-litraje="<?= $activo_traspaso->litraje; ?>" data-litros-disponibles="<?= $ba->litraje; ?>"><?= $activo_traspaso->codigo; ?> (<?= $ba->litraje; ?>L)</option>
                             <?php
                             }
-
                             ?>
                         </select>
                     </div>
                     <div class="col-6 mb-1">
-                        Fermentador Final:
+                        Hasta:
                     </div>
                     <div class="col-6 mb-1">
-                        <select class="form-control" name="id_fermentadores_final" id="nuevo-traspasos-id_fermentadores_final-select">
+                        <select class="form-control" id="nuevo-traspasos-hasta-select">
                             <?php
-                            foreach($fermentadores as $fermentador) {
+                            foreach($activos_disponibles_traspaso as $atd) {
                             ?>
-                            <option value="<?= $fermentador->id; ?>"><?= $fermentador->codigo; ?></option>
+                            <option value="<?= $atd->id; ?>" data-litraje="<?= $atd->litraje; ?>"><?= $atd->codigo; ?> (<?= $atd->litraje; ?>L)</option>
                             <?php
                             }
-
                             ?>
                         </select>
+                    </div>
+                    <div class="col-12 my-2 text-center text-danger" id="traspaso-warning-label" style="display: none;">
+                        Los fermentadores deben tener el mismo litraje.
+                    </div>
+                    <div class="col-12 my-2">
+                        <hr/>
+                    </div>
+                    <div class="col-6 mb-1">
+                        Batch:
+                    </div>
+                    <div class="col-6 mb-1">
+                        <input type="text" class="form-control" id="nuevo-traspasos-batch" value="<?= $batch->batch_nombre; ?>" readonly>
                     </div>
                     <div class="col-6 mb-1">
                         Fecha:
                     </div>
                     <div class="col-6 mb-1">
-                        <input type="date" name="date" id="nuevo-traspasos-date-input" class="form-control">
+                        <input type="date" name="date" id="nuevo-traspasos-date-input" class="form-control" readonly>
                     </div>
                     <div class="col-6 mb-1">
                         Hora:
                     </div>
                     <div class="col-6 mb-1">
-                        <input type="time" name="hora" id="nuevo-traspasos-hora-input" class="form-control">
+                        <input type="time" name="hora" id="nuevo-traspasos-hora-input" class="form-control" readonly>
+                    </div>
+                    <div class="col-12 my-2">
+                        <hr/>
+                    </div>
+                    <div class="col-6 mb-1">
+                        Merma (opcional):
+                    </div>
+                    <div class="col-6 mb-1">
+                        <div class="input-group">
+                            <input type="number" step="0.1" min="0" class="form-control" id="nuevo-traspasos-merma-input" value="0">
+                            <span class="input-group-text">L</span>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="agregar-traspasos-agregar-btn" data-bs-dismiss="modal">Agregar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="agregar-traspasos-agregar-btn">
+                    Traspasar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Revertir Traspaso -->
+<div class="modal modal-fade" tabindex="-1" role="dialog" id="revertir-traspaso-modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title"><i class="fas fa-undo me-2"></i>Revertir Traspaso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de revertir este traspaso?</p>
+                <p>La cerveza será devuelta de <strong id="revertir-traspaso-destino"></strong> a <strong id="revertir-traspaso-origen"></strong>.</p>
+                <input type="hidden" id="revertir-traspaso-id" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" id="revertir-traspaso-confirmar-btn">
+                    <i class="fas fa-undo me-1"></i> Revertir
+                </button>
             </div>
         </div>
     </div>
@@ -937,7 +1131,7 @@
 
 
   <div class="modal modal-fade" tabindex="-1" role="dialog" id="agregar-fermentadores-modal">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -947,54 +1141,66 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-6 mb-1">
+                    <div class="col-6 mb-2">
                         Fermentador:
                     </div>
-                    <div class="col-6 mb-1">
+                    <div class="col-6 mb-2">
                         <select class="form-control" id="agregar-fermentadores_id_activos-select">
                             <?php
-                            foreach($activos as $activo) {
+                            foreach($activos_disponibles as $activo) {
                             ?>
-                            <option value="<?= $activo->id; ?>"><?= $activo->nombre; ?></option>
+                            <option value="<?= $activo->id; ?>" data-litraje="<?= $activo->litraje; ?>"><?= $activo->codigo; ?> (<?= $activo->litraje; ?>L)</option>
                             <?php
                             }
-
                             ?>
                         </select>
                     </div>
-                    <div class="col-6 mb-1">
-                        Cantidad:
+                    <div class="col-6 mb-2">
+                        Capacidad:
                     </div>
-                    <div class="col-6 mb-1">
+                    <div class="col-6 mb-2">
                         <div class="input-group">
-                            <input type="number" class="form-control acero-float" name="cantidad" id="agregar-fermentadores-cantidad-input" value="0" step="0.1" min="0" DISABLED>
-                            <span class="input-group-text" style="border-radius: 0px 10px 10px 0px" id="agregar-fermentadores-unidad-de-medida">L</span>
+                            <input type="number" class="form-control" id="agregar-fermentadores-cantidad-input" value="0" readonly>
+                            <span class="input-group-text">L</span>
                         </div>
                     </div>
-                    <div class="col-12 mb-1">
-                        <hr>
-                        <div id="fermentadores-resumen-capacidad" class="mt-2">
-                            <div class="d-flex justify-content-between">
-                                <span><strong>Litros del Batch:</strong></span>
-                                <span id="batch-litros-total"></span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span><strong>Ya asignado:</strong></span>
-                                <span id="fermentadores-litros-asignados"></span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span><strong>Disponible:</strong></span>
-                                <span id="fermentadores-litros-disponibles" style="font-weight: bold; color: #28a745;"></span>
-                            </div>
-                        </div>
-                        <div id="fermentadores-error-capacidad" class="error-message mt-2" style="display: none;">
-                            ⚠️ No hay capacidad suficiente para agregar este fermentador
+                    <div class="col-12 mt-2">
+                        <div class="alert alert-info mb-0" id="agregar-fermentadores-info">
+                            <small>El fermentador se agregará con estado <strong>Fermentación</strong> y su capacidad completa.</small>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="agregar-fermentadores-aceptar-btn">Agregar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="agregar-fermentadores-aceptar-btn">
+                    Agregar Fermentador
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Eliminar Fermentador -->
+<div class="modal modal-fade" tabindex="-1" role="dialog" id="eliminar-fermentador-modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Eliminar Fermentador</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de quitar este fermentador del batch?</p>
+                <p>Fermentador: <strong id="eliminar-fermentador-codigo"></strong></p>
+                <p class="text-muted"><small>El fermentador quedará disponible para otros batches.</small></p>
+                <input type="hidden" id="eliminar-fermentador-id-batches-activos" value="">
+                <input type="hidden" id="eliminar-fermentador-id-batches" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="eliminar-fermentador-confirmar-btn">
+                    <i class="fas fa-trash me-1"></i> Eliminar
+                </button>
             </div>
         </div>
     </div>
@@ -1045,14 +1251,16 @@ var fermentadores = <?= json_encode($activos,JSON_PRETTY_PRINT); ?>;
 var fermentadores_disponibles = <?= json_encode($activos_disponibles,JSON_PRETTY_PRINT); ?>;
 var fermentadores_usados = [];
 
-var fermentacion_fermentadores = <?= json_encode($fermentacion_fermentadores,JSON_PRETTY_PRINT); ?>; 
+var fermentacion_fermentadores = <?= json_encode($fermentacion_fermentadores,JSON_PRETTY_PRINT); ?>;
+
+// Variables para traspasos asíncronos
+var batch_activos_para_traspaso = <?= json_encode($batch_activos_para_traspaso, JSON_PRETTY_PRINT); ?>;
+var activos_disponibles_traspaso = <?= json_encode($activos_disponibles_traspaso, JSON_PRETTY_PRINT); ?>;
+var id_batches_actual = '<?= $batch->id; ?>';
 
 var lista_selected = false;
 
 var etapas = ['licor','maceracion','coccion','inoculacion','lupulizacion','enfriado'];
-
-
-
 
 
 // Validación en tiempo real para campos numéricos
@@ -1178,7 +1386,58 @@ function changeInsumosSelect() {
 $(document).on('change','select[name="id_tipos_de_insumos"]',function(){
     changeTiposDeInsumosSelect();
     changeInsumosSelect();
+
+    // Mostrar/ocultar campos de levadura según tipo
+    var tipoSeleccionado = $('select[name="id_tipos_de_insumos"] option:selected').text().trim();
+    if(tipoSeleccionado.toLowerCase() === 'levadura' || tipoSeleccionado.toLowerCase() === 'levaduras') {
+        $('#campos-levadura-modal').slideDown();
+    } else {
+        $('#campos-levadura-modal').slideUp();
+        // Limpiar campos de levadura
+        resetCamposLevaduraModal();
+    }
 });
+
+// Toggle volumen starter en modal de insumos
+$('#lev_uso_starter_modal').change(function() {
+    if($(this).is(':checked')) {
+        $('#lev-starter-volumen-modal').slideDown();
+    } else {
+        $('#lev-starter-volumen-modal').slideUp();
+        $('input[name="lev_volumen_starter"]').val('');
+    }
+});
+
+// Función para resetear campos de levadura en el modal
+function resetCamposLevaduraModal() {
+    $('input[name="lev_generacion"]').val('1');
+    $('input[name="lev_tasa_inoculacion"]').val('');
+    $('input[name="lev_viabilidad"]').val('');
+    $('input[name="lev_vitalidad"]').val('');
+    $('input[name="lev_tiempo_lag"]').val('');
+    $('input[name="lev_atenuacion"]').val('');
+    $('#lev_uso_starter_modal').prop('checked', false);
+    $('input[name="lev_volumen_starter"]').val('');
+    $('#lev-starter-volumen-modal').hide();
+    $('select[name="lev_origen_batch"]').val('');
+    $('textarea[name="lev_observaciones"]').val('');
+}
+
+// Función para obtener datos de levadura del modal
+function getLevaduraDataFromModal() {
+    return {
+        generacion: $('input[name="lev_generacion"]').val() || 1,
+        tasa_inoculacion: $('input[name="lev_tasa_inoculacion"]').val() || 0,
+        viabilidad_medida: $('input[name="lev_viabilidad"]').val() || 0,
+        vitalidad_medida: $('input[name="lev_vitalidad"]').val() || 0,
+        tiempo_lag_h: $('input[name="lev_tiempo_lag"]').val() || 0,
+        atenuacion_real: $('input[name="lev_atenuacion"]').val() || 0,
+        uso_starter: $('#lev_uso_starter_modal').is(':checked') ? 1 : 0,
+        volumen_starter_ml: $('input[name="lev_volumen_starter"]').val() || 0,
+        origen_batch: $('select[name="lev_origen_batch"]').val() || '',
+        observaciones: $('textarea[name="lev_observaciones"]').val() || ''
+    };
+}
 
 $(document).on('change','select[name="id_insumos"]',function(){
     changeInsumosSelect();
@@ -1318,6 +1577,91 @@ function validarCampos() {
         return true;
       },
       mensaje: 'El pH debe estar entre 0 y 14'
+    },
+    // Validaciones campos ML (opcionales pero con límites)
+    {
+      campo: 'abv_final',
+      nombre: 'ABV Final',
+      etapa: 'batch',
+      tab: '#pills-batch-tab',
+      validacion: function(val) {
+        if (val === '' || val === null) return true; // Opcional
+        var num = parseFloat(val);
+        return !isNaN(num) && num >= 0 && num <= 99.99;
+      },
+      mensaje: 'ABV Final debe estar entre 0 y 99.99%'
+    },
+    {
+      campo: 'ibu_final',
+      nombre: 'IBU Final',
+      etapa: 'batch',
+      tab: '#pills-batch-tab',
+      validacion: function(val) {
+        if (val === '' || val === null) return true; // Opcional
+        var num = parseInt(val);
+        return !isNaN(num) && num >= 0;
+      },
+      mensaje: 'IBU Final debe ser un número positivo'
+    },
+    {
+      campo: 'color_ebc',
+      nombre: 'Color EBC',
+      etapa: 'batch',
+      tab: '#pills-batch-tab',
+      validacion: function(val) {
+        if (val === '' || val === null) return true; // Opcional
+        var num = parseInt(val);
+        return !isNaN(num) && num >= 0;
+      },
+      mensaje: 'Color EBC debe ser un número positivo'
+    },
+    {
+      campo: 'calificacion_sensorial',
+      nombre: 'Calificación Sensorial',
+      etapa: 'batch',
+      tab: '#pills-batch-tab',
+      validacion: function(val) {
+        if (val === '' || val === null) return true; // Opcional
+        var num = parseInt(val);
+        return !isNaN(num) && num >= 1 && num <= 127;
+      },
+      mensaje: 'Calificación Sensorial debe estar entre 1 y 127'
+    },
+    {
+      campo: 'rendimiento_litros_final',
+      nombre: 'Rendimiento Final',
+      etapa: 'batch',
+      tab: '#pills-batch-tab',
+      validacion: function(val) {
+        if (val === '' || val === null) return true; // Opcional
+        var num = parseFloat(val);
+        return !isNaN(num) && num >= 0;
+      },
+      mensaje: 'Rendimiento Final debe ser un número positivo'
+    },
+    {
+      campo: 'merma_total_litros',
+      nombre: 'Merma Total',
+      etapa: 'batch',
+      tab: '#pills-batch-tab',
+      validacion: function(val) {
+        if (val === '' || val === null) return true; // Opcional
+        var num = parseFloat(val);
+        return !isNaN(num) && num >= 0;
+      },
+      mensaje: 'Merma Total debe ser un número positivo'
+    },
+    {
+      campo: 'densidad_final_verificada',
+      nombre: 'Densidad Final',
+      etapa: 'batch',
+      tab: '#pills-batch-tab',
+      validacion: function(val) {
+        if (val === '' || val === null) return true; // Opcional
+        var num = parseFloat(val);
+        return !isNaN(num) && num >= 0 && num <= 99.999;
+      },
+      mensaje: 'Densidad Final debe estar entre 0 y 99.999'
     }
   ];
 
@@ -1439,59 +1783,44 @@ $(document).on('click','.guardar-btn',function(e){
     return false;
   }
 
-  // Validar capacidad de fermentadores
-  if (fermentacion_fermentadores.length > 0) {
-    var capacidad = calcularLitrosDisponibles();
-    if (capacidad.asignado > capacidad.total) {
-      alert('⚠️ Error: La capacidad asignada a los fermentadores (' + capacidad.asignado + ' L) excede la capacidad del batch (' + capacidad.total + ' L).\n\n' +
-            'Por favor, elimine o ajuste los fermentadores antes de guardar.');
-
-      // Cambiar al tab de fermentación
-      $('#pills-fermentacion-tab').click();
-      return false;
-    }
-  }
+  // Nota: Los fermentadores ahora se manejan de forma asíncrona
+  // La validación de capacidad se hace al agregar cada fermentador
 
   var url = "./ajax/ajax_guardarEntidad.php";
   var data = getDataForm("batch");
-  data['insumos'] = lista;
+  // Convertir arrays/objetos complejos a JSON strings para que PHP los reciba correctamente
+  data['insumos'] = JSON.stringify(lista);
   data['etapa_seleccionada'] = etapa_seleccionada;
-  data['lupulizaciones'] = lupulizaciones;
-  data['enfriados'] = enfriados;
-  data['traspasos'] = traspasos;
+  data['lupulizaciones'] = JSON.stringify(lupulizaciones);
+  data['enfriados'] = JSON.stringify(enfriados);
+  // Traspasos ya no se envían aquí - se manejan de forma asíncrona
+  // Fermentadores ya no se envían aquí - se manejan de forma asíncrona
   data['tipo'] = $(e.currentTarget).data('tipo');
-  data['fermentacion_fermentadores'] = fermentacion_fermentadores;
 
-  console.log(fermentacion_fermentadores);
+  // Agregar campos ML manualmente
+  data['abv_final'] = $('input[name="abv_final"]').val();
+  data['ibu_final'] = $('input[name="ibu_final"]').val();
+  data['color_ebc'] = $('input[name="color_ebc"]').val();
+  data['calificacion_sensorial'] = $('input[name="calificacion_sensorial"]').val();
+  data['notas_cata'] = $('textarea[name="notas_cata"]').val();
+  data['rendimiento_litros_final'] = $('input[name="rendimiento_litros_final"]').val();
+  data['merma_total_litros'] = $('input[name="merma_total_litros"]').val();
+  data['densidad_final_verificada'] = $('input[name="densidad_final_verificada"]').val();
 
-  /*data['fermentacion_id_activos'] = [];
-  fermentacion_fermentadores.forEach((f) => {
-    data['fermentacion_id_activos'].push(f.id);
-  });
-  data['fermentacion_id_activos'] = JSON.stringify(data['fermentacion_id_activos']);*/
-
-
-  console.log(data);
+  data['debug_sql'] = 1
 
   $.post(url,data,function(response_raw){
-    try {
-      var response = JSON.parse(response_raw);
-      if(response.status == "ERROR" || response.mensaje != "OK") {
-        console.error("Error al guardar:", response);
-        alert("Error al guardar el batch: " + (response.mensaje || "Error desconocido"));
-        return false;
-      } else {
-        window.location.href = './?s=nuevo-batches&id=' + response.obj.id;
-      }
-    } catch(e) {
-      console.error("Error parseando respuesta:", e);
-      console.error("Respuesta raw:", response_raw);
-      alert("Error al procesar la respuesta del servidor");
+    console.log(response_raw)
+    var response = (typeof response_raw === 'string') ? JSON.parse(response_raw) : response_raw;
+
+    if(response.status == "ERROR" || response.mensaje != "OK") {
+      alert("Error al guardar el batch: " + (response.mensaje || "Error desconocido"));
+      return false;
+    } else {
+      window.location.href = './?s=nuevo-batches&id=' + response.obj.id;
     }
   }).fail(function(xhr, status, error){
-    console.error("Error en petición AJAX:", status, error);
-    console.error("Respuesta:", xhr.responseText);
-    alert("Error de conexión al guardar. Por favor revise la consola del navegador o intente nuevamente.");
+    alert("Error de conexión al guardar. Por favor intente nuevamente.");
   });
 });
 
@@ -1524,8 +1853,19 @@ $(document).on('click','#agregar-insumos-aceptar',function(e){
   insumo_new.cantidad = $('input[name="cantidad"').val();
   insumo_new.etapa_index = index_seleccionado;
 
+  // Si es tipo levadura, agregar datos específicos
+  var tipoSeleccionado = $('select[name="id_tipos_de_insumos"] option:selected').text().trim();
+  if(tipoSeleccionado.toLowerCase() === 'levadura' || tipoSeleccionado.toLowerCase() === 'levaduras') {
+    insumo_new.levadura_data = getLevaduraDataFromModal();
+    insumo_new.es_levadura = true;
+  }
+
   lista[lista_selected].push(insumo_new);
   renderLista();
+
+  // Resetear campos de levadura para el próximo uso
+  resetCamposLevaduraModal();
+  $('#campos-levadura-modal').hide();
 
 });
 
@@ -1818,13 +2158,29 @@ $(document).on('click','.enfriados-item-eliminar-btn',function(e){
 });
 
 
-$(document).on('click','#nuevo-traspasos-btn',function(e){
+// ===========================
+// SISTEMA DE TRASPASOS ASÍNCRONOS
+// ===========================
 
+// Abrir modal de traspaso
+$(document).on('click','#nuevo-traspasos-btn',function(e){
     e.preventDefault();
 
+    // Verificar si hay fermentadores disponibles para traspasar
+    if(batch_activos_para_traspaso.length == 0) {
+        alert('No hay fermentadores con cerveza disponible para traspasar en este batch.');
+        return false;
+    }
+
+    if(activos_disponibles_traspaso.length == 0) {
+        alert('No hay fermentadores vacíos disponibles para recibir el traspaso.');
+        return false;
+    }
+
+    // Setear fecha y hora actuales
     const fecha = new Date();
     const anio = fecha.getFullYear();
-    const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
     const dia = String(fecha.getDate()).padStart(2, '0');
     const horas = String(fecha.getHours()).padStart(2, '0');
     const minutos = String(fecha.getMinutes()).padStart(2, '0');
@@ -1832,62 +2188,152 @@ $(document).on('click','#nuevo-traspasos-btn',function(e){
 
     $('#nuevo-traspasos-date-input').val(anio + '-' + mes + '-' + dia);
     $('#nuevo-traspasos-hora-input').val(horas + ':' + minutos + ':' + segundos);
-    $('#nuevo-traspasos-modal').modal('toggle');
+    $('#nuevo-traspasos-merma-input').val(0);
+    $('#traspaso-warning-label').hide();
 
+    // Validar litrajes al abrir
+    validarLitrajesTraspasos();
+
+    $('#nuevo-traspasos-modal').modal('show');
 });
 
-$(document).on('click','#agregar-traspasos-agregar-btn',function(e){
-
-    e.preventDefault();
-
-    var traspaso = {
-        'id': '',
-        'id_batches': obj.id,
-        'id_fermentadores_inicio': $('#nuevo-traspasos-id_fermentadores_inicio-select').val(),
-        'id_fermentadores_final': $('#nuevo-traspasos-id_fermentadores_final-select').val(),
-        'cantidad': $('#nuevo-traspasos-cantidad-input').val(),
-        'date': $('#nuevo-traspasos-date-input').val(),
-        'hora': $('#nuevo-traspasos-hora-input').val()
-    };
-
-    traspasos.push(traspaso);
-
-    renderListaTraspasos();
-
+// Validar litrajes cuando cambian los selects
+$(document).on('change', '#nuevo-traspasos-desde-select, #nuevo-traspasos-hasta-select', function() {
+    validarLitrajesTraspasos();
 });
 
-function renderListaTraspasos() {
+function validarLitrajesTraspasos() {
+    var $desde = $('#nuevo-traspasos-desde-select option:selected');
+    var $hasta = $('#nuevo-traspasos-hasta-select option:selected');
 
-  
-    var html = '';
-    traspasos.forEach(function(traspaso,index){
+    var litrajeDe = parseInt($desde.data('litraje')) || 0;
+    var litrajeHasta = parseInt($hasta.data('litraje')) || 0;
 
-        var fermentador_inicio = fermentadores.find((f) => f.id == traspaso.id_fermentadores_inicio);
-        var fermentador_final = fermentadores.find((f) => f.id == traspaso.id_fermentadores_final);
-        html += '<div class="p-3 shadow mb-5">';
-        html += '<div class="d-flex justify-content-between mb-1">';
-        html += '<div><h4>Traspaso #' + (parseInt(index) + 1) + '</h4></div>';
-        html += '<button class="btn btn-sm traspasos-item-eliminar-btn" data-index="' + index + '">x</button>';
-        html += '</div>';
-        html += '<div class="mb-1">' + traspaso.date + ' ' + traspaso.hora + '</div>';
-        html += '<div class="mb-1">Cantidad: ' + traspaso.cantidad + '</div>';
-        html += '<div class="mb-1">Fermentador inicio: ' + fermentador_inicio.codigo + '</div>';
-        html += '<div class="mb-1">Fermentador final: ' + fermentador_final.codigo + '</div>';
-        html += '</div>';
-
-    });
-
-    $('#traspasos-div').html(html);
-
-
+    if(litrajeDe != litrajeHasta) {
+        $('#traspaso-warning-label').show();
+        $('#agregar-traspasos-agregar-btn').prop('disabled', true);
+    } else {
+        $('#traspaso-warning-label').hide();
+        $('#agregar-traspasos-agregar-btn').prop('disabled', false);
+    }
 }
 
+// Ejecutar traspaso vía AJAX
+$(document).on('click','#agregar-traspasos-agregar-btn',function(e){
+    e.preventDefault();
 
-$(document).on('click','.traspasos-item-eliminar-btn',function(e){
-  e.preventDefault();
-  var index = $(e.currentTarget).data('index');
-  traspasos.splice(index,1);
-  renderListaTraspasos();
+    var $btn = $(this);
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Traspasando...');
+
+    var data = {
+        'id_batches': id_batches_actual,
+        'id_fermentadores_inicio': $('#nuevo-traspasos-desde-select').val(),
+        'id_fermentadores_final': $('#nuevo-traspasos-hasta-select').val(),
+        'date': $('#nuevo-traspasos-date-input').val(),
+        'hora': $('#nuevo-traspasos-hora-input').val(),
+        'merma_litros': $('#nuevo-traspasos-merma-input').val() || 0
+    };
+
+    $.post('./ajax/ajax_agregarTraspasosInventarioProductos.php', data, function(response){
+        console.log('Respuesta traspaso:', response);
+
+        if(typeof response === 'string') {
+            response = JSON.parse(response);
+        }
+
+        if(response.status == 'OK') {
+            // Recargar la página para reflejar los cambios
+            window.location.href = './?s=nuevo-batches&id=' + id_batches_actual + '&msg=2';
+        } else {
+            alert('Error: ' + response.mensaje);
+            $btn.prop('disabled', false).html('Traspasar');
+        }
+    }).fail(function(xhr, status, error) {
+        console.error('Error AJAX:', error);
+        alert('Error al realizar el traspaso. Por favor intente nuevamente.');
+        $btn.prop('disabled', false).html('Traspasar');
+    });
+});
+
+// Renderizar lista de traspasos existentes
+function renderListaTraspasos() {
+    var html = '';
+
+    if(traspasos.length == 0) {
+        html = '<p class="text-muted">No hay traspasos registrados.</p>';
+    } else {
+        traspasos.forEach(function(traspaso, index){
+            var fermentador_inicio = fermentadores.find((f) => f.id == traspaso.id_fermentadores_inicio);
+            var fermentador_final = fermentadores.find((f) => f.id == traspaso.id_fermentadores_final);
+
+            html += '<div class="p-3 shadow mb-3 border-start border-4 border-primary">';
+            html += '<div class="d-flex justify-content-between align-items-center mb-2">';
+            html += '<h5 class="mb-0">Traspaso #' + (parseInt(index) + 1) + '</h5>';
+            html += '<button class="btn btn-sm btn-outline-danger revertir-traspaso-btn" data-id="' + traspaso.id + '" data-origen="' + (fermentador_inicio ? fermentador_inicio.codigo : '-') + '" data-destino="' + (fermentador_final ? fermentador_final.codigo : '-') + '"><i class="fas fa-undo"></i></button>';
+            html += '</div>';
+            html += '<div class="row">';
+            html += '<div class="col-6"><small class="text-muted">Fecha:</small><br>' + traspaso.date + ' ' + traspaso.hora + '</div>';
+            html += '<div class="col-6"><small class="text-muted">Cantidad:</small><br>' + traspaso.cantidad + ' L</div>';
+            html += '</div>';
+            html += '<div class="row mt-2">';
+            html += '<div class="col-6"><small class="text-muted">Desde:</small><br><strong>' + (fermentador_inicio ? fermentador_inicio.codigo : '-') + '</strong></div>';
+            html += '<div class="col-6"><small class="text-muted">Hasta:</small><br><strong>' + (fermentador_final ? fermentador_final.codigo : '-') + '</strong></div>';
+            html += '</div>';
+            if(traspaso.merma_litros && traspaso.merma_litros > 0) {
+                html += '<div class="mt-2"><small class="text-muted">Merma:</small> ' + traspaso.merma_litros + ' L</div>';
+            }
+            html += '</div>';
+        });
+    }
+
+    $('#traspasos-div').html(html);
+}
+
+// Abrir modal de revertir traspaso
+$(document).on('click', '.revertir-traspaso-btn', function(e) {
+    e.preventDefault();
+    var idTraspaso = $(this).data('id');
+    var origen = $(this).data('origen');
+    var destino = $(this).data('destino');
+
+    $('#revertir-traspaso-id').val(idTraspaso);
+    $('#revertir-traspaso-origen').text(origen);
+    $('#revertir-traspaso-destino').text(destino);
+    $('#revertir-traspaso-modal').modal('show');
+});
+
+// Confirmar revertir traspaso
+$(document).on('click', '#revertir-traspaso-confirmar-btn', function(e) {
+    e.preventDefault();
+
+    var $btn = $(this);
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Revirtiendo...');
+
+    var idTraspaso = $('#revertir-traspaso-id').val();
+    var url = './ajax/ajax_revertirTraspaso.php';
+    var data = {
+        'id_traspaso': idTraspaso
+    };
+
+    $.post(url, data, function(response) {
+        console.log('Respuesta revertir:', response);
+
+        if(typeof response === 'string') {
+            response = JSON.parse(response);
+        }
+
+        if(response.status == 'OK') {
+            window.location.href = './?s=nuevo-batches&id=' + id_batches_actual + '&msg=1&msg_content=' + encodeURIComponent(response.mensaje);
+        } else {
+            alert('Error: ' + response.mensaje);
+            $btn.prop('disabled', false).html('<i class="fas fa-undo me-1"></i> Revertir');
+            $('#revertir-traspaso-modal').modal('hide');
+        }
+    }).fail(function(xhr, status, error) {
+        console.error('Error AJAX:', error);
+        alert('Error al revertir el traspaso.');
+        $btn.prop('disabled', false).html('<i class="fas fa-undo me-1"></i> Revertir');
+    });
 });
 
 $(document).on('click','.eliminar-obj-btn',function(e){
@@ -1945,7 +2391,11 @@ $(document).on('click','#finalizar-aceptar-btn',function(e){
 
 
 
-// Función para calcular litros disponibles
+// ===========================
+// SISTEMA DE FERMENTADORES ASÍNCRONOS
+// ===========================
+
+// Función para calcular litros disponibles (mantenida para visualización)
 function calcularLitrosDisponibles() {
     var batchLitros = parseFloat($('[name="batch_litros"]').val()) || 0;
     var litrosAsignados = 0;
@@ -1963,105 +2413,99 @@ function calcularLitrosDisponibles() {
     };
 }
 
-// Función para actualizar resumen de capacidad en modal
-function actualizarResumenCapacidad(litrajeFermentador) {
-    var capacidad = calcularLitrosDisponibles();
-
-    $('#batch-litros-total').text(capacidad.total + ' L');
-    $('#fermentadores-litros-asignados').text(capacidad.asignado + ' L');
-    $('#fermentadores-litros-disponibles').text(capacidad.disponible + ' L');
-
-    // Cambiar color según disponibilidad
-    if (capacidad.disponible < litrajeFermentador) {
-        $('#fermentadores-litros-disponibles').css('color', '#dc3545');
-        $('#fermentadores-error-capacidad').show();
-        $('#agregar-fermentadores-aceptar-btn').prop('disabled', true);
-    } else if (capacidad.disponible < capacidad.total * 0.2) {
-        $('#fermentadores-litros-disponibles').css('color', '#ffc107');
-        $('#fermentadores-error-capacidad').hide();
-        $('#agregar-fermentadores-aceptar-btn').prop('disabled', false);
-    } else {
-        $('#fermentadores-litros-disponibles').css('color', '#28a745');
-        $('#fermentadores-error-capacidad').hide();
-        $('#agregar-fermentadores-aceptar-btn').prop('disabled', false);
-    }
-}
-
+// Abrir modal de agregar fermentador
 $(document).on('click','#agregar-fermentadores-btn',function(e){
     e.preventDefault();
-    armarFermentadoresSelect();
-    var id_activos = $('#agregar-fermentadores_id_activos-select').val();
-    var fermentador = fermentadores.find((f) => f.id == id_activos);
-    $('#agregar-fermentadores-cantidad-input').val(fermentador.litraje);
 
-    // Actualizar resumen de capacidad
-    actualizarResumenCapacidad(parseFloat(fermentador.litraje));
+    // Verificar que hay fermentadores disponibles
+    var $select = $('#agregar-fermentadores_id_activos-select');
+    if($select.find('option').length == 0) {
+        alert('No hay fermentadores disponibles para agregar.');
+        return false;
+    }
+
+    // Actualizar cantidad con el primer fermentador
+    var litraje = $select.find('option:first').data('litraje') || 0;
+    $('#agregar-fermentadores-cantidad-input').val(litraje);
+
+    $('#agregar-fermentadores-modal').modal('show');
 });
 
+// Al cambiar fermentador seleccionado
 $(document).on('change','#agregar-fermentadores_id_activos-select',function(e){
-    e.preventDefault();
-    var id_activos = $('#agregar-fermentadores_id_activos-select').val();
-    var fermentador = fermentadores.find((f) => f.id == id_activos);
-    $('#agregar-fermentadores-cantidad-input').val(fermentador.litraje);
-
-    // Actualizar resumen de capacidad
-    actualizarResumenCapacidad(parseFloat(fermentador.litraje));
+    var litraje = $(this).find('option:selected').data('litraje') || 0;
+    $('#agregar-fermentadores-cantidad-input').val(litraje);
 });
 
-
+// Agregar fermentador vía AJAX
 $(document).on('click','#agregar-fermentadores-aceptar-btn',function(e){
-  e.preventDefault();
+    e.preventDefault();
 
-  var id_activos = $('#agregar-fermentadores_id_activos-select').val();
-  var fermentador_index = fermentadores.findIndex((f) => f.id == id_activos);
-  var fermentador = fermentadores[fermentador_index];
+    var $btn = $(this);
+    var id_activos = $('#agregar-fermentadores_id_activos-select').val();
 
-  // Validar capacidad disponible
-  var capacidad = calcularLitrosDisponibles();
-  var litrajeFermentador = parseFloat(fermentador.litraje);
+    if(!id_activos) {
+        alert('Seleccione un fermentador');
+        return false;
+    }
 
-  if (capacidad.disponible < litrajeFermentador) {
-    alert('⚠️ No hay capacidad suficiente en el batch.\n\n' +
-          'Litros del batch: ' + capacidad.total + ' L\n' +
-          'Ya asignado: ' + capacidad.asignado + ' L\n' +
-          'Disponible: ' + capacidad.disponible + ' L\n' +
-          'Requiere: ' + litrajeFermentador + ' L\n\n' +
-          'Faltan ' + (litrajeFermentador - capacidad.disponible) + ' L');
-    return false;
-  }
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Agregando...');
 
-  // Agregar fermentador
-  fermentacion_fermentadores.push({
-    'id': '',
-    'id_batches': obj.id,
-    'id_activos': $('#agregar-fermentadores_id_activos-select').val(),
-    'estado': 'Fermentación',
-    'litraje': fermentador.litraje
-  });
-  fermentadores_usados.push(fermentador);
+    var data = {
+        'id_batches': id_batches_actual,
+        'id_activos': id_activos,
+        'estado': 'Fermentación'
+    };
 
-  var fermentadores_disponibles_index = fermentadores_disponibles.findIndex((f) => f.id == id_activos);
-  fermentadores_disponibles.splice(fermentador_index,1);
-  renderFermentacionFermentadores();
+    $.post('./ajax/ajax_inventarioProductosBatchActivoAgregar.php', data, function(response){
+        console.log('Respuesta agregar fermentador:', response);
 
-  // Cerrar modal
-  $('#agregar-fermentadores-modal').modal('hide');
+        if(typeof response === 'string') {
+            response = JSON.parse(response);
+        }
+
+        if(response.status == 'OK') {
+            window.location.href = './?s=nuevo-batches&id=' + id_batches_actual + '&msg=1&msg_content=' + encodeURIComponent(response.msg_content);
+        } else {
+            alert('Error: ' + (response.mensaje || response.msg_content || 'Error desconocido'));
+            $btn.prop('disabled', false).html('Agregar Fermentador');
+        }
+    }).fail(function(xhr, status, error) {
+        console.error('Error AJAX:', error);
+        alert('Error al agregar fermentador. Por favor intente nuevamente.');
+        $btn.prop('disabled', false).html('Agregar Fermentador');
+    });
 });
 
+// Renderizar lista de fermentadores
 function renderFermentacionFermentadores() {
     var html = '';
     var litraje_total = 0;
-    fermentacion_fermentadores.forEach(function(batch_activo,index){
-        var fermentador = fermentadores.find((f) => f.id == batch_activo.id_activos);
-        console.log(batch_activo.id_activos);
-        console.log(fermentadores);
-        html += '<tr><td>' + fermentador.codigo;
-        html += '</td><td>' + batch_activo.litraje + ' Litros';
-        html += '</td><td><b>' + batch_activo.estado;
-        html += '</b></td><td><b><button class="btn btn-sm fermentacion-fermentador-eliminar-btn" data-index="' + index + '">x</button>';
-        html += '</b></td></tr>';
-        litraje_total += parseInt(batch_activo.litraje);
-    });
+
+    if(fermentacion_fermentadores.length == 0) {
+        html = '<tr><td colspan="4" class="text-center text-muted">No hay fermentadores asignados</td></tr>';
+    } else {
+        fermentacion_fermentadores.forEach(function(batch_activo, index){
+            var fermentador = fermentadores.find((f) => f.id == batch_activo.id_activos);
+            var codigo = fermentador ? fermentador.codigo : 'N/A';
+
+            html += '<tr>';
+            html += '<td>' + codigo + '</td>';
+            html += '<td>' + batch_activo.litraje + ' L</td>';
+            html += '<td><span class="badge bg-primary">' + batch_activo.estado + '</span></td>';
+            html += '<td>';
+            html += '<button class="btn btn-sm btn-outline-danger fermentacion-fermentador-eliminar-btn" ';
+            html += 'data-id="' + batch_activo.id + '" ';
+            html += 'data-codigo="' + codigo + '">';
+            html += '<i class="fas fa-times"></i>';
+            html += '</button>';
+            html += '</td>';
+            html += '</tr>';
+
+            litraje_total += parseInt(batch_activo.litraje) || 0;
+        });
+    }
+
     $('#fermentacion-fermentadores-tbody').html(html);
     $('#fermentacion-fermentadores-litraje-total-span').html(litraje_total);
 
@@ -2071,22 +2515,18 @@ function renderFermentacionFermentadores() {
 
     if (capacidad.total > 0) {
         var porcentajeUsado = (capacidad.asignado / capacidad.total) * 100;
-        var colorBarra = '#28a745'; // Verde
+        var colorBarra = '#28a745';
         var mensaje = '';
-        var icono = '✓';
 
         if (porcentajeUsado > 100) {
-            colorBarra = '#dc3545'; // Rojo
+            colorBarra = '#dc3545';
             mensaje = '⚠️ ¡EXCEDE LA CAPACIDAD DEL BATCH!';
-            icono = '⚠️';
         } else if (porcentajeUsado > 95) {
-            colorBarra = '#ffc107'; // Amarillo
+            colorBarra = '#ffc107';
             mensaje = '⚠️ Casi al límite de capacidad';
-            icono = '⚠️';
         } else if (porcentajeUsado >= 80) {
-            colorBarra = '#17a2b8'; // Azul
+            colorBarra = '#17a2b8';
             mensaje = 'Buen uso de capacidad';
-            icono = '✓';
         }
 
         infoHtml = '<div style="font-size: 0.9rem;">';
@@ -2096,50 +2536,72 @@ function renderFermentacionFermentadores() {
         infoHtml += '</div>';
         infoHtml += '<div class="d-flex justify-content-between mb-2">';
         infoHtml += '<span><strong>Disponible:</strong></span>';
-        infoHtml += '<span style="color: ' + colorBarra + '; font-weight: bold;">' + capacidad.disponible.toFixed(1) + ' L (' + (100 - porcentajeUsado).toFixed(1) + '%)</span>';
+        infoHtml += '<span style="color: ' + colorBarra + '; font-weight: bold;">' + capacidad.disponible.toFixed(1) + ' L</span>';
         infoHtml += '</div>';
-
-        // Barra de progreso
         infoHtml += '<div class="progress" style="height: 20px;">';
-        infoHtml += '<div class="progress-bar" role="progressbar" style="width: ' + Math.min(porcentajeUsado, 100) + '%; background-color: ' + colorBarra + ';" aria-valuenow="' + porcentajeUsado + '" aria-valuemin="0" aria-valuemax="100">';
-        infoHtml += icono + ' ' + porcentajeUsado.toFixed(1) + '%';
-        infoHtml += '</div>';
-        infoHtml += '</div>';
-
+        infoHtml += '<div class="progress-bar" role="progressbar" style="width: ' + Math.min(porcentajeUsado, 100) + '%; background-color: ' + colorBarra + ';">';
+        infoHtml += porcentajeUsado.toFixed(1) + '%';
+        infoHtml += '</div></div>';
         if (mensaje) {
             infoHtml += '<div class="mt-2" style="color: ' + colorBarra + '; font-weight: bold;">' + mensaje + '</div>';
         }
-
         infoHtml += '</div>';
     }
 
     $('#fermentacion-capacidad-info').html(infoHtml);
 }
 
-$(document).on('click','.fermentacion-fermentador-eliminar-btn',function(e){
+// Abrir modal de eliminar fermentador
+$(document).on('click', '.fermentacion-fermentador-eliminar-btn', function(e){
     e.preventDefault();
-    var index = $(e.currentTarget).data('index');
-    var fermentacion_fermentador_seleccionado = fermentacion_fermentadores[index];
+    var idBatchActivo = $(this).data('id');
+    var codigo = $(this).data('codigo');
 
-    var fermentador_usado_index = fermentadores_usados.findIndex((f) => f.id == fermentacion_fermentador_seleccionado.id);
-    fermentadores_usados.splice(fermentador_usado_index,1);
-
-
-    var fermentador_para_push = fermentadores_usados.find((f) => f.id == fermentacion_fermentador_seleccionado.id_activos);
-    fermentadores_disponibles.push(fermentador_para_push);    
-
-    fermentacion_fermentadores.splice(index,1);
-    renderFermentacionFermentadores();
+    $('#eliminar-fermentador-id-batches-activos').val(idBatchActivo);
+    $('#eliminar-fermentador-id-batches').val(id_batches_actual);
+    $('#eliminar-fermentador-codigo').text(codigo);
+    $('#eliminar-fermentador-modal').modal('show');
 });
 
+// Confirmar eliminar fermentador
+$(document).on('click', '#eliminar-fermentador-confirmar-btn', function(e){
+    e.preventDefault();
 
+    var $btn = $(this);
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Eliminando...');
+
+    var data = {
+        'id_batches': $('#eliminar-fermentador-id-batches').val(),
+        'id_batches_activos': $('#eliminar-fermentador-id-batches-activos').val()
+    };
+
+    $.post('./ajax/ajax_inventarioProductosBatchActivoEliminar.php', data, function(response){
+        console.log('Respuesta eliminar fermentador:', response);
+
+        if(typeof response === 'string') {
+            response = JSON.parse(response);
+        }
+
+        if(response.status == 'OK') {
+            window.location.href = './?s=nuevo-batches&id=' + id_batches_actual + '&msg=1&msg_content=' + encodeURIComponent(response.msg_content);
+        } else {
+            alert('Error: ' + (response.mensaje || response.msg_content || 'Error desconocido'));
+            $btn.prop('disabled', false).html('<i class="fas fa-trash me-1"></i> Eliminar');
+            $('#eliminar-fermentador-modal').modal('hide');
+        }
+    }).fail(function(xhr, status, error) {
+        console.error('Error AJAX:', error);
+        alert('Error al eliminar fermentador.');
+        $btn.prop('disabled', false).html('<i class="fas fa-trash me-1"></i> Eliminar');
+    });
+});
+
+// Función legacy para compatibilidad (ya no se usa activamente)
 function armarFermentadoresSelect() {
     var fermentadores_select_html = '';
     fermentadores_disponibles.sort();
     fermentadores_disponibles.forEach(function(f){
-        console.log(f.codigo);
-        console.log(f);
-        fermentadores_select_html += '<option value="' + f.id + '">' + f.codigo + '</option>';
+        fermentadores_select_html += '<option value="' + f.id + '" data-litraje="' + f.litraje + '">' + f.codigo + ' (' + f.litraje + 'L)</option>';
     });
     $('#agregar-fermentadores_id_activos-select').html(fermentadores_select_html);
 }

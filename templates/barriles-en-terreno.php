@@ -48,7 +48,7 @@
   <div class="col-md-4">
     <div class="card">
       <div class="card-body">
-        <div class="d-sm-flex align-items-center justify-content-between mb-3" id="cliente-<?= $cliente->id; ?>">
+        <div class="d-sm-flex align-items-center justify-content-between mb-3">
           <div class="mb-2">
             <h1 class="h4 mb-0 text-gray-800"><b>En Planta</b> (<?= count($barriles_en_planta); ?>)</h1>
           </div>
@@ -132,7 +132,7 @@
   <div class="col-md-4">
     <div class="card">
       <div class="card-body">
-        <div class="d-sm-flex align-items-center justify-content-between mb-3" id="cliente-<?= $cliente->id; ?>">
+        <div class="d-sm-flex align-items-center justify-content-between mb-3">
           <div class="mb-2">
             <h1 class="h4 mb-0 text-gray-800"><b>Perdidos</b> (<?= count($barriles_perdidos); ?>)</h1>
           </div>
@@ -204,7 +204,7 @@
   <div class="col-md-6">
     <div class="card">
       <div class="card-body">
-        <div class="d-sm-flex align-items-center justify-content-between mb-3" id="cliente-<?= $cliente->id; ?>">
+        <div class="d-sm-flex align-items-center justify-content-between mb-3">
           <div class="mb-2">
             <h1 class="h4 mb-0 text-gray-800"><b><?= $cliente->nombre; ?></b> (<?= count($barriles); ?>)</h1>
           </div>
@@ -259,7 +259,7 @@
                 <?= $datetime_entrega; ?>
               </td>
               <td>
-                <?= ($barril->id_batches != 0) ? "#".$id_batches : "-"; ?>
+                <?= ($barril->id_batches != 0) ? "#".$barril->id_batches : "-"; ?>
               </td>
               <?php
               if($usuario->nivel == 'Administrador') {

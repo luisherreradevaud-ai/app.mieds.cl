@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 29, 2025 at 11:06 AM
+-- Generation Time: Dec 05, 2025 at 09:39 AM
 -- Server version: 10.4.34-MariaDB
 -- PHP Version: 7.2.30
 
@@ -53,22 +53,23 @@ CREATE TABLE `activos` (
   `clasificacion` varchar(100) NOT NULL,
   `estado` varchar(100) NOT NULL,
   `propietario` varchar(100) NOT NULL,
-  `adquisicion_date` date NOT NULL,
+  `adquisicion_date` date DEFAULT NULL,
   `valorizacion` varchar(100) NOT NULL,
-  `ultima_inspeccion` date NOT NULL,
-  `proxima_inspeccion` date NOT NULL,
+  `ultima_inspeccion` date DEFAULT NULL,
+  `proxima_inspeccion` date DEFAULT NULL,
   `inspeccion_procedimiento` mediumtext NOT NULL,
   `inspeccion_periodicidad` varchar(100) NOT NULL,
-  `ultima_mantencion` date NOT NULL,
-  `proxima_mantencion` date NOT NULL,
+  `ultima_mantencion` date DEFAULT NULL,
+  `proxima_mantencion` date DEFAULT NULL,
   `mantencion_procedimiento` mediumtext NOT NULL,
   `mantencion_periodicidad` varchar(100) NOT NULL,
-  `creada` date NOT NULL,
+  `creada` date DEFAULT NULL,
   `id_media_header` int(11) NOT NULL,
   `id_usuarios_control` int(11) NOT NULL DEFAULT 0,
   `ubicacion` varchar(100) NOT NULL,
   `id_clientes_ubicacion` int(11) NOT NULL,
   `clase` varchar(255) NOT NULL,
+  `linea_productiva` enum('alcoholica','analcoholica','general') DEFAULT 'general',
   `id_batches` int(11) NOT NULL DEFAULT 0,
   `litraje` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -82,7 +83,7 @@ CREATE TABLE `activos` (
 CREATE TABLE `alertas` (
   `id` int(11) NOT NULL,
   `alerta` varchar(300) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `estado` varchar(20) NOT NULL,
   `id_usuarios` int(11) NOT NULL,
   `usuarios_nivel` varchar(50) NOT NULL
@@ -97,7 +98,7 @@ CREATE TABLE `alertas` (
 CREATE TABLE `barriles` (
   `id` int(11) NOT NULL,
   `tipo_barril` varchar(30) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `estado` varchar(50) NOT NULL,
   `codigo` varchar(30) NOT NULL,
   `id_clientes` int(11) NOT NULL,
@@ -105,6 +106,7 @@ CREATE TABLE `barriles` (
   `clasificacion` varchar(100) NOT NULL,
   `litraje` int(11) NOT NULL DEFAULT 0,
   `litros_cargados` int(11) NOT NULL DEFAULT 0,
+  `fecha_llenado` datetime DEFAULT NULL,
   `id_activos` int(11) NOT NULL DEFAULT 0,
   `id_batches_activos` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -119,11 +121,11 @@ CREATE TABLE `barriles_estados` (
   `id` int(11) NOT NULL,
   `id_barriles` int(11) NOT NULL,
   `id_clientes` int(11) NOT NULL,
-  `inicio_date` datetime NOT NULL,
-  `finalizacion_date` datetime NOT NULL,
+  `inicio_date` datetime DEFAULT NULL,
+  `finalizacion_date` datetime DEFAULT NULL,
   `tiempo_transcurrido` varchar(255) NOT NULL,
   `estado` varchar(100) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `id_usuarios` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -137,7 +139,7 @@ CREATE TABLE `barriles_reemplazos` (
   `id` int(11) NOT NULL,
   `id_barriles_devuelto` int(11) NOT NULL,
   `id_barriles_reemplazo` int(11) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `motivo` varchar(500) NOT NULL,
   `id_entregas_productos` int(11) NOT NULL,
   `id_entregas` int(11) NOT NULL,
@@ -185,7 +187,7 @@ CREATE TABLE `batches` (
   `fermentacion_densidad` decimal(5,3) DEFAULT 0.000,
   `fermentacion_tipo_de_densidad` varchar(50) DEFAULT NULL,
   `fermentacion_finalizada` int(11) NOT NULL DEFAULT 0,
-  `fermentacion_finalizada_datetime` datetime NOT NULL,
+  `fermentacion_finalizada_datetime` datetime DEFAULT NULL,
   `traspaso_datetime` datetime DEFAULT NULL,
   `maduracion_date` date DEFAULT NULL,
   `maduracion_temperatura_inicio` decimal(5,2) DEFAULT 0.00,
@@ -197,7 +199,7 @@ CREATE TABLE `batches` (
   `creada` timestamp NOT NULL DEFAULT current_timestamp(),
   `etapa_seleccionada` varchar(30) NOT NULL DEFAULT 'batch',
   `tipo` varchar(255) NOT NULL,
-  `finalizacion_date` date NOT NULL
+  `finalizacion_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -209,13 +211,13 @@ CREATE TABLE `batches` (
 CREATE TABLE `batches_2` (
   `id` int(11) NOT NULL,
   `id_recetas` int(11) NOT NULL,
-  `fecha_inicio` date NOT NULL,
-  `fecha_termino` date NOT NULL,
+  `fecha_inicio` date DEFAULT NULL,
+  `fecha_termino` date DEFAULT NULL,
   `id_usuarios_ejecutor` int(11) NOT NULL,
   `estado` varchar(100) NOT NULL,
   `id_activos` int(11) NOT NULL,
   `observaciones` mediumtext NOT NULL,
-  `creada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -230,7 +232,7 @@ CREATE TABLE `batches_activos` (
   `id_activos` int(11) NOT NULL DEFAULT 0,
   `estado` varchar(100) NOT NULL,
   `litraje` int(11) NOT NULL DEFAULT 0,
-  `creada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -260,19 +262,44 @@ CREATE TABLE `batches_cajas` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `batches_de_envases`
+--
+
+CREATE TABLE `batches_de_envases` (
+  `id` int(11) NOT NULL,
+  `tipo` varchar(20) NOT NULL DEFAULT 'Lata' COMMENT 'Tipo de envase: Lata, Botella',
+  `id_batches` int(11) NOT NULL DEFAULT 0 COMMENT 'Batch de cerveza origen',
+  `id_activos` int(11) NOT NULL DEFAULT 0 COMMENT 'Fermentador origen (si aplica)',
+  `id_barriles` int(11) NOT NULL DEFAULT 0 COMMENT 'Barril origen (si aplica)',
+  `id_batches_activos` int(11) NOT NULL DEFAULT 0 COMMENT 'BatchActivo origen (si aplica)',
+  `id_formatos_de_envases` int(11) NOT NULL COMMENT 'Formato de envase utilizado',
+  `id_recetas` int(11) NOT NULL DEFAULT 0 COMMENT 'Receta del batch',
+  `cantidad_de_envases` int(11) NOT NULL COMMENT 'Cantidad total de envases creados',
+  `volumen_origen_ml` int(11) NOT NULL DEFAULT 0 COMMENT 'Volumen disponible antes de enlatar (ml)',
+  `rendimiento_ml` int(11) NOT NULL DEFAULT 0 COMMENT 'Volumen efectivamente enlatado (ml)',
+  `merma_ml` int(11) NOT NULL DEFAULT 0 COMMENT 'Volumen perdido (origen - rendimiento)',
+  `id_usuarios` int(11) NOT NULL COMMENT 'Usuario que realizó el enlatado',
+  `estado` varchar(50) NOT NULL DEFAULT 'Cargado en planta' COMMENT 'Cargado en planta, Sin latas',
+  `creada` datetime NOT NULL DEFAULT current_timestamp(),
+  `actualizada` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `batches_enfriado`
 --
 
 CREATE TABLE `batches_enfriado` (
   `id` int(11) NOT NULL,
-  `date` date NOT NULL,
+  `date` date DEFAULT NULL,
   `temperatura_inicio` int(11) NOT NULL DEFAULT 0,
   `hora_inicio` varchar(10) NOT NULL,
   `ph` int(11) NOT NULL DEFAULT 0,
   `densidad` varchar(50) NOT NULL,
   `ph_enfriado` int(11) NOT NULL DEFAULT 0,
   `seq_index` int(11) NOT NULL DEFAULT 0,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `id_batches` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -285,7 +312,7 @@ CREATE TABLE `batches_enfriado` (
 CREATE TABLE `batches_historial` (
   `id` int(11) NOT NULL,
   `contenido` text NOT NULL,
-  `creada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -300,7 +327,7 @@ CREATE TABLE `batches_insumos` (
   `id_insumos` int(11) NOT NULL,
   `cantidad` float NOT NULL,
   `tipo` varchar(100) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `date` date NOT NULL DEFAULT current_timestamp(),
   `etapa` varchar(100) NOT NULL,
   `etapa_index` int(11) NOT NULL DEFAULT 0
@@ -316,9 +343,9 @@ CREATE TABLE `batches_lupulizacion` (
   `id` int(11) NOT NULL,
   `tipo` varchar(100) NOT NULL,
   `seq_index` int(11) NOT NULL DEFAULT 0,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `hora` varchar(5) NOT NULL,
-  `date` date NOT NULL,
+  `date` date DEFAULT NULL,
   `id_batches` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -332,10 +359,11 @@ CREATE TABLE `batches_traspasos` (
   `id` int(11) NOT NULL,
   `id_batches` int(11) DEFAULT 0,
   `cantidad` int(11) DEFAULT 0,
+  `merma_litros` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Litros perdidos durante el traspaso',
   `id_fermentadores_inicio` int(11) DEFAULT 0,
   `id_fermentadores_final` int(11) DEFAULT 0,
   `creada` timestamp NOT NULL DEFAULT current_timestamp(),
-  `date` date NOT NULL,
+  `date` date DEFAULT NULL,
   `hora` time NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -348,9 +376,26 @@ CREATE TABLE `batches_traspasos` (
 CREATE TABLE `cajas` (
   `id` int(11) NOT NULL,
   `id_productos` int(11) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `estado` varchar(50) NOT NULL,
   `codigo` varchar(30) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cajas_de_envases`
+--
+
+CREATE TABLE `cajas_de_envases` (
+  `id` int(11) NOT NULL,
+  `codigo` varchar(50) NOT NULL COMMENT 'Código único de la caja (ej: CL-2025-0001)',
+  `id_productos` int(11) NOT NULL COMMENT 'Producto asociado',
+  `cantidad_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Cantidad de envases en la caja',
+  `id_usuarios` int(11) NOT NULL DEFAULT 0 COMMENT 'Usuario que creó la caja',
+  `estado` varchar(50) NOT NULL DEFAULT 'En planta' COMMENT 'En planta, En despacho, Entregada',
+  `creada` datetime NOT NULL DEFAULT current_timestamp(),
+  `actualizada` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -364,7 +409,7 @@ CREATE TABLE `clientes` (
   `nombre` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `telefono` varchar(30) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `estado` varchar(50) NOT NULL,
   `criterio` varchar(50) NOT NULL,
   `precio_tripack` int(11) NOT NULL,
@@ -403,8 +448,8 @@ CREATE TABLE `clientes_productos_precios` (
 CREATE TABLE `compras_de_insumos` (
   `id` int(11) NOT NULL,
   `id_usuarios` int(11) NOT NULL,
-  `date` date NOT NULL,
-  `creada` datetime NOT NULL,
+  `date` date DEFAULT NULL,
+  `creada` datetime DEFAULT NULL,
   `monto` int(11) NOT NULL,
   `factura` varchar(100) NOT NULL,
   `estado` varchar(30) NOT NULL,
@@ -530,8 +575,9 @@ CREATE TABLE `conversaciones_internas_tags` (
 CREATE TABLE `despachos` (
   `id` int(11) NOT NULL,
   `id_usuarios_repartidor` int(11) NOT NULL,
+  `id_clientes` int(11) NOT NULL DEFAULT 0 COMMENT 'Cliente destino del despacho',
   `estado` varchar(30) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `id_pedidos` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -551,6 +597,7 @@ CREATE TABLE `despachos_productos` (
   `id_barriles` int(11) NOT NULL,
   `estado` varchar(60) NOT NULL,
   `id_productos` int(11) NOT NULL DEFAULT 0,
+  `id_cajas_de_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Caja de envases asociada (si tipo=CajaEnvases)',
   `clasificacion` varchar(100) NOT NULL,
   `id_pedidos` int(11) NOT NULL DEFAULT 0,
   `id_pedidos_productos` int(11) NOT NULL DEFAULT 0,
@@ -570,8 +617,8 @@ CREATE TABLE `documentos` (
   `estado` varchar(100) NOT NULL,
   `folio` varchar(100) NOT NULL,
   `id_clientes` int(11) NOT NULL,
-  `creada` datetime NOT NULL,
-  `datetime_aprobado` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
+  `datetime_aprobado` datetime DEFAULT NULL,
   `id_pagos` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -589,13 +636,13 @@ CREATE TABLE `dte` (
   `dte` int(11) NOT NULL,
   `certificacion` int(11) NOT NULL,
   `tasa` int(11) NOT NULL,
-  `fecha` date NOT NULL,
+  `fecha` date DEFAULT NULL,
   `neto` int(11) NOT NULL,
   `iva` int(11) NOT NULL,
   `total` int(11) NOT NULL,
   `usuario` int(11) NOT NULL,
   `track_id` int(11) NOT NULL,
-  `fecha_hora_creacion` datetime NOT NULL,
+  `fecha_hora_creacion` datetime DEFAULT NULL,
   `id_entregas` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -623,10 +670,10 @@ CREATE TABLE `entregas` (
   `id_clientes` int(11) NOT NULL,
   `tipo_de_entrega` varchar(50) NOT NULL,
   `estado` varchar(30) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `monto` int(11) NOT NULL,
   `factura` varchar(60) NOT NULL,
-  `fecha_vencimiento` date NOT NULL,
+  `fecha_vencimiento` date DEFAULT NULL,
   `abonado` int(11) NOT NULL DEFAULT 0,
   `datetime_abonado` datetime DEFAULT NULL,
   `rand_int` int(11) NOT NULL,
@@ -651,10 +698,31 @@ CREATE TABLE `entregas_productos` (
   `codigo` varchar(70) NOT NULL,
   `monto` int(11) NOT NULL,
   `id_barriles` int(11) NOT NULL,
+  `id_cajas_de_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Caja de envases entregada',
   `QtyItem` int(11) NOT NULL DEFAULT 1,
   `id_productos` int(11) NOT NULL DEFAULT 0,
   `id_pedidos_productos` int(11) NOT NULL DEFAULT 0,
   `id_despachos_productos` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `envases`
+--
+
+CREATE TABLE `envases` (
+  `id` int(11) NOT NULL,
+  `id_formatos_de_envases` int(11) NOT NULL COMMENT 'Formato del envase',
+  `volumen_ml` int(11) NOT NULL COMMENT 'Volumen de la lata en ml',
+  `id_batches_de_envases` int(11) NOT NULL COMMENT 'Batch de envases al que pertenece',
+  `id_batches` int(11) NOT NULL DEFAULT 0 COMMENT 'Batch de cerveza origen',
+  `id_barriles` int(11) NOT NULL DEFAULT 0 COMMENT 'Barril origen (si aplica)',
+  `id_activos` int(11) NOT NULL DEFAULT 0 COMMENT 'Fermentador origen (si aplica)',
+  `id_cajas_de_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Caja a la que pertenece (0 si no está en caja)',
+  `estado` varchar(50) NOT NULL DEFAULT 'Enlatada' COMMENT 'Enlatada, En caja en planta, En despacho, Entregada',
+  `creada` datetime NOT NULL DEFAULT current_timestamp(),
+  `actualizada` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -682,7 +750,7 @@ CREATE TABLE `fermentadores` (
   `id_batches` int(11) NOT NULL DEFAULT 0,
   `clasificacion` varchar(100) NOT NULL,
   `activo` int(11) NOT NULL DEFAULT 1,
-  `creada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -699,6 +767,22 @@ CREATE TABLE `formatos` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `formatos_de_envases`
+--
+
+CREATE TABLE `formatos_de_envases` (
+  `id` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL COMMENT 'Nombre descriptivo (ej: Lata 350ml)',
+  `tipo` varchar(20) NOT NULL DEFAULT 'Lata' COMMENT 'Tipo de envase: Lata, Botella',
+  `volumen_ml` int(11) NOT NULL COMMENT 'Volumen en mililitros',
+  `estado` varchar(50) NOT NULL DEFAULT 'activo',
+  `creada` datetime NOT NULL DEFAULT current_timestamp(),
+  `actualizada` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `gastos`
 --
 
@@ -707,7 +791,7 @@ CREATE TABLE `gastos` (
   `id_usuarios` int(11) NOT NULL,
   `monto` int(11) NOT NULL,
   `estado` varchar(30) NOT NULL,
-  `creada` date NOT NULL,
+  `creada` date DEFAULT NULL,
   `tipo_de_gasto` varchar(100) NOT NULL,
   `item` varchar(100) NOT NULL,
   `comentarios` varchar(300) NOT NULL,
@@ -746,7 +830,7 @@ CREATE TABLE `gastos_fijos_mes` (
   `real_neto` int(11) NOT NULL DEFAULT 0,
   `real_impuesto` int(11) NOT NULL DEFAULT 0,
   `real_bruto` int(11) NOT NULL DEFAULT 0,
-  `creada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -773,7 +857,7 @@ CREATE TABLE `historial` (
   `id` int(11) NOT NULL,
   `accion` varchar(300) NOT NULL,
   `id_usuarios` int(11) NOT NULL,
-  `creada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -806,8 +890,8 @@ CREATE TABLE `kanban_columnas` (
   `id_kanban_tableros` int(11) NOT NULL,
   `orden` int(11) DEFAULT 0,
   `color` varchar(7) DEFAULT '#6A1693',
-  `creada` datetime NOT NULL,
-  `actualizada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL,
+  `actualizada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -835,8 +919,8 @@ CREATE TABLE `kanban_tableros` (
   `id_entidad` varchar(100) NOT NULL,
   `id_usuario_creador` int(11) DEFAULT NULL,
   `orden` int(11) DEFAULT 0,
-  `creada` datetime NOT NULL,
-  `actualizada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL,
+  `actualizada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -870,8 +954,8 @@ CREATE TABLE `kanban_tareas` (
   `links` text DEFAULT NULL,
   `estado` varchar(50) DEFAULT 'Pendiente',
   `time_elapsed` int(11) DEFAULT 0,
-  `creada` datetime NOT NULL,
-  `actualizada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL,
+  `actualizada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -918,7 +1002,7 @@ CREATE TABLE `lineas_de_negocio` (
 CREATE TABLE `locaciones` (
   `id` int(11) NOT NULL,
   `nombre` varchar(255) NOT NULL,
-  `creada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -932,7 +1016,7 @@ CREATE TABLE `mailing` (
   `nombre` varchar(300) NOT NULL,
   `asunto` varchar(300) NOT NULL,
   `mensaje` mediumtext NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `categoria` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -944,7 +1028,7 @@ CREATE TABLE `mailing` (
 
 CREATE TABLE `mantenciones` (
   `id` int(11) NOT NULL,
-  `date` date NOT NULL,
+  `date` date DEFAULT NULL,
   `ejecutor` varchar(100) NOT NULL,
   `observaciones` mediumtext NOT NULL,
   `tarea` varchar(100) NOT NULL,
@@ -1078,7 +1162,7 @@ CREATE TABLE `notificaciones` (
   `id_usuarios` int(11) NOT NULL,
   `texto` varchar(500) NOT NULL,
   `link` varchar(200) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `vista` int(11) NOT NULL DEFAULT 0,
   `vista_datetime` datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1109,7 +1193,7 @@ CREATE TABLE `pagos` (
   `total` int(11) NOT NULL,
   `session_id` int(11) NOT NULL,
   `token` varchar(100) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `ids_entregas` varchar(200) NOT NULL,
   `id_clientes` int(11) NOT NULL,
   `codigo_transaccion` varchar(100) NOT NULL,
@@ -1129,7 +1213,7 @@ CREATE TABLE `pagos` (
 CREATE TABLE `pedidos` (
   `id` int(11) NOT NULL,
   `id_clientes` int(11) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `estado` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1186,7 +1270,7 @@ CREATE TABLE `prevlinks` (
   `id` int(11) NOT NULL,
   `id_usuarios` int(11) NOT NULL,
   `url` varchar(300) NOT NULL,
-  `datetime` datetime NOT NULL,
+  `datetime` datetime DEFAULT NULL,
   `count` int(11) NOT NULL,
   `id_secciones` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1205,7 +1289,11 @@ CREATE TABLE `productos` (
   `clasificacion` varchar(100) NOT NULL,
   `cantidad` varchar(30) NOT NULL,
   `monto` int(11) NOT NULL DEFAULT 0,
-  `codigo_de_barra` varchar(100) NOT NULL
+  `codigo_de_barra` varchar(100) NOT NULL,
+  `id_formatos_de_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Formato de envase para este producto',
+  `cantidad_de_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Cantidad de envases por caja/pack',
+  `tipo_envase` varchar(20) NOT NULL DEFAULT 'Lata' COMMENT 'Tipo de envase: Lata, Botella',
+  `es_mixto` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 = producto mixto que acepta multiples recetas (mismo formato)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1234,7 +1322,7 @@ CREATE TABLE `proveedores` (
   `nombre` varchar(300) NOT NULL,
   `email` varchar(200) NOT NULL,
   `telefono` varchar(20) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `comentarios` varchar(300) NOT NULL,
   `numero_cuenta` varchar(100) NOT NULL,
   `rut_empresa` varchar(50) NOT NULL,
@@ -1253,8 +1341,8 @@ CREATE TABLE `proyectos` (
   `descripcion` varchar(500) NOT NULL,
   `clasificacion` varchar(100) NOT NULL,
   `estado` varchar(100) NOT NULL,
-  `date_inicio` date NOT NULL,
-  `date_finalizacion` date NOT NULL
+  `date_inicio` date DEFAULT NULL,
+  `date_finalizacion` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1281,7 +1369,7 @@ CREATE TABLE `proyectos_ingresos` (
   `monto` int(11) NOT NULL,
   `forma_de_pago` varchar(100) NOT NULL,
   `impuestos` varchar(100) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `item` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1298,7 +1386,7 @@ CREATE TABLE `proyectos_productos` (
   `id_productos` int(11) NOT NULL,
   `monto` int(11) NOT NULL,
   `formato` varchar(40) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `id_gastos` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1339,10 +1427,10 @@ CREATE TABLE `recetas_insumos` (
 CREATE TABLE `registro_asistencia` (
   `id` int(11) NOT NULL,
   `id_usuarios` int(11) NOT NULL DEFAULT 0,
-  `date` date NOT NULL,
+  `date` date DEFAULT NULL,
   `entrada` varchar(10) NOT NULL,
   `salida` varchar(10) NOT NULL,
-  `creada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1353,11 +1441,11 @@ CREATE TABLE `registro_asistencia` (
 
 CREATE TABLE `reportes_diarios` (
   `id` int(11) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `json_reporte` text NOT NULL,
   `json_discrepancias` text NOT NULL,
   `id_usuarios` int(11) NOT NULL,
-  `date` date NOT NULL,
+  `date` date DEFAULT NULL,
   `estado` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1371,7 +1459,7 @@ CREATE TABLE `return_urls` (
   `id` int(11) NOT NULL,
   `hash` int(11) NOT NULL,
   `return_url` varchar(500) NOT NULL,
-  `creada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1403,7 +1491,7 @@ CREATE TABLE `sugerencias` (
   `id_usuarios` int(11) NOT NULL,
   `tipo` varchar(50) NOT NULL,
   `contenido` mediumtext NOT NULL,
-  `creada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1420,8 +1508,8 @@ CREATE TABLE `tareas` (
   `importancia` varchar(100) NOT NULL,
   `tarea` varchar(300) NOT NULL,
   `estado` varchar(100) NOT NULL,
-  `creada` datetime NOT NULL,
-  `plazo_maximo` date NOT NULL,
+  `creada` datetime DEFAULT NULL,
+  `plazo_maximo` date DEFAULT NULL,
   `random_int` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1435,7 +1523,7 @@ CREATE TABLE `tareas_comentarios` (
   `id` int(11) NOT NULL,
   `id_tareas` int(11) NOT NULL,
   `id_usuarios` int(11) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `comentario` mediumtext NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1498,7 +1586,7 @@ CREATE TABLE `transacciones` (
   `total` int(11) NOT NULL,
   `session_id` int(11) NOT NULL,
   `token` varchar(100) NOT NULL,
-  `creada` datetime NOT NULL,
+  `creada` datetime DEFAULT NULL,
   `ids_entregas` varchar(200) NOT NULL,
   `id_clientes` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1556,7 +1644,7 @@ CREATE TABLE `usuarios_niveles` (
   `nombre` varchar(200) NOT NULL,
   `editable` int(11) NOT NULL DEFAULT 1,
   `comentarios` varchar(300) NOT NULL,
-  `creada` datetime NOT NULL
+  `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1573,7 +1661,7 @@ CREATE TABLE `vendedores` (
   `estado` varchar(30) NOT NULL,
   `meta_barriles_mensuales` int(11) NOT NULL,
   `meta_cajas_mensuales` int(11) NOT NULL,
-  `creada` date NOT NULL
+  `creada` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1584,7 +1672,7 @@ CREATE TABLE `vendedores` (
 
 CREATE TABLE `visitas` (
   `id` int(11) NOT NULL,
-  `fecha` date NOT NULL,
+  `fecha` date DEFAULT NULL,
   `cantidad` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1602,7 +1690,8 @@ ALTER TABLE `accesorios`
 -- Indexes for table `activos`
 --
 ALTER TABLE `activos`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_activos_linea_productiva` (`linea_productiva`);
 
 --
 -- Indexes for table `alertas`
@@ -1614,7 +1703,8 @@ ALTER TABLE `alertas`
 -- Indexes for table `barriles`
 --
 ALTER TABLE `barriles`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_barriles_fecha_llenado` (`fecha_llenado`);
 
 --
 -- Indexes for table `barriles_estados`
@@ -1659,6 +1749,19 @@ ALTER TABLE `batches_cajas`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `batches_de_envases`
+--
+ALTER TABLE `batches_de_envases`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_id_batches` (`id_batches`),
+  ADD KEY `idx_id_activos` (`id_activos`),
+  ADD KEY `idx_id_barriles` (`id_barriles`),
+  ADD KEY `idx_id_formatos_de_latas` (`id_formatos_de_envases`),
+  ADD KEY `idx_estado` (`estado`),
+  ADD KEY `idx_id_recetas` (`id_recetas`),
+  ADD KEY `idx_tipo` (`tipo`);
+
+--
 -- Indexes for table `batches_enfriado`
 --
 ALTER TABLE `batches_enfriado`
@@ -1693,6 +1796,15 @@ ALTER TABLE `batches_traspasos`
 --
 ALTER TABLE `cajas`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `cajas_de_envases`
+--
+ALTER TABLE `cajas_de_envases`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_codigo` (`codigo`),
+  ADD KEY `idx_id_productos` (`id_productos`),
+  ADD KEY `idx_estado` (`estado`);
 
 --
 -- Indexes for table `clientes`
@@ -1763,13 +1875,15 @@ ALTER TABLE `conversaciones_internas_tags`
 -- Indexes for table `despachos`
 --
 ALTER TABLE `despachos`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_id_clientes` (`id_clientes`);
 
 --
 -- Indexes for table `despachos_productos`
 --
 ALTER TABLE `despachos_productos`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_id_cajas_de_envases` (`id_cajas_de_envases`);
 
 --
 -- Indexes for table `documentos`
@@ -1799,7 +1913,19 @@ ALTER TABLE `entregas`
 -- Indexes for table `entregas_productos`
 --
 ALTER TABLE `entregas_productos`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_id_cajas_de_envases` (`id_cajas_de_envases`);
+
+--
+-- Indexes for table `envases`
+--
+ALTER TABLE `envases`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_id_batches_de_latas` (`id_batches_de_envases`),
+  ADD KEY `idx_id_cajas_de_latas` (`id_cajas_de_envases`),
+  ADD KEY `idx_estado` (`estado`),
+  ADD KEY `idx_id_batches` (`id_batches`),
+  ADD KEY `idx_id_formatos_de_latas` (`id_formatos_de_envases`);
 
 --
 -- Indexes for table `fermentadores`
@@ -1812,6 +1938,15 @@ ALTER TABLE `fermentadores`
 --
 ALTER TABLE `formatos`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `formatos_de_envases`
+--
+ALTER TABLE `formatos_de_envases`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_estado` (`estado`),
+  ADD KEY `idx_volumen_ml` (`volumen_ml`),
+  ADD KEY `idx_tipo` (`tipo`);
 
 --
 -- Indexes for table `gastos`
@@ -2040,7 +2175,10 @@ ALTER TABLE `prevlinks`
 -- Indexes for table `productos`
 --
 ALTER TABLE `productos`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_id_formatos_de_latas` (`id_formatos_de_envases`),
+  ADD KEY `idx_tipo_envase` (`tipo_envase`),
+  ADD KEY `idx_es_mixto` (`es_mixto`);
 
 --
 -- Indexes for table `productos_items`
@@ -2263,6 +2401,12 @@ ALTER TABLE `batches_cajas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `batches_de_envases`
+--
+ALTER TABLE `batches_de_envases`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `batches_enfriado`
 --
 ALTER TABLE `batches_enfriado`
@@ -2296,6 +2440,12 @@ ALTER TABLE `batches_traspasos`
 -- AUTO_INCREMENT for table `cajas`
 --
 ALTER TABLE `cajas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `cajas_de_envases`
+--
+ALTER TABLE `cajas_de_envases`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -2395,6 +2545,12 @@ ALTER TABLE `entregas_productos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `envases`
+--
+ALTER TABLE `envases`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `fermentadores`
 --
 ALTER TABLE `fermentadores`
@@ -2404,6 +2560,12 @@ ALTER TABLE `fermentadores`
 -- AUTO_INCREMENT for table `formatos`
 --
 ALTER TABLE `formatos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `formatos_de_envases`
+--
+ALTER TABLE `formatos_de_envases`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --

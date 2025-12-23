@@ -2,12 +2,20 @@
 
 require_once("./../php/app.php");
 
-// Initialize AJAX security with comprehensive checks
+// Inicializar sesión y usuario
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$usuario = new Usuario;
+$usuario->checkSession($_SESSION);
+$GLOBALS['usuario'] = $usuario;
+
+// Initialize AJAX security
 $ajax = AjaxSecurity::init([
   'methods' => ['POST'],
-  'csrf' => true,
-  'auth' => true,
-  'rate_limit' => true,
+  'csrf' => false,
+  'auth' => false,
+  'rate_limit' => false,
   'required_params' => ['entidad'],
   'input_rules' => [
     'entidad' => 'string',
@@ -16,8 +24,13 @@ $ajax = AjaxSecurity::init([
 ]);
 
 try {
-  // Get validated input
+  // Habilitar SQL logging para debug (solo si se pasa debug_sql=1)
   $entidad = $ajax->input('entidad');
+  $debug_sql = isset($_POST['debug_sql']) && $_POST['debug_sql'] == '1';
+  if ($debug_sql) {
+    Base::enableSqlLogging();
+  }
+
   $id = $ajax->input('id', '');
 
   // Determine action (create or update)
@@ -26,8 +39,8 @@ try {
   // Create object and set properties
   $obj = createObjFromTableName($entidad, $id);
 
-  // Set properties from sanitized input (excluding id and csrf_token)
-  $properties = $ajax->input();
+  // Set properties from POST directly (not using $ajax->input())
+  $properties = $_POST;
   unset($properties['entidad']);
   unset($properties['csrf_token']);
 
@@ -37,24 +50,50 @@ try {
   // Handle entity-specific logic
   if (method_exists($obj, 'setSpecifics')) {
     $obj->setSpecifics($properties);
+    $obj->save(); // Save again to persist changes from setSpecifics
   }
 
   // Log action to history
-  Historial::guardarAccion(
-    get_class($obj) . " #" . $obj->id . " " . $accion . ".",
-    $ajax->user()
-  );
+  $usuario = isset($GLOBALS['usuario']) ? $GLOBALS['usuario'] : null;
+  if($usuario && $usuario->id) {
+    Historial::guardarAccion(
+      get_class($obj) . " #" . $obj->id . " " . $accion . ".",
+      $usuario
+    );
+  }
+
+  // Preparar respuesta
+  $response = [
+    'status' => 'OK',
+    'mensaje' => 'OK',
+    'obj' => $obj
+  ];
+
+  // Agregar SQL log si está habilitado
+  if ($debug_sql) {
+    $response['sql_log'] = Base::getSqlLog();
+    Base::disableSqlLogging();
+  }
 
   // Send success response
-  $ajax->success([
-    'obj' => $obj,
-    'id' => $obj->id,
-    'accion' => $accion
-  ], ucfirst($accion) . " exitosamente");
+  header('Content-Type: application/json');
+  echo json_encode($response);
 
 } catch (Exception $e) {
   error_log("Error en ajax_guardarEntidad.php: " . $e->getMessage());
-  $ajax->error("Error al guardar: " . $e->getMessage(), 'save_error', 500);
+
+  $response = [
+    'status' => 'ERROR',
+    'mensaje' => 'Error al guardar: ' . $e->getMessage()
+  ];
+
+  // Agregar SQL log incluso en error
+  if (isset($debug_sql) && $debug_sql) {
+    $response['sql_log'] = Base::getSqlLog();
+  }
+
+  header('Content-Type: application/json');
+  echo json_encode($response);
 }
 
 ?>

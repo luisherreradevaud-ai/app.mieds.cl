@@ -160,9 +160,23 @@ if($usuario->nivel == "Cliente") {
       </form>
     </div>
     <div class="col-md-6">
-      <table class="table">
+      <h6 class="mb-3"><i class="fas fa-fw fa-box"></i> Productos Entregados</h6>
+      <table class="table table-sm">
+        <thead class="table-light">
+          <tr>
+            <th>Tipo</th>
+            <th>Cant.</th>
+            <th>Producto</th>
+            <th>Código</th>
+            <th>Monto</th>
+            <th>Trazabilidad</th>
+          </tr>
+        </thead>
+        <tbody>
         <?php
         foreach($entregas_productos as $ep) {
+          // Verificar si tiene trazabilidad disponible (barril o caja de envases)
+          $tiene_trazabilidad = ($ep->id_barriles > 0 || $ep->id_cajas_de_envases > 0);
           ?>
           <tr>
             <td>
@@ -180,10 +194,23 @@ if($usuario->nivel == "Cliente") {
             <td>
               <b>$<?= number_format($ep->monto); ?></b>
             </td>
+            <td>
+              <?php if($tiene_trazabilidad): ?>
+              <a href="./ajax/ajax_generarPDFTrazabilidad.php?id=<?= $ep->id; ?>"
+                 class="btn btn-sm btn-outline-primary"
+                 target="_blank"
+                 title="Descargar PDF de Trazabilidad">
+                <i class="fas fa-file-pdf"></i>
+              </a>
+              <?php else: ?>
+              <span class="text-muted" title="Sin trazabilidad disponible">-</span>
+              <?php endif; ?>
+            </td>
           </tr>
           <?php
         }
         ?>
+        </tbody>
       </table>
     </div>
   </div>

@@ -111,7 +111,7 @@
         return "";
       }
       $pre_hash = "recuperacion".$this->id;
-      $this->recuperacion = $this->passwordHash($this->id,$pre_hash);
+      $this->recuperacion = $this->passwordHash($pre_hash);
       $email = new Email;
       $email->destinatario = $this->email;
       $email->setMailRecuparacion($this->nombre,$this->recuperacion);

@@ -44,6 +44,15 @@ Msg::show(1,'Producto guardado con &eacute;xito','info');
   <div class="row">
     <div class="col-md-6">
     <div class="row">
+    <?php if(!empty($obj->codigo_producto)) { ?>
+    <div class="col-6 mb-1">
+        C&oacute;digo:
+      </div>
+      <div class="col-6 mb-1">
+        <input type="text" class="form-control bg-light" value="<?= htmlspecialchars($obj->codigo_producto); ?>" readonly>
+        <small class="text-muted">Generado autom&aacute;ticamente</small>
+      </div>
+    <?php } ?>
     <div class="col-6 mb-1">
         Nombre:
       </div>
@@ -115,6 +124,16 @@ Msg::show(1,'Producto guardado con &eacute;xito','info');
             <option>Kombucha</option>
             <option>Agua saborizada</option>
             <option>Agua fermentada</option>
+        </select>
+      </div>
+      <div class="col-6 mb-1">
+        L&iacute;nea Productiva:
+      </div>
+      <div class="col-6 mb-1">
+        <select class="form-control" name="linea_productiva">
+            <option value="general">General</option>
+            <option value="alcoholica">L&iacute;nea Alcoh&oacute;lica</option>
+            <option value="analcoholica">L&iacute;nea Sin Alcohol</option>
         </select>
       </div>
       <div id="config-receta">
@@ -456,17 +475,15 @@ $(document).on('click','#guardar-btn',function(e){
   console.log(data);
 
 
-  $.post(url,data,function(raw){
-    console.log(raw);
-    //return false;
-    var response = JSON.parse(raw);
+  $.post(url,data,function(response){
+    console.log(response);
     if(response.mensaje!="OK") {
       alert("Algo fallo");
       return false;
     } else {
       window.location.href = "./?s=detalle-productos&id=" + response.obj.id + "&msg=1";
     }
-  }).fail(function(){
+  },'json').fail(function(){
     alert("No funciono");
   });
 });

@@ -51,11 +51,7 @@ $usuario = $GLOBALS['usuario'];
 </div>
 <hr />
 <?php
-if($msg == 1) {
-?>
-<div class="alert alert-info" role="alert" >Proveedor guardado con &eacute;xito.</div>
-<?php
-}
+  Msg::show(1,'Proveedor guardado con &eacute;xito','primary');
 ?>
 
 <form id="proveedores-form">
@@ -185,14 +181,13 @@ $(document).on('click','#guardar-btn',function(e){
   var url = "./ajax/ajax_guardarEntidad.php";
   var data = getDataForm("proveedores");
 
-  $.post(url,data,function(response_raw){
-    console.log(response_raw);
-    var response = JSON.parse(response_raw);
+  $.post(url,data,function(response){
+    console.log(response);
     if(response.mensaje!="OK") {
       alert("Algo fallo");
       return false;
     } else {
-      //window.location.href = "./?s=detalle-proveedores&id=" + response.obj.id + "&msg=1";
+      window.location.href = "./?s=detalle-proveedores&id=" + response.obj.id + "&msg=1";
     }
   }).fail(function(){
     alert("No funciono");

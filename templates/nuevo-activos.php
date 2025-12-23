@@ -3,6 +3,7 @@
   $usuario = $GLOBALS['usuario'];
   $locaciones = Locacion::getAll('ORDER BY nombre asc');
   $clases = Activo::getClases();
+  $lineas_productivas = Activo::getLineasProductivas();
   $clientes = Cliente::getAll("WHERE estado!='Bloqueado' ORDER BY nombre asc");
 
 ?>
@@ -102,6 +103,23 @@
         </select>
       </div>
 
+      <div class="col-6 mb-1">
+        L&iacute;nea Productiva:
+      </div>
+      <div class="col-6 mb-1">
+        <select class="form-control" name="linea_productiva">
+          <?php
+            foreach($lineas_productivas as $key => $label) {
+              $selected = ($key == 'general') ? 'selected' : '';
+              ?>
+              <option value="<?= $key; ?>" <?= $selected; ?>>
+                <?= $label; ?>
+              </option>
+              <?php
+            }
+          ?>
+        </select>
+      </div>
 
       <div class="col-6 mb-1">
         Ubicaci&oacute;n:
@@ -183,9 +201,8 @@ $(document).on('click','#guardar-btn',function(e){
   var data = getDataForm("activos");
   console.log(data);
 
-  $.post(url,data,function(response_raw){
-    console.log(response_raw);
-    var response = JSON.parse(response_raw);
+  $.post(url,data,function(response){
+    console.log(response);
     if(response.mensaje!="OK") {
       alert("Algo fallo");
       return false;
@@ -210,9 +227,8 @@ $(document).on('click','#guardar-y-agregar-btn',function(e){
   var data = getDataForm("activos");
   console.log(data);
 
-  $.post(url,data,function(response_raw){
-    console.log(response_raw);
-    var response = JSON.parse(response_raw);
+  $.post(url,data,function(response){
+    console.log(response);
     if(response.mensaje!="OK") {
       alert("Algo fallo");
       return false;

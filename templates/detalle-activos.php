@@ -15,6 +15,7 @@
 
   $locaciones = Locacion::getAll('ORDER BY nombre asc');
   $clases = Activo::getClases();
+  $lineas_productivas = Activo::getLineasProductivas();
 
 ?>
 
@@ -28,6 +29,13 @@
 
 .obj-archivo-img {
   cursor: pointer;
+}
+
+/* Campos readonly con fondo gris */
+input[readonly],
+textarea[readonly] {
+  background-color: #e9ecef !important;
+  color: #6c757d;
 }
 </style>
 
@@ -149,6 +157,23 @@
           <option>Activo</option>
           <option>Con observaciones</option>
           <option>Inactivo</option>
+        </select>
+      </div>
+
+      <div class="col-6 mb-1">
+        L&iacute;nea Productiva:
+      </div>
+      <div class="col-6 mb-1">
+        <select class="form-control" name="linea_productiva">
+          <?php
+            foreach($lineas_productivas as $key => $label) {
+              ?>
+              <option value="<?= $key; ?>">
+                <?= $label; ?>
+              </option>
+              <?php
+            }
+          ?>
         </select>
       </div>
 
@@ -399,6 +424,153 @@
         <textarea class="form-control" name="mantencion_procedimiento" id="mantencion_procedimiento"></textarea>
     </div>
 
+    <!-- SECCIÓN: Limpiezas -->
+    <div class="col-12 mt-3 mb-3">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0"><i class="fas fa-broom"></i> Limpiezas</h6>
+          <button class="btn btn-primary btn-sm" id="registrar-limpieza-btn" type="button">
+            <i class="fas fa-plus"></i> Registrar Limpieza
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- Configuración de Limpiezas -->
+          <div class="row mb-3">
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Periodicidad:</label>
+              <select class="form-control" name="limpieza_periodicidad">
+                <?php
+                $periodicidades = Activo::getPeriodicidadesLimpieza();
+                foreach($periodicidades as $key => $label) {
+                  echo "<option value='{$key}'>{$label}</option>";
+                }
+                ?>
+              </select>
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">&Uacute;ltima limpieza:</label>
+              <input type="text" class="form-control" name="fecha_ultima_limpieza" readonly
+                     value="<?= $obj->fecha_ultima_limpieza ? date('d/m/Y H:i', strtotime($obj->fecha_ultima_limpieza)) : 'Sin registrar'; ?>">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Pr&oacute;xima limpieza:</label>
+              <input type="date" class="form-control" name="proxima_limpieza">
+            </div>
+            <div class="col-md-3 mb-2">
+              <label class="form-label">Procedimiento:</label>
+              <textarea class="form-control" name="limpieza_procedimiento" rows="1"
+                        placeholder="Procedimiento est&aacute;ndar"></textarea>
+            </div>
+          </div>
+
+          <!-- Campos específicos Halal -->
+          <?php if($obj->linea_productiva == 'general' || $obj->linea_productiva == 'analcoholica'): ?>
+          <div class="row mb-3 pt-2 border-top">
+            <div class="col-12 mb-2">
+              <small class="text-success fw-bold"><i class="fas fa-certificate"></i> Limpieza Halal</small>
+            </div>
+            <div class="col-md-4 mb-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="uso_exclusivo_halal"
+                       id="uso_exclusivo_halal" value="1" <?= $obj->uso_exclusivo_halal ? 'checked' : ''; ?>>
+                <label class="form-check-label" for="uso_exclusivo_halal">
+                  Uso exclusivo para producci&oacute;n Halal
+                </label>
+              </div>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label class="form-label">&Uacute;ltima limpieza Halal:</label>
+              <input type="text" class="form-control" readonly
+                     value="<?= $obj->fecha_ultima_limpieza_halal ? date('d/m/Y H:i', strtotime($obj->fecha_ultima_limpieza_halal)) : 'Sin registrar'; ?>">
+            </div>
+            <div class="col-md-4 mb-2">
+              <label class="form-label">Certificado:</label>
+              <input type="text" class="form-control" name="certificado_limpieza_halal"
+                     value="<?= htmlspecialchars($obj->certificado_limpieza_halal); ?>" readonly>
+            </div>
+          </div>
+          <?php endif; ?>
+
+          <!-- Historial de Limpiezas -->
+          <div class="pt-2 border-top">
+            <h6 class="mb-2"><i class="fas fa-history"></i> Historial</h6>
+            <table class="table table-sm table-hover mb-0" id="tabla-historial-limpiezas">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th>Usuario</th>
+                  <th>Halal</th>
+                  <th>Certificado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                $historial = $obj->getHistorialLimpiezas(10);
+                foreach($historial as $limpieza):
+                  $usuario_limpieza = new Usuario($limpieza->id_usuarios);
+                ?>
+                <tr>
+                  <td><?= date('d/m/Y H:i', strtotime($limpieza->fecha)); ?></td>
+                  <td>
+                    <?php
+                    $badge_class = 'secondary';
+                    if($limpieza->tipo_limpieza == 'Halal') $badge_class = 'success';
+                    elseif($limpieza->tipo_limpieza == 'CIP') $badge_class = 'primary';
+                    ?>
+                    <span class="badge bg-<?= $badge_class; ?>">
+                      <?= $limpieza->tipo_limpieza; ?>
+                    </span>
+                    <?php if($limpieza->tipo_limpieza == 'CIP'): ?>
+                      <?= $limpieza->getEstadoCIPBadge(); ?>
+                    <?php endif; ?>
+                  </td>
+                  <td><?= $usuario_limpieza->nombre; ?></td>
+                  <td>
+                    <?php if($limpieza->es_limpieza_halal): ?>
+                      <i class="fas fa-check-circle text-success"></i>
+                    <?php else: ?>
+                      <i class="fas fa-minus text-muted"></i>
+                    <?php endif; ?>
+                  </td>
+                  <td><?= $limpieza->certificado_numero ?: '-'; ?></td>
+                  <td>
+                    <button class="btn btn-xs btn-outline-info ver-limpieza-btn" type="button"
+                            data-id="<?= $limpieza->id; ?>"
+                            data-fecha="<?= $limpieza->fecha; ?>"
+                            data-tipo="<?= $limpieza->tipo_limpieza; ?>"
+                            data-procedimiento="<?= htmlspecialchars($limpieza->procedimiento_utilizado); ?>"
+                            data-productos="<?= htmlspecialchars($limpieza->productos_utilizados); ?>"
+                            data-observaciones="<?= htmlspecialchars($limpieza->observaciones); ?>"
+                            data-halal="<?= $limpieza->es_limpieza_halal; ?>"
+                            data-certificado="<?= htmlspecialchars($limpieza->certificado_numero); ?>"
+                            data-programa-cip="<?= htmlspecialchars($limpieza->programa_cip); ?>"
+                            data-temperatura-cip="<?= $limpieza->temperatura_max_cip; ?>"
+                            data-tiempo-cip="<?= $limpieza->tiempo_total_cip_min; ?>"
+                            data-conductividad="<?= $limpieza->conductividad_promedio; ?>"
+                            data-cip-inicio="<?= $limpieza->cip_timestamp_inicio; ?>"
+                            data-cip-fin="<?= $limpieza->cip_timestamp_fin; ?>">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </td>
+                </tr>
+                <?php endforeach; ?>
+                <?php if(count($historial) == 0): ?>
+                <tr>
+                  <td colspan="6" class="text-center text-muted">
+                    No hay registros de limpieza
+                  </td>
+                </tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- FIN SECCIÓN Limpiezas -->
+
     <div class="col-12 mt-3 mb-1 d-flex justify-content-between">
         <button class="btn btn-danger btn-sm eliminar-obj-btn" style="float: right"><i class="fas fa-fw fa-trash"></i> Eliminar</button>
         <button class="btn btn-sm btn-primary" id="guardar-btn"><i class="fas fa-fw fa-save"></i> Guardar</button>
@@ -623,7 +795,218 @@
   </div>
 </div>
 
+<!-- Modal: Registrar Limpieza -->
+<div class="modal fade" id="registrar-limpieza-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-broom"></i> Registrar Limpieza
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-registrar-limpieza">
+          <input type="hidden" name="id_activos" value="<?= $obj->id; ?>">
 
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Fecha y Hora:</label>
+              <input type="datetime-local" class="form-control" name="fecha"
+                     value="<?= date('Y-m-d\TH:i'); ?>" required>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Tipo de Limpieza:</label>
+              <select class="form-control" name="tipo_limpieza" id="tipo_limpieza_select" required>
+                <?php
+                $tipos = RegistroLimpieza::getTiposLimpieza();
+                foreach($tipos as $key => $label) {
+                  echo "<option value='{$key}'>{$label}</option>";
+                }
+                ?>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label class="form-label">Procedimiento Utilizado:</label>
+              <select class="form-control" name="procedimiento_utilizado">
+                <option value="">-- Seleccionar procedimiento --</option>
+                <?php
+                $procedimientos = ProcedimientoLimpieza::getAll("WHERE estado='activo' ORDER BY nombre");
+                foreach($procedimientos as $proc) {
+                  echo "<option value='{$proc->codigo}'>{$proc->codigo} - {$proc->nombre}</option>";
+                }
+                ?>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label class="form-label">Productos Utilizados:</label>
+              <textarea class="form-control" name="productos_utilizados" rows="2"
+                        placeholder="Lista de productos de limpieza utilizados"></textarea>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label class="form-label">Observaciones:</label>
+              <textarea class="form-control" name="observaciones" rows="2"></textarea>
+            </div>
+          </div>
+
+          <!-- Campos Halal (ocultos por defecto) -->
+          <div id="campos-halal" style="display: none;">
+            <hr>
+            <h6 class="text-success"><i class="fas fa-certificate"></i> Certificación Halal</h6>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Número de Certificado:</label>
+                <input type="text" class="form-control" name="certificado_numero"
+                       placeholder="HALAL-LIM-2025-001">
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Entidad Certificadora:</label>
+                <input type="text" class="form-control" name="certificado_emisor">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Supervisor:</label>
+                <select class="form-control" name="id_usuarios_supervisor">
+                  <option value="">-- Seleccionar supervisor --</option>
+                  <?php
+                  $supervisores = Usuario::getAll("WHERE nivel IN ('Administrador', 'Jefe de Planta') ORDER BY nombre");
+                  foreach($supervisores as $sup) {
+                    echo "<option value='{$sup->id}'>{$sup->nombre}</option>";
+                  }
+                  ?>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Campos CIP (ocultos por defecto) -->
+          <div id="campos-cip" style="display: none;">
+            <hr>
+            <h6 class="text-primary"><i class="fas fa-shower"></i> Par&aacute;metros CIP</h6>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Programa CIP:</label>
+                <select class="form-control" name="programa_cip">
+                  <option value="">-- Seleccionar programa --</option>
+                  <?php
+                  $programas_cip = RegistroLimpieza::getProgramasCIP();
+                  foreach($programas_cip as $key => $label) {
+                    echo "<option value='{$key}'>{$label}</option>";
+                  }
+                  ?>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Batch Posterior:</label>
+                <select class="form-control" name="id_batches_posterior">
+                  <option value="">-- Sin asignar --</option>
+                  <?php
+                  $batches_activos = Batch::getAll("WHERE estado NOT IN ('eliminado', 'Finalizado') ORDER BY fecha_coccion DESC LIMIT 20");
+                  foreach($batches_activos as $batch) {
+                    $receta = new Receta($batch->id_recetas);
+                    echo "<option value='{$batch->id}'>#{$batch->numero_batch} - {$receta->nombre}</option>";
+                  }
+                  ?>
+                </select>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Temperatura M&aacute;x. (&deg;C):</label>
+                <input type="number" class="form-control" name="temperatura_max_cip"
+                       step="0.1" min="0" max="100" placeholder="Ej: 85.0">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Tiempo Total (min):</label>
+                <input type="number" class="form-control" name="tiempo_total_cip_min"
+                       min="0" placeholder="Ej: 45">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Conductividad (&micro;S/cm):</label>
+                <input type="number" class="form-control" name="conductividad_promedio"
+                       step="0.1" min="0" placeholder="< 50 = limpio">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Inicio CIP:</label>
+                <input type="datetime-local" class="form-control" name="cip_timestamp_inicio">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Fin CIP:</label>
+                <input type="datetime-local" class="form-control" name="cip_timestamp_fin">
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="guardar-limpieza-btn">
+          <i class="fas fa-save"></i> Registrar Limpieza
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Ver Limpieza -->
+<div class="modal fade" id="ver-limpieza-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-broom"></i> Detalle de Limpieza</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-sm">
+          <tr><td><strong>Fecha:</strong></td><td id="ver-fecha"></td></tr>
+          <tr><td><strong>Tipo:</strong></td><td id="ver-tipo"></td></tr>
+          <tr><td><strong>Procedimiento:</strong></td><td id="ver-procedimiento"></td></tr>
+          <tr><td><strong>Productos:</strong></td><td id="ver-productos"></td></tr>
+          <tr><td><strong>Observaciones:</strong></td><td id="ver-observaciones"></td></tr>
+          <tr id="ver-halal-row"><td><strong>Halal:</strong></td><td id="ver-halal"></td></tr>
+          <tr id="ver-certificado-row"><td><strong>Certificado:</strong></td><td id="ver-certificado"></td></tr>
+        </table>
+
+        <!-- Sección CIP -->
+        <div id="ver-cip-section" style="display: none;">
+          <hr>
+          <h6 class="text-primary"><i class="fas fa-shower"></i> Par&aacute;metros CIP</h6>
+          <table class="table table-sm">
+            <tr><td><strong>Programa:</strong></td><td id="ver-programa-cip"></td></tr>
+            <tr><td><strong>Temperatura M&aacute;x.:</strong></td><td id="ver-temperatura-cip"></td></tr>
+            <tr><td><strong>Tiempo Total:</strong></td><td id="ver-tiempo-cip"></td></tr>
+            <tr><td><strong>Conductividad:</strong></td><td id="ver-conductividad"></td></tr>
+            <tr><td><strong>Inicio CIP:</strong></td><td id="ver-cip-inicio"></td></tr>
+            <tr><td><strong>Fin CIP:</strong></td><td id="ver-cip-fin"></td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 
@@ -752,16 +1135,17 @@ $(document).on('click','#guardar-btn',function(e){
   data['mantencion_procedimiento'] = CKEDITOR.instances.mantencion_procedimiento.getData();
   data['inspeccion_procedimiento'] = CKEDITOR.instances.inspeccion_procedimiento.getData();
 
-  $.post(url,data,function(response_raw){
-    console.log(response_raw);
-    var response = JSON.parse(response_raw);
+  // Agregar checkbox Halal manualmente (los checkboxes no se envían cuando están desmarcados)
+  data['uso_exclusivo_halal'] = $('#uso_exclusivo_halal').is(':checked') ? '1' : '0';
+
+  $.post(url,data,function(response){
     if(response.mensaje!="OK") {
       alert("Algo fallo");
       return false;
     } else {
       window.location.href = "./?s=detalle-activos&id=" + response.obj.id + "&msg=1";
     }
-  }).fail(function(){
+  },'json').fail(function(){
     alert("No funciono");
   });
 });
@@ -938,6 +1322,165 @@ $('#nuevo-accesorio-abrir-modal-btn').on('click', function(e){
     },"json").fail(function(){
       alert("No funcionó la eliminación del Accesorio");
     });
+  });
+
+  // ============================================
+  // LIMPIEZAS
+  // ============================================
+
+  // Mostrar/ocultar campos según tipo seleccionado
+  $('#tipo_limpieza_select').change(function() {
+    var tipo = $(this).val();
+
+    // Campos Halal
+    if(tipo == 'Halal') {
+      $('#campos-halal').slideDown();
+      $('input[name="certificado_numero"]').prop('required', true);
+    } else {
+      $('#campos-halal').slideUp();
+      $('input[name="certificado_numero"]').prop('required', false);
+    }
+
+    // Campos CIP
+    if(tipo == 'CIP') {
+      $('#campos-cip').slideDown();
+    } else {
+      $('#campos-cip').slideUp();
+    }
+  });
+
+  // Abrir modal de registrar limpieza
+  $('#registrar-limpieza-btn').click(function() {
+    $('#form-registrar-limpieza')[0].reset();
+    $('#form-registrar-limpieza input[name="fecha"]').val(new Date().toISOString().slice(0,16));
+    $('#campos-halal').hide();
+    $('#campos-cip').hide();
+    $('#registrar-limpieza-modal').modal('show');
+  });
+
+  // Guardar limpieza
+  $('#guardar-limpieza-btn').click(function() {
+    var $btn = $(this);
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
+
+    var tipoLimpieza = $('#tipo_limpieza_select').val();
+    var data = {
+      id_activos: $('#form-registrar-limpieza input[name="id_activos"]').val(),
+      fecha: $('#form-registrar-limpieza input[name="fecha"]').val(),
+      tipo_limpieza: tipoLimpieza,
+      procedimiento_utilizado: $('#form-registrar-limpieza select[name="procedimiento_utilizado"]').val(),
+      productos_utilizados: $('#form-registrar-limpieza textarea[name="productos_utilizados"]').val(),
+      observaciones: $('#form-registrar-limpieza textarea[name="observaciones"]').val(),
+      es_limpieza_halal: tipoLimpieza == 'Halal' ? 1 : 0,
+      certificado_numero: $('#form-registrar-limpieza input[name="certificado_numero"]').val(),
+      certificado_emisor: $('#form-registrar-limpieza input[name="certificado_emisor"]').val(),
+      id_usuarios_supervisor: $('#form-registrar-limpieza select[name="id_usuarios_supervisor"]').val(),
+      // Campos CIP
+      programa_cip: tipoLimpieza == 'CIP' ? $('#form-registrar-limpieza select[name="programa_cip"]').val() : '',
+      temperatura_max_cip: tipoLimpieza == 'CIP' ? $('#form-registrar-limpieza input[name="temperatura_max_cip"]').val() : '',
+      tiempo_total_cip_min: tipoLimpieza == 'CIP' ? $('#form-registrar-limpieza input[name="tiempo_total_cip_min"]').val() : '',
+      conductividad_promedio: tipoLimpieza == 'CIP' ? $('#form-registrar-limpieza input[name="conductividad_promedio"]').val() : '',
+      cip_timestamp_inicio: tipoLimpieza == 'CIP' ? $('#form-registrar-limpieza input[name="cip_timestamp_inicio"]').val() : '',
+      cip_timestamp_fin: tipoLimpieza == 'CIP' ? $('#form-registrar-limpieza input[name="cip_timestamp_fin"]').val() : '',
+      id_batches_posterior: tipoLimpieza == 'CIP' ? $('#form-registrar-limpieza select[name="id_batches_posterior"]').val() : ''
+    };
+
+    $.post('./ajax/ajax_registrarLimpieza.php', data, function(response) {
+      if(response.status == 'OK') {
+        window.location.reload();
+      } else {
+        alert('Error: ' + response.mensaje);
+        $btn.prop('disabled', false).html('<i class="fas fa-save"></i> Registrar Limpieza');
+      }
+    }, 'json').fail(function() {
+      alert('Error de conexión');
+      $btn.prop('disabled', false).html('<i class="fas fa-save"></i> Registrar Limpieza');
+    });
+  });
+
+  // Ver detalle de limpieza
+  $(document).on('click', '.ver-limpieza-btn', function() {
+    var $btn = $(this);
+    var fecha = new Date($btn.data('fecha'));
+    var fechaStr = fecha.toLocaleDateString('es-CL') + ' ' + fecha.toLocaleTimeString('es-CL', {hour: '2-digit', minute:'2-digit'});
+    var tipo = $btn.data('tipo');
+
+    $('#ver-fecha').text(fechaStr);
+
+    // Badge de tipo con colores apropiados
+    var badgeClass = 'secondary';
+    if(tipo == 'Halal') badgeClass = 'success';
+    else if(tipo == 'CIP') badgeClass = 'primary';
+    $('#ver-tipo').html('<span class="badge bg-' + badgeClass + '">' + tipo + '</span>');
+
+    $('#ver-procedimiento').text($btn.data('procedimiento') || '-');
+    $('#ver-productos').text($btn.data('productos') || '-');
+    $('#ver-observaciones').text($btn.data('observaciones') || '-');
+
+    // Campos Halal
+    if($btn.data('halal') == 1) {
+      $('#ver-halal-row').show();
+      $('#ver-certificado-row').show();
+      $('#ver-halal').html('<i class="fas fa-check-circle text-success"></i> Sí');
+      $('#ver-certificado').text($btn.data('certificado') || '-');
+    } else {
+      $('#ver-halal-row').hide();
+      $('#ver-certificado-row').hide();
+    }
+
+    // Campos CIP
+    if(tipo == 'CIP') {
+      $('#ver-cip-section').show();
+
+      // Programa CIP
+      var programaCip = $btn.data('programa-cip');
+      var programasLabels = {
+        'CIP-BASICO': 'CIP Básico (Enjuague + Soda)',
+        'CIP-COMPLETO': 'CIP Completo (Enjuague + Soda + Ácido)',
+        'CIP-SANITIZADO': 'CIP con Sanitizado',
+        'CIP-HALAL': 'CIP Halal Certificado',
+        'CIP-PERSONALIZADO': 'CIP Personalizado'
+      };
+      $('#ver-programa-cip').text(programasLabels[programaCip] || programaCip || '-');
+
+      // Temperatura
+      var temp = $btn.data('temperatura-cip');
+      $('#ver-temperatura-cip').text(temp ? temp + ' °C' : '-');
+
+      // Tiempo
+      var tiempo = $btn.data('tiempo-cip');
+      $('#ver-tiempo-cip').text(tiempo ? tiempo + ' minutos' : '-');
+
+      // Conductividad
+      var cond = $btn.data('conductividad');
+      if(cond) {
+        var condClass = cond <= 50 ? 'text-success' : 'text-warning';
+        $('#ver-conductividad').html('<span class="' + condClass + '">' + cond + ' µS/cm</span>' +
+          (cond <= 50 ? ' <i class="fas fa-check-circle text-success"></i>' : ' <i class="fas fa-exclamation-triangle text-warning"></i>'));
+      } else {
+        $('#ver-conductividad').text('-');
+      }
+
+      // Timestamps CIP
+      var cipInicio = $btn.data('cip-inicio');
+      var cipFin = $btn.data('cip-fin');
+      if(cipInicio) {
+        var inicioDate = new Date(cipInicio);
+        $('#ver-cip-inicio').text(inicioDate.toLocaleDateString('es-CL') + ' ' + inicioDate.toLocaleTimeString('es-CL', {hour: '2-digit', minute:'2-digit'}));
+      } else {
+        $('#ver-cip-inicio').text('-');
+      }
+      if(cipFin) {
+        var finDate = new Date(cipFin);
+        $('#ver-cip-fin').text(finDate.toLocaleDateString('es-CL') + ' ' + finDate.toLocaleTimeString('es-CL', {hour: '2-digit', minute:'2-digit'}));
+      } else {
+        $('#ver-cip-fin').text('-');
+      }
+    } else {
+      $('#ver-cip-section').hide();
+    }
+
+    $('#ver-limpieza-modal').modal('show');
   });
 
 </script>

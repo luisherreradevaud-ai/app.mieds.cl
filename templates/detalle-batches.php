@@ -3,7 +3,7 @@
   if(!validaIdExists($_GET,'id')) {
       die();
   }
-  
+
   $obj = new Batch($_GET['id']);
 
   $recetas['Cerveza'] = Receta::getAll('WHERE clasificacion="Cerveza"');
@@ -211,9 +211,12 @@
       
       <div class="col-12 mt-3 mb-1 d-flex justify-content-between">
         <div>
+          <a href="./ajax/ajax_generarBatchPDF.php?id=<?= htmlspecialchars($obj->id); ?>" target="_blank" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-fw fa-file-pdf"></i> PDF Informe
+          </a>
         </div>
         <div>
-          <?php 
+          <?php
           if($usuario->nivel == "Administrador") {
             ?>
             <button class="btn btn-sm btn-danger eliminar-obj-btn"><i class="fas fa-fw fa-trash"></i> Eliminar</button>
@@ -228,7 +231,6 @@
   </form>
   <br/>
   <br/>
-  
 
   <div class="modal" tabindex="-1" role="dialog" id="barrilesModal">
     <div class="modal-dialog" role="document">

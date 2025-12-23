@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan de Implementación - Requerimiento 2 | Barril.cl</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+            font-size: 11pt;
+        }
+
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20mm;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 24pt;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 14pt;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .header .meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 10pt;
+            color: #95a5a6;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            page-break-after: always;
+        }
+
+        .toc h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 14pt;
+        }
+
+        .toc ol {
+            list-style-position: inside;
+            padding-left: 0;
+        }
+
+        .toc li {
+            padding: 5px 0;
+            border-bottom: 1px dotted #ddd;
+        }
+
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        /* Section Headers */
+        h2 {
+            color: #2c3e50;
+            font-size: 16pt;
+            margin: 30px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            color: #34495e;
+            font-size: 13pt;
+            margin: 20px 0 10px 0;
+            page-break-after: avoid;
+        }
+
+        h4 {
+            color: #7f8c8d;
+            font-size: 11pt;
+            margin: 15px 0 8px 0;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 10pt;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        /* Code blocks */
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 9pt;
+            line-height: 1.4;
+            margin: 15px 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        code {
+            background: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 9pt;
+            color: #c0392b;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+
+        /* SQL Syntax Highlighting */
+        .sql-keyword { color: #e74c3c; font-weight: bold; }
+        .sql-string { color: #27ae60; }
+        .sql-comment { color: #95a5a6; font-style: italic; }
+
+        /* PHP Syntax */
+        .php-keyword { color: #9b59b6; font-weight: bold; }
+        .php-variable { color: #e74c3c; }
+        .php-string { color: #27ae60; }
+        .php-comment { color: #95a5a6; font-style: italic; }
+
+        /* Diagrams (ASCII Art) */
+        .diagram {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 9pt;
+            line-height: 1.3;
+            overflow-x: auto;
+            white-space: pre;
+            margin: 15px 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 10px 0 10px 25px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        /* Checkboxes */
+        .checklist {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .checklist li {
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .checklist li::before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            color: #3498db;
+        }
+
+        /* Info boxes */
+        .info-box {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .warning-box {
+            background: #fef9e7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .success-box {
+            background: #e8f8f5;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 9pt;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #27ae60; color: white; }
+        .badge-warning { background: #f39c12; color: white; }
+        .badge-danger { background: #e74c3c; color: white; }
+        .badge-info { background: #3498db; color: white; }
+
+        /* Page breaks */
+        .page-break {
+            page-break-after: always;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                font-size: 10pt;
+            }
+
+            .container {
+                padding: 15mm;
+            }
+
+            pre {
+                font-size: 8pt;
+                page-break-inside: avoid;
+            }
+
+            table {
+                page-break-inside: avoid;
+            }
+
+            h2, h3 {
+                page-break-after: avoid;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+
+        /* Horizontal rule */
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+
+        /* File path styling */
+        .file-path {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-family: 'Consolas', monospace;
+            font-size: 9pt;
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>Plan de Implementacion - Requerimiento 2</h1>
+            <div class="subtitle">Sistema de Trazabilidad Halal y Mejoras ML</div>
+            <div class="meta">
+                <span><strong>Fecha:</strong> 2025-12-04</span>
+                <span><strong>Version:</strong> 1.0</span>
+                <span><strong>Sistema:</strong> Barril.cl ERP</span>
+            </div>
+        </div>
+
+        <!-- TABLE OF CONTENTS -->
+        <div class="toc">
+            <h2>Indice</h2>
+            <ol>
+                <li><a href="#sec1">Resumen Ejecutivo</a></li>
+                <li><a href="#sec2">Analisis de Estado Actual</a></li>
+                <li><a href="#sec3">Requerimientos Detallados</a></li>
+                <li><a href="#sec4">Arquitectura de Cambios</a></li>
+                <li><a href="#sec5">Migraciones de Base de Datos</a></li>
+                <li><a href="#sec6">Modificaciones a Clases PHP</a></li>
+                <li><a href="#sec7">Nuevas Clases a Crear</a></li>
+                <li><a href="#sec8">Modificaciones a Templates</a></li>
+                <li><a href="#sec9">Endpoints AJAX</a></li>
+                <li><a href="#sec10">Modificaciones al PDF de Trazabilidad</a></li>
+                <li><a href="#sec11">Sistema de Limpiezas</a></li>
+                <li><a href="#sec12">Plan de Ejecucion</a></li>
+                <li><a href="#sec13">Dependencias y Orden de Implementacion</a></li>
+                <li><a href="#sec14">Plan de Pruebas</a></li>
+                <li><a href="#sec15">Riesgos y Mitigaciones</a></li>
+            </ol>
+        </div>
+
+        <!-- SECTION 1: RESUMEN EJECUTIVO -->
+        <h2 id="sec1">1. Resumen Ejecutivo</h2>
+
+        <h3>1.1 Objetivo</h3>
+        <p>Implementar mejoras al sistema de trazabilidad de Barril.cl para:</p>
+        <ul>
+            <li>Soportar certificacion <strong>Halal</strong> (mercados de Medio Oriente)</li>
+            <li>Preparar datos para <strong>Machine Learning</strong> (ML ready)</li>
+            <li>Mejorar la documentacion de <strong>insumos</strong> con fichas tecnicas y certificados</li>
+            <li>Registrar <strong>limpiezas</strong> de activos para lineas de produccion mixtas</li>
+        </ul>
+
+        <h3>1.2 Alcance</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Modulo</th>
+                    <th>Impacto</th>
+                    <th>Prioridad</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>PDF de Trazabilidad</td>
+                    <td><span class="badge badge-danger">Alto</span></td>
+                    <td><span class="badge badge-danger">Alta</span></td>
+                </tr>
+                <tr>
+                    <td>Sistema de Insumos</td>
+                    <td><span class="badge badge-danger">Alto</span></td>
+                    <td><span class="badge badge-danger">Alta</span></td>
+                </tr>
+                <tr>
+                    <td>Sistema de Limpiezas</td>
+                    <td><span class="badge badge-danger">Alto</span></td>
+                    <td><span class="badge badge-danger">Alta</span></td>
+                </tr>
+                <tr>
+                    <td>Sistema de Batches (ML)</td>
+                    <td><span class="badge badge-warning">Medio</span></td>
+                    <td><span class="badge badge-warning">Media</span></td>
+                </tr>
+                <tr>
+                    <td>Sistema de Productos</td>
+                    <td><span class="badge badge-info">Bajo</span></td>
+                    <td><span class="badge badge-info">Baja</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>1.3 Normas a Cumplir</h3>
+        <div class="info-box">
+            <strong>Linea Alcoholica:</strong><br>
+            ISO 22005 / ISO 22000 / FSSC 22000 / BRCGS / IFS
+        </div>
+        <div class="success-box">
+            <strong>Linea Sin Alcohol (Halal):</strong><br>
+            OIC/SMIIC 1 / GSO 2055-1 / ISO 22005 / ISO 22000 / FSSC 22000 / BRCGS / IFS
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 2: ANALISIS DE ESTADO ACTUAL -->
+        <h2 id="sec2">2. Analisis de Estado Actual</h2>
+
+        <h3>2.1 Sistema de Productos</h3>
+        <p><strong>Clase:</strong> <span class="file-path">php/classes/Producto.php</span></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo Actual</th>
+                    <th>Existe</th>
+                    <th>Observacion</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>id</td><td>&#10004;</td><td>AUTO_INCREMENT</td></tr>
+                <tr><td>nombre</td><td>&#10004;</td><td>VARCHAR(300)</td></tr>
+                <tr><td>tipo</td><td>&#10004;</td><td>'Barril' / 'Caja'</td></tr>
+                <tr><td>id_recetas</td><td>&#10004;</td><td>FK a recetas</td></tr>
+                <tr><td>clasificacion</td><td>&#10004;</td><td>Cerveza, Kombucha, etc.</td></tr>
+                <tr><td>linea_productiva</td><td><span class="badge badge-danger">FALTA</span></td><td>Nuevo campo requerido</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.2 Sistema de Insumos</h3>
+        <p><strong>Clase:</strong> <span class="file-path">php/classes/Insumo.php</span></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo Actual</th>
+                    <th>Existe</th>
+                    <th>Observacion</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>id</td><td>&#10004;</td><td>-</td></tr>
+                <tr><td>nombre</td><td>&#10004;</td><td>-</td></tr>
+                <tr><td>id_tipos_de_insumos</td><td>&#10004;</td><td>FK a tipos</td></tr>
+                <tr><td>unidad_de_medida</td><td>&#10004;</td><td>-</td></tr>
+                <tr><td>url_ficha_tecnica</td><td><span class="badge badge-danger">FALTA</span></td><td>Nuevo</td></tr>
+                <tr><td>url_certificado_halal</td><td><span class="badge badge-danger">FALTA</span></td><td>Nuevo</td></tr>
+                <tr><td>es_halal_certificado</td><td><span class="badge badge-danger">FALTA</span></td><td>Nuevo</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.3 Sistema de Batches</h3>
+        <p><strong>Clase:</strong> <span class="file-path">php/classes/Batch.php</span> (63 campos actuales)</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campos ML Sugeridos</th>
+                    <th>Existe</th>
+                    <th>Observacion</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>abv_final</td><td><span class="badge badge-danger">FALTA</span></td><td>Alcohol by volume final</td></tr>
+                <tr><td>ibu_final</td><td><span class="badge badge-danger">FALTA</span></td><td>IBU medido</td></tr>
+                <tr><td>color_ebc</td><td><span class="badge badge-danger">FALTA</span></td><td>Color EBC</td></tr>
+                <tr><td>rendimiento_litros_final</td><td><span class="badge badge-danger">FALTA</span></td><td>Volumen final real</td></tr>
+                <tr><td>merma_total_litros</td><td><span class="badge badge-danger">FALTA</span></td><td>Perdida total</td></tr>
+                <tr><td>calificacion_sensorial</td><td><span class="badge badge-danger">FALTA</span></td><td>1-10</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.4 Sistema de Activos (Fermentadores)</h3>
+        <p><strong>Clase:</strong> <span class="file-path">php/classes/Activo.php</span></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo Actual</th>
+                    <th>Existe</th>
+                    <th>Observacion</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>linea_productiva</td><td>&#10004;</td><td>ENUM (alcoholica, analcoholica, general)</td></tr>
+                <tr><td>ultima_inspeccion</td><td>&#10004;</td><td>DATE</td></tr>
+                <tr><td>ultima_mantencion</td><td>&#10004;</td><td>DATE</td></tr>
+                <tr><td>fecha_ultima_limpieza</td><td><span class="badge badge-danger">FALTA</span></td><td>Nuevo</td></tr>
+                <tr><td>fecha_ultima_limpieza_halal</td><td><span class="badge badge-danger">FALTA</span></td><td>Nuevo</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.5 Sistema de Limpiezas</h3>
+        <div class="warning-box">
+            <strong>Estado: NO IMPLEMENTADO</strong><br><br>
+            No existe:
+            <ul>
+                <li>Tabla registros_limpiezas</li>
+                <li>Clase RegistroLimpieza.php</li>
+                <li>Templates para gestionar limpiezas</li>
+                <li>Historial de limpiezas por activo</li>
+            </ul>
+        </div>
+
+        <h3>2.6 PDF de Trazabilidad</h3>
+        <p><strong>Clase:</strong> <span class="file-path">php/classes/TrazabilidadPDF.php</span></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Elemento</th>
+                    <th>Estado Actual</th>
+                    <th>Requerido</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Titulo</td><td>Fijo</td><td>Dinamico segun linea</td></tr>
+                <tr><td>Normas ISO</td><td>No muestra</td><td>Mostrar segun linea</td></tr>
+                <tr><td>ID Batch</td><td>No muestra</td><td>Mostrar con fecha</td></tr>
+                <tr><td>Codigo</td><td>"Codigo"</td><td>"Codigo de barril"</td></tr>
+                <tr><td>Insumos</td><td>Solo granos</td><td>Todos los insumos</td></tr>
+                <tr><td>Links fichas</td><td>No tiene</td><td>Agregar URLs</td></tr>
+                <tr><td>Linea en activos</td><td>Con titulo</td><td>Sin titulo "Linea:"</td></tr>
+                <tr><td>Calculo tiempos</td><td>Error reportado</td><td>Corregir</td></tr>
+                <tr><td>Registro limpieza</td><td>No muestra</td><td>Mostrar para Halal</td></tr>
+            </tbody>
+        </table>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 3: REQUERIMIENTOS DETALLADOS -->
+        <h2 id="sec3">3. Requerimientos Detallados</h2>
+
+        <h3>REQ-2.1: Ajustar ID de Productos por Linea</h3>
+        <p><strong>Descripcion:</strong> Agregar campo linea_productiva a productos para categorizar por linea de produccion.</p>
+        <p><strong>Criterios de Aceptacion:</strong></p>
+        <ul class="checklist">
+            <li>Campo linea_productiva en tabla productos</li>
+            <li>Selector en formulario de nuevo producto</li>
+            <li>Selector en formulario de edicion de producto</li>
+            <li>Filtro por linea en listado de productos</li>
+        </ul>
+
+        <h3>REQ-2.2: Mejorar Proceso de Batches (ML Ready)</h3>
+        <p><strong>Descripcion:</strong> Agregar campos adicionales para capturar metricas que permitan analisis de Machine Learning.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripcion</th>
+                    <th>Uso ML</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>abv_final</td><td>DECIMAL(4,2)</td><td>% alcohol final</td><td>Prediccion de fermentacion</td></tr>
+                <tr><td>ibu_final</td><td>INT</td><td>IBU medido</td><td>Correlacion con lupulos</td></tr>
+                <tr><td>color_ebc</td><td>INT</td><td>Color EBC</td><td>Prediccion por maltas</td></tr>
+                <tr><td>rendimiento_litros_final</td><td>FLOAT</td><td>Volumen final</td><td>Eficiencia de proceso</td></tr>
+                <tr><td>merma_total_litros</td><td>FLOAT</td><td>Perdida total</td><td>Deteccion de anomalias</td></tr>
+                <tr><td>calificacion_sensorial</td><td>TINYINT</td><td>1-10</td><td>Target para ML</td></tr>
+                <tr><td>notas_cata</td><td>TEXT</td><td>Descripcion sensorial</td><td>NLP features</td></tr>
+            </tbody>
+        </table>
+
+        <h3>REQ-2.3: Mejorar Sistema de Insumos</h3>
+        <p><strong>Descripcion:</strong> Agregar soporte para fichas tecnicas y certificados Halal.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Campo</th>
+                    <th>Tipo</th>
+                    <th>Descripcion</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>url_ficha_tecnica</td><td>VARCHAR(500)</td><td>Link a PDF de ficha tecnica</td></tr>
+                <tr><td>url_certificado_halal</td><td>VARCHAR(500)</td><td>Link a certificado Halal</td></tr>
+                <tr><td>certificado_halal_numero</td><td>VARCHAR(100)</td><td>Numero de certificado</td></tr>
+                <tr><td>certificado_halal_vencimiento</td><td>DATE</td><td>Fecha de vencimiento</td></tr>
+                <tr><td>certificado_halal_emisor</td><td>VARCHAR(200)</td><td>Entidad certificadora</td></tr>
+                <tr><td>es_halal_certificado</td><td>BOOLEAN</td><td>Flag de certificacion</td></tr>
+            </tbody>
+        </table>
+
+        <h3>REQ-2.4: Titulo del Certificado segun Linea</h3>
+        <p><strong>Descripcion:</strong> El titulo del PDF debe incluir las normas correspondientes segun la linea productiva.</p>
+
+        <div class="info-box">
+            <strong>Linea Alcoholica:</strong>
+            <pre style="background: transparent; color: #333; margin: 10px 0;">CERTIFICADO DE TRAZABILIDAD DE PRODUCTO
+ISO 22005 / ISO 22000 / FSSC 22000 / BRCGS / IFS
+Cerveza Cocholgue</pre>
+        </div>
+
+        <div class="success-box">
+            <strong>Linea Sin Alcohol (Halal):</strong>
+            <pre style="background: transparent; color: #333; margin: 10px 0;">CERTIFICADO DE TRAZABILIDAD DE PRODUCTO
+OIC/SMIIC 1 / GSO 2055-1 / ISO 22005 / ISO 22000 / FSSC 22000 / BRCGS / IFS
+Cerveza Cocholgue</pre>
+        </div>
+
+        <h3>REQ-2.5 a REQ-2.10</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>REQ</th>
+                    <th>Descripcion</th>
+                    <th>Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>REQ-2.5</td>
+                    <td>Agregar ID Batch con Fecha</td>
+                    <td>En seccion "DATOS DEL PRODUCTO", agregar: Batch: #045 (15/11/2025)</td>
+                </tr>
+                <tr>
+                    <td>REQ-2.6</td>
+                    <td>Cambiar "Codigo" a "Codigo de barril"</td>
+                    <td>Para barriles: "Codigo de barril", Para cajas: "Codigo de caja"</td>
+                </tr>
+                <tr>
+                    <td>REQ-2.7</td>
+                    <td>Cambiar "Granos" por "Insumos"</td>
+                    <td>Mostrar todos los insumos con links a fichas tecnicas</td>
+                </tr>
+                <tr>
+                    <td>REQ-2.8</td>
+                    <td>Linea Productiva sin Titulo</td>
+                    <td>Mostrar: FER-001 (60L) [Alcoholica] en vez de "Linea: Alcoholica"</td>
+                </tr>
+                <tr>
+                    <td>REQ-2.9</td>
+                    <td>Corregir Calculo de Tiempos</td>
+                    <td>El calculo "Empaque &rarr; Entrega" reporta valores incorrectos</td>
+                </tr>
+                <tr>
+                    <td>REQ-2.10</td>
+                    <td>Registros de Limpieza para Halal</td>
+                    <td>Registrar limpieza certificada antes de produccion sin alcohol</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 4: ARQUITECTURA DE CAMBIOS -->
+        <h2 id="sec4">4. Arquitectura de Cambios</h2>
+
+        <h3>4.1 Diagrama de Entidades Modificadas</h3>
+        <div class="diagram">+---------------------------------------------------------------------+
+|                     ENTIDADES MODIFICADAS                           |
++---------------------------------------------------------------------+
+|                                                                     |
+|  +--------------+      +--------------+      +--------------+       |
+|  |   Producto   |      |    Insumo    |      |    Batch     |       |
+|  | + linea_prod |      | + url_ficha  |      | + abv_final  |       |
+|  +--------------+      | + url_halal  |      | + ibu_final  |       |
+|                        | + es_halal   |      | + color_ebc  |       |
+|                        +--------------+      | + merma      |       |
+|                                              +--------------+       |
+|                                                                     |
+|  +--------------+      +------------------------------------+       |
+|  |    Activo    |      |         NUEVAS ENTIDADES           |       |
+|  | + limpieza   |      +------------------------------------+       |
+|  | + limpieza_  |      |  +--------------------+            |       |
+|  |   halal      |      |  |  RegistroLimpieza  |            |       |
+|  +--------------+      |  |  - id_activos      |            |       |
+|                        |  |  - fecha           |            |       |
+|                        |  |  - tipo_limpieza   |            |       |
+|                        |  |  - es_halal        |            |       |
+|                        |  |  - certificado     |            |       |
+|                        |  +--------------------+            |       |
+|                        +------------------------------------+       |
+|                                                                     |
+|  +----------------------------------------------------------+      |
+|  |                    TrazabilidadPDF                        |      |
+|  |  + Titulo dinamico con normas ISO/OIC                    |      |
+|  |  + ID Batch con fecha                                    |      |
+|  |  + Todos los insumos con links                           |      |
+|  |  + Linea productiva inline                               |      |
+|  |  + Registro de limpieza Halal                            |      |
+|  |  + Correccion de calculo de tiempos                      |      |
+|  +----------------------------------------------------------+      |
+|                                                                     |
++---------------------------------------------------------------------+</div>
+
+        <h3>4.2 Flujo de Datos para PDF Halal</h3>
+        <div class="diagram">                    +-------------------+
+                    |  EntregaProducto  |
+                    +---------+---------+
+                              |
+               +--------------+---------------+
+               v              v               v
+         +---------+    +----------+    +---------+
+         | Barril  |    |   Caja   |    |Producto |
+         +----+----+    | Envases  |    |(precio) |
+              |         +----+-----+    +---------+
+              |              |
+              +------+-------+
+                     v
+               +----------+
+               |  Batch   |-------------+
+               +----+-----+             |
+                    |                   |
+         +----------+----------+        |
+         v          v          v        v
+   +-----------+ +-------+ +----------------+
+   |BatchInsumo| | Receta| |   BatchActivo  |
+   +-----+-----+ +-------+ +-------+--------+
+         |                         |
+         v                         v
+   +-----------+             +-----------+
+   |  Insumo   |             |  Activo   |
+   | +url_ficha|             | +linea_   |
+   | +url_halal|             |  productiva|
+   +-----------+             +-----+-----+
+                                   |
+                                   v
+                          +-----------------+
+                          |RegistroLimpieza |
+                          | (si es General  |
+                          |  usado p/ Halal)|
+                          +-----------------+</div>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 5: MIGRACIONES DE BASE DE DATOS -->
+        <h2 id="sec5">5. Migraciones de Base de Datos</h2>
+
+        <h3>5.1 Migracion 009: Productos - Linea Productiva</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">db/migrations/009_productos_linea_productiva.sql</span></p>
+        <pre>-- =====================================================
+-- Migracion 009: Agregar linea productiva a productos
+-- Fecha: 2025-12-04
+-- Descripcion: Permite categorizar productos por linea
+--              de produccion (alcoholica/sin alcohol)
+-- =====================================================
+
+-- Agregar campo linea_productiva
+ALTER TABLE productos
+ADD COLUMN linea_productiva ENUM('alcoholica', 'analcoholica', 'general')
+NOT NULL DEFAULT 'general'
+AFTER es_mixto;
+
+-- Indice para consultas por linea
+CREATE INDEX idx_productos_linea_productiva ON productos(linea_productiva);
+
+-- Actualizar productos existentes segun clasificacion
+UPDATE productos
+SET linea_productiva = 'alcoholica'
+WHERE clasificacion IN ('Cerveza', 'Cerveza Artesanal');
+
+UPDATE productos
+SET linea_productiva = 'analcoholica'
+WHERE clasificacion IN ('Kombucha', 'Agua saborizada', 'Agua fermentada');</pre>
+
+        <h3>5.2 Migracion 010: Batches - Campos ML</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">db/migrations/010_batches_ml_fields.sql</span></p>
+        <pre>-- =====================================================
+-- Migracion 010: Campos ML para Batches
+-- Fecha: 2025-12-04
+-- Descripcion: Agrega campos para analisis de Machine
+--              Learning y metricas de calidad
+-- =====================================================
+
+-- Metricas de producto final
+ALTER TABLE batches
+ADD COLUMN abv_final DECIMAL(4,2) DEFAULT NULL
+  COMMENT 'Alcohol by volume final (%)',
+ADD COLUMN ibu_final INT DEFAULT NULL
+  COMMENT 'IBU medido del producto final',
+ADD COLUMN color_ebc INT DEFAULT NULL
+  COMMENT 'Color en escala EBC';
+
+-- Metricas de rendimiento
+ALTER TABLE batches
+ADD COLUMN rendimiento_litros_final FLOAT DEFAULT NULL
+  COMMENT 'Volumen final real producido (L)',
+ADD COLUMN merma_total_litros FLOAT DEFAULT NULL
+  COMMENT 'Total de perdida en proceso (L)',
+ADD COLUMN densidad_final_verificada DECIMAL(5,3) DEFAULT NULL
+  COMMENT 'Gravedad final verificada';
+
+-- Metricas de calidad sensorial
+ALTER TABLE batches
+ADD COLUMN calificacion_sensorial TINYINT DEFAULT NULL
+  COMMENT 'Calificacion sensorial 1-10',
+ADD COLUMN notas_cata TEXT DEFAULT NULL
+  COMMENT 'Notas de cata descriptivas';
+
+-- Condiciones ambientales
+ALTER TABLE batches
+ADD COLUMN temperatura_ambiente_promedio DECIMAL(4,1) DEFAULT NULL
+  COMMENT 'Temperatura ambiente durante fermentacion (C)',
+ADD COLUMN humedad_relativa_promedio DECIMAL(4,1) DEFAULT NULL
+  COMMENT 'Humedad relativa promedio (%)';
+
+-- Indices para consultas analiticas
+CREATE INDEX idx_batches_abv ON batches(abv_final);
+CREATE INDEX idx_batches_calificacion ON batches(calificacion_sensorial);
+CREATE INDEX idx_batches_rendimiento ON batches(rendimiento_litros_final);</pre>
+
+        <h3>5.3 Migracion 011: Insumos - Fichas y Certificados</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">db/migrations/011_insumos_fichas_certificados.sql</span></p>
+        <pre>-- =====================================================
+-- Migracion 011: Fichas tecnicas y certificados Halal
+-- Fecha: 2025-12-04
+-- Descripcion: Agrega soporte para documentacion de
+--              insumos incluyendo certificacion Halal
+-- =====================================================
+
+-- URLs de documentacion
+ALTER TABLE insumos
+ADD COLUMN url_ficha_tecnica VARCHAR(500) DEFAULT NULL
+  COMMENT 'URL a PDF de ficha tecnica',
+ADD COLUMN url_certificado_halal VARCHAR(500) DEFAULT NULL
+  COMMENT 'URL a certificado Halal';
+
+-- Datos del certificado Halal
+ALTER TABLE insumos
+ADD COLUMN certificado_halal_numero VARCHAR(100) DEFAULT NULL
+  COMMENT 'Numero de certificado Halal',
+ADD COLUMN certificado_halal_vencimiento DATE DEFAULT NULL
+  COMMENT 'Fecha de vencimiento del certificado',
+ADD COLUMN certificado_halal_emisor VARCHAR(200) DEFAULT NULL
+  COMMENT 'Entidad certificadora Halal',
+ADD COLUMN es_halal_certificado BOOLEAN NOT NULL DEFAULT FALSE
+  COMMENT 'Flag: insumo tiene certificacion Halal vigente';
+
+-- Indice para filtrar insumos Halal
+CREATE INDEX idx_insumos_halal ON insumos(es_halal_certificado);
+CREATE INDEX idx_insumos_halal_vencimiento ON insumos(certificado_halal_vencimiento);</pre>
+
+        <h3>5.4 Migracion 012: Sistema de Limpiezas</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">db/migrations/012_sistema_limpiezas.sql</span></p>
+        <pre>-- =====================================================
+-- Migracion 012: Sistema de Registro de Limpiezas
+-- Fecha: 2025-12-04
+-- Descripcion: Crea sistema completo para registrar
+--              limpiezas de activos, especialmente
+--              para certificacion Halal
+-- =====================================================
+
+-- 1. Campos de limpieza en tabla activos
+ALTER TABLE activos
+ADD COLUMN fecha_ultima_limpieza DATETIME DEFAULT NULL
+  COMMENT 'Fecha/hora de ultima limpieza general',
+ADD COLUMN proxima_limpieza DATE DEFAULT NULL
+  COMMENT 'Fecha programada proxima limpieza',
+ADD COLUMN limpieza_procedimiento MEDIUMTEXT DEFAULT NULL
+  COMMENT 'Procedimiento de limpieza estandar',
+ADD COLUMN limpieza_periodicidad VARCHAR(100) DEFAULT 'Semanal'
+  COMMENT 'Frecuencia de limpieza requerida';
+
+-- Campos especificos Halal
+ALTER TABLE activos
+ADD COLUMN fecha_ultima_limpieza_halal DATETIME DEFAULT NULL
+  COMMENT 'Fecha/hora de ultima limpieza certificada Halal',
+ADD COLUMN certificado_limpieza_halal VARCHAR(100) DEFAULT NULL
+  COMMENT 'Numero de certificado de limpieza Halal',
+ADD COLUMN uso_exclusivo_halal BOOLEAN NOT NULL DEFAULT FALSE
+  COMMENT 'Activo de uso exclusivo para produccion Halal';
+
+-- Indices
+CREATE INDEX idx_activos_limpieza ON activos(fecha_ultima_limpieza);
+CREATE INDEX idx_activos_limpieza_halal ON activos(fecha_ultima_limpieza_halal);
+
+-- 2. Tabla de registros de limpiezas (historial)
+CREATE TABLE registros_limpiezas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_activos INT NOT NULL COMMENT 'FK al activo limpiado',
+    fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora de la limpieza',
+    tipo_limpieza ENUM('General', 'Profunda', 'Halal', 'Sanitizacion', 'CIP')
+        NOT NULL DEFAULT 'General' COMMENT 'Tipo de limpieza realizada',
+    procedimiento_utilizado VARCHAR(255) DEFAULT NULL
+        COMMENT 'Referencia al procedimiento usado',
+    productos_utilizados TEXT DEFAULT NULL
+        COMMENT 'Lista de productos de limpieza usados',
+    id_usuarios INT NOT NULL COMMENT 'Usuario que realizo la limpieza',
+    id_usuarios_supervisor INT DEFAULT NULL
+        COMMENT 'Supervisor que verifico (para Halal)',
+    observaciones TEXT DEFAULT NULL COMMENT 'Notas adicionales',
+
+    -- Campos especificos Halal
+    es_limpieza_halal BOOLEAN NOT NULL DEFAULT FALSE
+        COMMENT 'Flag: limpieza certificada Halal',
+    certificado_numero VARCHAR(100) DEFAULT NULL
+        COMMENT 'Numero de certificado Halal',
+    certificado_emisor VARCHAR(200) DEFAULT NULL
+        COMMENT 'Entidad certificadora',
+
+    -- Evidencia
+    id_media INT DEFAULT NULL COMMENT 'Foto/documento de evidencia',
+
+    -- Metadatos
+    creada DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    estado VARCHAR(50) NOT NULL DEFAULT 'activo',
+
+    -- Indices
+    INDEX idx_registros_limpiezas_activo (id_activos),
+    INDEX idx_registros_limpiezas_fecha (fecha),
+    INDEX idx_registros_limpiezas_tipo (tipo_limpieza),
+    INDEX idx_registros_limpiezas_halal (es_limpieza_halal),
+    INDEX idx_registros_limpiezas_usuario (id_usuarios),
+
+    -- Foreign Key
+    CONSTRAINT fk_registros_limpiezas_activos
+      FOREIGN KEY (id_activos) REFERENCES activos(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Historial de limpiezas de activos';
+
+-- 3. Tabla de procedimientos de limpieza
+CREATE TABLE procedimientos_limpieza (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(50) NOT NULL UNIQUE COMMENT 'Codigo del procedimiento',
+    nombre VARCHAR(200) NOT NULL COMMENT 'Nombre del procedimiento',
+    tipo ENUM('General', 'Profunda', 'Halal', 'Sanitizacion', 'CIP') NOT NULL,
+    descripcion TEXT COMMENT 'Descripcion detallada',
+    pasos TEXT COMMENT 'Pasos del procedimiento (JSON)',
+    productos_requeridos TEXT COMMENT 'Lista de productos necesarios (JSON)',
+    tiempo_estimado_minutos INT DEFAULT NULL,
+    frecuencia_recomendada VARCHAR(100) DEFAULT NULL,
+    aplica_a_clases TEXT DEFAULT NULL COMMENT 'Clases de activos donde aplica',
+    es_halal_certificado BOOLEAN NOT NULL DEFAULT FALSE,
+    version VARCHAR(20) DEFAULT '1.0',
+    creada DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizada DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    estado VARCHAR(50) NOT NULL DEFAULT 'activo',
+
+    INDEX idx_procedimientos_tipo (tipo),
+    INDEX idx_procedimientos_halal (es_halal_certificado)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4. Datos iniciales: Procedimientos basicos
+INSERT INTO procedimientos_limpieza
+    (codigo, nombre, tipo, descripcion, tiempo_estimado_minutos, es_halal_certificado)
+VALUES
+    ('PROC-LIM-001', 'Limpieza General de Fermentador', 'General',
+     'Limpieza estandar de fermentadores con agua y detergente neutro', 30, FALSE),
+    ('PROC-LIM-002', 'Limpieza Profunda de Fermentador', 'Profunda',
+     'Limpieza profunda con sanitizante y enjuague multiple', 60, FALSE),
+    ('PROC-LIM-003', 'Sanitizacion CIP', 'CIP',
+     'Clean In Place - Limpieza automatizada sin desarmar', 45, FALSE),
+    ('PROC-LIM-004', 'Limpieza Halal Certificada', 'Halal',
+     'Limpieza segun protocolo Halal con productos certificados y supervisor', 90, TRUE),
+    ('PROC-LIM-005', 'Limpieza Halal Post-Alcohol', 'Halal',
+     'Limpieza Halal especifica despues de produccion alcoholica', 120, TRUE);</pre>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 6: MODIFICACIONES A CLASES PHP -->
+        <h2 id="sec6">6. Modificaciones a Clases PHP</h2>
+
+        <h3>6.1 Producto.php</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">php/classes/Producto.php</span></p>
+        <pre>&lt;?php
+class Producto extends Base {
+    // ... campos existentes ...
+
+    // NUEVO: Campo de linea productiva
+    public $linea_productiva = "general";
+
+    // NUEVO: Metodo para obtener label de linea
+    public function getLineaProductivaLabel() {
+        $lineas = [
+            'alcoholica' =&gt; 'Linea Alcoholica',
+            'analcoholica' =&gt; 'Linea Sin Alcohol',
+            'general' =&gt; 'General'
+        ];
+        return isset($lineas[$this-&gt;linea_productiva])
+            ? $lineas[$this-&gt;linea_productiva]
+            : 'General';
+    }
+
+    // NUEVO: Metodo estatico para obtener opciones
+    public static function getLineasProductivas() {
+        return [
+            'alcoholica' =&gt; 'Linea Alcoholica',
+            'analcoholica' =&gt; 'Linea Sin Alcohol',
+            'general' =&gt; 'General'
+        ];
+    }
+
+    // NUEVO: Obtener productos por linea
+    public static function getByLineaProductiva($linea) {
+        return self::getAll("WHERE linea_productiva='" . addslashes($linea) .
+            "' AND estado!='eliminado'");
+    }
+}</pre>
+
+        <h3>6.2 Insumo.php</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">php/classes/Insumo.php</span></p>
+        <pre>&lt;?php
+class Insumo extends Base {
+    // ... campos existentes ...
+
+    // NUEVOS: Campos de documentacion
+    public $url_ficha_tecnica = "";
+    public $url_certificado_halal = "";
+    public $certificado_halal_numero = "";
+    public $certificado_halal_vencimiento = "0000-00-00";
+    public $certificado_halal_emisor = "";
+    public $es_halal_certificado = 0;
+
+    // NUEVO: Verificar si certificado Halal esta vigente
+    public function tieneCertificadoHalalVigente() {
+        if(!$this-&gt;es_halal_certificado) {
+            return false;
+        }
+        if(empty($this-&gt;certificado_halal_vencimiento) ||
+           $this-&gt;certificado_halal_vencimiento == '0000-00-00') {
+            return false;
+        }
+        return strtotime($this-&gt;certificado_halal_vencimiento) &gt;= strtotime('today');
+    }
+
+    // NUEVO: Obtener insumos con certificacion Halal vigente
+    public static function getInsumosHalalVigentes() {
+        return self::getAll("WHERE es_halal_certificado=1
+            AND certificado_halal_vencimiento &gt;= CURDATE()
+            ORDER BY nombre ASC");
+    }
+
+    // NUEVO: Obtener insumos con certificados por vencer
+    public static function getInsumosHalalPorVencer($dias = 30) {
+        return self::getAll("WHERE es_halal_certificado=1
+            AND certificado_halal_vencimiento BETWEEN CURDATE()
+            AND DATE_ADD(CURDATE(), INTERVAL " . intval($dias) . " DAY)
+            ORDER BY certificado_halal_vencimiento ASC");
+    }
+}</pre>
+
+        <h3>6.3 Batch.php</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">php/classes/Batch.php</span></p>
+        <pre>&lt;?php
+class Batch extends Base {
+    // ... campos existentes (63 campos) ...
+
+    // NUEVOS: Campos ML - Metricas de producto final
+    public $abv_final = null;
+    public $ibu_final = null;
+    public $color_ebc = null;
+
+    // NUEVOS: Campos ML - Rendimiento
+    public $rendimiento_litros_final = null;
+    public $merma_total_litros = null;
+    public $densidad_final_verificada = null;
+
+    // NUEVOS: Campos ML - Calidad sensorial
+    public $calificacion_sensorial = null;
+    public $notas_cata = "";
+
+    // NUEVOS: Campos ML - Condiciones ambientales
+    public $temperatura_ambiente_promedio = null;
+    public $humedad_relativa_promedio = null;
+
+    // NUEVO: Calcular eficiencia del batch
+    public function calcularEficiencia() {
+        if($this-&gt;batch_litros &gt; 0 &amp;&amp; $this-&gt;rendimiento_litros_final &gt; 0) {
+            return round(($this-&gt;rendimiento_litros_final / $this-&gt;batch_litros) * 100, 2);
+        }
+        return null;
+    }
+
+    // NUEVO: Calcular merma porcentual
+    public function calcularMermaPorcentual() {
+        if($this-&gt;batch_litros &gt; 0 &amp;&amp; $this-&gt;merma_total_litros !== null) {
+            return round(($this-&gt;merma_total_litros / $this-&gt;batch_litros) * 100, 2);
+        }
+        return null;
+    }
+
+    // NUEVO: Determinar linea productiva del batch
+    public function getLineaProductiva() {
+        // Obtener del primer activo asignado
+        $batches_activos = BatchActivo::getAll("WHERE id_batches='" . $this-&gt;id . "' LIMIT 1");
+        if(count($batches_activos) &gt; 0) {
+            $activo = new Activo($batches_activos[0]-&gt;id_activos);
+            return $activo-&gt;linea_productiva;
+        }
+        // Fallback: determinar por clasificacion de receta
+        if($this-&gt;id_recetas &gt; 0) {
+            $receta = new Receta($this-&gt;id_recetas);
+            if(in_array($receta-&gt;clasificacion, ['Cerveza', 'Cerveza Artesanal'])) {
+                return 'alcoholica';
+            }
+            if(in_array($receta-&gt;clasificacion, ['Kombucha', 'Agua saborizada'])) {
+                return 'analcoholica';
+            }
+        }
+        return 'general';
+    }
+}</pre>
+
+        <h3>6.4 Activo.php</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">php/classes/Activo.php</span></p>
+        <pre>&lt;?php
+class Activo extends Base {
+    // ... campos existentes ...
+
+    // NUEVOS: Campos de limpieza general
+    public $fecha_ultima_limpieza = null;
+    public $proxima_limpieza = null;
+    public $limpieza_procedimiento = "";
+    public $limpieza_periodicidad = "Semanal";
+
+    // NUEVOS: Campos de limpieza Halal
+    public $fecha_ultima_limpieza_halal = null;
+    public $certificado_limpieza_halal = "";
+    public $uso_exclusivo_halal = 0;
+
+    // NUEVO: Verificar si requiere limpieza
+    public function requiereLimpieza() {
+        if(empty($this-&gt;proxima_limpieza) || $this-&gt;proxima_limpieza == '0000-00-00') {
+            return true;
+        }
+        return strtotime($this-&gt;proxima_limpieza) &lt;= strtotime('today');
+    }
+
+    // NUEVO: Verificar si puede usarse para produccion Halal
+    public function puedeUsarseParaHalal() {
+        if($this-&gt;uso_exclusivo_halal) return true;
+        if($this-&gt;linea_productiva == 'analcoholica') return true;
+        return $this-&gt;tieneLimpiezaHalalReciente();
+    }
+
+    // NUEVO: Verificar limpieza Halal reciente (ultimas 24 horas)
+    public function tieneLimpiezaHalalReciente($horas = 24) {
+        if(empty($this-&gt;fecha_ultima_limpieza_halal)) return false;
+        $limite = strtotime("-{$horas} hours");
+        return strtotime($this-&gt;fecha_ultima_limpieza_halal) &gt;= $limite;
+    }
+
+    // NUEVO: Obtener ultima limpieza Halal registrada
+    public function getUltimaLimpiezaHalal() {
+        $limpiezas = RegistroLimpieza::getAll(
+            "WHERE id_activos='" . $this-&gt;id . "'
+             AND es_limpieza_halal=1
+             ORDER BY fecha DESC LIMIT 1"
+        );
+        return count($limpiezas) &gt; 0 ? $limpiezas[0] : null;
+    }
+
+    // NUEVO: Obtener historial de limpiezas
+    public function getHistorialLimpiezas($limit = 10) {
+        return RegistroLimpieza::getAll(
+            "WHERE id_activos='" . $this-&gt;id . "'
+             ORDER BY fecha DESC LIMIT " . intval($limit)
+        );
+    }
+
+    // NUEVO: Obtener periodicidades disponibles
+    public static function getPeriodicidadesLimpieza() {
+        return [
+            'Diaria' =&gt; 'Diaria',
+            'Cada 2 dias' =&gt; 'Cada 2 dias',
+            'Semanal' =&gt; 'Semanal',
+            'Quincenal' =&gt; 'Quincenal',
+            'Mensual' =&gt; 'Mensual',
+            'Despues de cada uso' =&gt; 'Despues de cada uso'
+        ];
+    }
+}</pre>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 7: NUEVAS CLASES A CREAR -->
+        <h2 id="sec7">7. Nuevas Clases a Crear</h2>
+
+        <h3>7.1 RegistroLimpieza.php</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">php/classes/RegistroLimpieza.php</span></p>
+        <div class="info-box">
+            Clase para gestionar registros de limpieza de activos. Soporta limpiezas generales y certificadas Halal.
+        </div>
+        <p><strong>Metodos principales:</strong></p>
+        <ul>
+            <li><code>getTiposLimpieza()</code> - Obtener tipos de limpieza disponibles</li>
+            <li><code>cargarRelaciones()</code> - Cargar objetos relacionados (activo, usuario, supervisor)</li>
+            <li><code>registrar()</code> - Registrar nueva limpieza y actualizar activo</li>
+            <li><code>calcularProximaLimpieza()</code> - Calcular fecha de proxima limpieza</li>
+            <li><code>getUltimaPorActivo()</code> - Obtener ultima limpieza de un activo</li>
+            <li><code>getUltimaHalalPorActivo()</code> - Obtener ultima limpieza Halal</li>
+            <li><code>validarLimpiezaHalalParaProduccion()</code> - Validar si activo tiene limpieza Halal valida</li>
+            <li><code>getActivosRequierenLimpiezaHalal()</code> - Obtener activos que requieren limpieza Halal</li>
+        </ul>
+
+        <h3>7.2 ProcedimientoLimpieza.php</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">php/classes/ProcedimientoLimpieza.php</span></p>
+        <div class="info-box">
+            Clase para gestionar procedimientos de limpieza estandarizados.
+        </div>
+        <p><strong>Metodos principales:</strong></p>
+        <ul>
+            <li><code>getPasosArray()</code> - Obtener pasos como array</li>
+            <li><code>setPasosArray()</code> - Establecer pasos desde array</li>
+            <li><code>getByTipo()</code> - Obtener procedimientos por tipo</li>
+            <li><code>getProcedimientosHalal()</code> - Obtener procedimientos Halal</li>
+            <li><code>getByClaseActivo()</code> - Obtener procedimientos aplicables a una clase de activo</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 8: MODIFICACIONES A TEMPLATES -->
+        <h2 id="sec8">8. Modificaciones a Templates</h2>
+
+        <h3>8.1 detalle-insumos.php</h3>
+        <p>Agregar seccion de documentacion y certificaciones Halal con:</p>
+        <ul>
+            <li>Campo URL ficha tecnica</li>
+            <li>Opcion de subir archivo</li>
+            <li>Switch de certificacion Halal</li>
+            <li>Campos de numero, emisor y vencimiento de certificado</li>
+            <li>URL certificado Halal</li>
+        </ul>
+
+        <h3>8.2 detalle-activos.php</h3>
+        <p>Agregar seccion de limpiezas con:</p>
+        <ul>
+            <li>Selector de periodicidad</li>
+            <li>Campos de ultima/proxima limpieza</li>
+            <li>Textarea para procedimiento</li>
+            <li>Campos especificos Halal (uso exclusivo, ultima limpieza Halal, certificado)</li>
+            <li>Tabla de historial de limpiezas</li>
+            <li>Modal para registrar nueva limpieza</li>
+        </ul>
+
+        <h3>8.3 nuevo-productos.php y detalle-productos.php</h3>
+        <p>Agregar selector de linea productiva:</p>
+        <ul>
+            <li>Linea Alcoholica</li>
+            <li>Linea Sin Alcohol</li>
+            <li>General</li>
+        </ul>
+
+        <h3>8.4 nuevo-batches.php</h3>
+        <p>Agregar seccion de metricas de calidad (ML) con:</p>
+        <ul>
+            <li>ABV Final (%)</li>
+            <li>IBU Final</li>
+            <li>Color EBC</li>
+            <li>Calificacion Sensorial (1-10)</li>
+            <li>Rendimiento Final (L)</li>
+            <li>Merma Total (L)</li>
+            <li>Densidad Final Verificada</li>
+            <li>Notas de Cata</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 9: ENDPOINTS AJAX -->
+        <h2 id="sec9">9. Endpoints AJAX</h2>
+
+        <h3>9.1 ajax_registrarLimpieza.php</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">ajax/ajax_registrarLimpieza.php</span></p>
+        <table>
+            <tr><th>Parametro</th><th>Tipo</th><th>Requerido</th><th>Descripcion</th></tr>
+            <tr><td>id_activos</td><td>INT</td><td>Si</td><td>ID del activo</td></tr>
+            <tr><td>tipo_limpieza</td><td>STRING</td><td>Si</td><td>Tipo de limpieza</td></tr>
+            <tr><td>fecha</td><td>DATETIME</td><td>No</td><td>Fecha y hora</td></tr>
+            <tr><td>procedimiento_utilizado</td><td>STRING</td><td>No</td><td>Codigo de procedimiento</td></tr>
+            <tr><td>productos_utilizados</td><td>TEXT</td><td>No</td><td>Lista de productos</td></tr>
+            <tr><td>observaciones</td><td>TEXT</td><td>No</td><td>Notas</td></tr>
+            <tr><td>es_limpieza_halal</td><td>BOOLEAN</td><td>No</td><td>Flag Halal</td></tr>
+            <tr><td>certificado_numero</td><td>STRING</td><td>No</td><td>Numero certificado</td></tr>
+            <tr><td>certificado_emisor</td><td>STRING</td><td>No</td><td>Entidad certificadora</td></tr>
+            <tr><td>id_usuarios_supervisor</td><td>INT</td><td>No</td><td>ID supervisor</td></tr>
+        </table>
+
+        <h3>9.2 ajax_obtenerHistorialLimpiezas.php</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">ajax/ajax_obtenerHistorialLimpiezas.php</span></p>
+        <table>
+            <tr><th>Parametro</th><th>Tipo</th><th>Requerido</th><th>Descripcion</th></tr>
+            <tr><td>id_activos</td><td>INT</td><td>Si</td><td>ID del activo</td></tr>
+            <tr><td>limit</td><td>INT</td><td>No</td><td>Limite de resultados (default: 20)</td></tr>
+        </table>
+
+        <h3>9.3 ajax_validarLimpiezaHalal.php</h3>
+        <p><strong>Archivo:</strong> <span class="file-path">ajax/ajax_validarLimpiezaHalal.php</span></p>
+        <table>
+            <tr><th>Parametro</th><th>Tipo</th><th>Requerido</th><th>Descripcion</th></tr>
+            <tr><td>id_activos</td><td>INT</td><td>Si</td><td>ID del activo</td></tr>
+            <tr><td>horas</td><td>INT</td><td>No</td><td>Horas maximas (default: 24)</td></tr>
+        </table>
+        <p><strong>Respuesta:</strong></p>
+        <pre>{
+    "status": "OK",
+    "valido": true|false,
+    "mensaje": "Mensaje descriptivo",
+    "requiere_limpieza": true|false,
+    "ultima_limpieza": { "fecha": "...", "certificado": "..." }
+}</pre>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 10: MODIFICACIONES AL PDF -->
+        <h2 id="sec10">10. Modificaciones al PDF de Trazabilidad</h2>
+
+        <h3>10.1 Resumen de Cambios en TrazabilidadPDF.php</h3>
+        <ol>
+            <li><strong>Titulo dinamico con normas ISO/OIC</strong> - Segun linea productiva</li>
+            <li><strong>Agregar ID Batch con fecha</strong> - Ejemplo: #045 (15/11/2025)</li>
+            <li><strong>Cambiar "Codigo" a "Codigo de barril/caja"</strong> - Segun tipo de producto</li>
+            <li><strong>Cambiar "granos" por "insumos" con links</strong> - Todos los insumos con iconos de ficha/halal</li>
+            <li><strong>Linea productiva inline</strong> - Sin titulo "Linea:", ejemplo: FER-001 (60L) [Alcoholica]</li>
+            <li><strong>Corregir calculo de tiempos</strong> - Validacion de fechas y formato</li>
+            <li><strong>Agregar registro de limpieza Halal</strong> - Seccion especial para produccion sin alcohol</li>
+        </ol>
+
+        <h3>10.2 Nuevos Metodos</h3>
+        <ul>
+            <li><code>determinarLineaProductiva()</code> - Determina linea desde producto, activo o receta</li>
+            <li><code>getNormasISO()</code> - Retorna normas segun linea productiva</li>
+            <li><code>obtenerTodosInsumos()</code> - Obtiene todos los insumos (no solo granos)</li>
+            <li><code>obtenerLimpiezaHalal()</code> - Obtiene ultima limpieza Halal relevante</li>
+            <li><code>getBadgeLineaInline()</code> - Genera badge de linea productiva inline</li>
+        </ul>
+
+        <h3>10.3 Correccion del Calculo de Tiempos</h3>
+        <div class="warning-box">
+            <strong>Problema:</strong> El calculo de "Empaque &rarr; Entrega" reportaba valores incorrectos.<br><br>
+            <strong>Solucion:</strong> Validar fechas vacias, normalizar formato, verificar orden de fechas, y manejar excepciones.
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 11: SISTEMA DE LIMPIEZAS -->
+        <h2 id="sec11">11. Sistema de Limpiezas</h2>
+
+        <h3>11.1 Diagrama de Flujo</h3>
+        <div class="diagram">+---------------------------------------------------------------------+
+|                    FLUJO DE LIMPIEZA HALAL                          |
++---------------------------------------------------------------------+
+|                                                                     |
+|  +---------------+                                                  |
+|  |   ACTIVO      |                                                  |
+|  |   GENERAL     |                                                  |
+|  +-------+-------+                                                  |
+|          |                                                          |
+|          v                                                          |
+|  +---------------------------------------+                          |
+|  | Ultima produccion fue alcoholica?    |                          |
+|  +------------------+--------------------+                          |
+|                     |                                               |
+|            +--------+--------+                                      |
+|            v                 v                                      |
+|          [SI]              [NO]                                     |
+|            |                 |                                      |
+|            v                 |                                      |
+|  +-----------------+         |                                      |
+|  |    REQUIERE     |         |                                      |
+|  |    LIMPIEZA     |         |                                      |
+|  |     HALAL       |         |                                      |
+|  +--------+--------+         |                                      |
+|           |                  |                                      |
+|           v                  |                                      |
+|  +--------------------+      |                                      |
+|  | 1. Ejecutar        |      |                                      |
+|  |    limpieza        |      |                                      |
+|  | 2. Registrar       |      |                                      |
+|  | 3. Certificar      |      |                                      |
+|  | 4. Supervisor      |      |                                      |
+|  |    verifica        |      |                                      |
+|  +---------+----------+      |                                      |
+|            |                 |                                      |
+|            +--------+--------+                                      |
+|                     v                                               |
+|            +----------------+                                       |
+|            |    ACTIVO      |                                       |
+|            |  HABILITADO    |                                       |
+|            |  PARA HALAL    |                                       |
+|            +-------+--------+                                       |
+|                    |                                                |
+|                    v                                                |
+|            +----------------+                                       |
+|            |  PRODUCCION    |                                       |
+|            |  SIN ALCOHOL   |                                       |
+|            +----------------+                                       |
+|                                                                     |
++---------------------------------------------------------------------+</div>
+
+        <h3>11.2 Validacion Antes de Produccion</h3>
+        <p>Al iniciar produccion para linea sin alcohol, se debe verificar:</p>
+        <ol>
+            <li>Si el activo es de uso general</li>
+            <li>Si la ultima produccion fue alcoholica</li>
+            <li>Si existe limpieza Halal certificada en las ultimas 24 horas</li>
+        </ol>
+        <div class="info-box">
+            <strong>Implementar en:</strong> ajax/ajax_llenarBarriles.php y templates de produccion
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 12: PLAN DE EJECUCION -->
+        <h2 id="sec12">12. Plan de Ejecucion</h2>
+
+        <h3>12.1 Fases de Implementacion</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fase</th>
+                    <th>Descripcion</th>
+                    <th>Tareas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="badge badge-info">1</span></td>
+                    <td><strong>Base de Datos</strong></td>
+                    <td>
+                        <ul>
+                            <li>Migracion 009: Productos linea productiva</li>
+                            <li>Migracion 010: Batches campos ML</li>
+                            <li>Migracion 011: Insumos fichas/certificados</li>
+                            <li>Migracion 012: Sistema de limpiezas</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-info">2</span></td>
+                    <td><strong>Clases PHP</strong></td>
+                    <td>
+                        <ul>
+                            <li>Modificar Producto.php</li>
+                            <li>Modificar Insumo.php</li>
+                            <li>Modificar Batch.php</li>
+                            <li>Modificar Activo.php</li>
+                            <li>Crear RegistroLimpieza.php</li>
+                            <li>Crear ProcedimientoLimpieza.php</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-info">3</span></td>
+                    <td><strong>Endpoints AJAX</strong></td>
+                    <td>
+                        <ul>
+                            <li>ajax_registrarLimpieza.php</li>
+                            <li>ajax_obtenerHistorialLimpiezas.php</li>
+                            <li>ajax_validarLimpiezaHalal.php</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-info">4</span></td>
+                    <td><strong>Templates</strong></td>
+                    <td>
+                        <ul>
+                            <li>Modificar detalle-insumos.php</li>
+                            <li>Modificar detalle-activos.php</li>
+                            <li>Modificar nuevo-productos.php</li>
+                            <li>Modificar detalle-productos.php</li>
+                            <li>Modificar nuevo-batches.php</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-info">5</span></td>
+                    <td><strong>PDF Trazabilidad</strong></td>
+                    <td>
+                        <ul>
+                            <li>Titulo dinamico con normas</li>
+                            <li>ID Batch con fecha</li>
+                            <li>Codigo de barril/caja</li>
+                            <li>Todos los insumos con links</li>
+                            <li>Linea productiva inline</li>
+                            <li>Corregir calculo tiempos</li>
+                            <li>Seccion limpieza Halal</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-info">6</span></td>
+                    <td><strong>Testing</strong></td>
+                    <td>
+                        <ul>
+                            <li>Pruebas unitarias</li>
+                            <li>Pruebas de integracion</li>
+                            <li>Pruebas de PDF</li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>12.2 Cronograma Sugerido</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fase</th>
+                    <th>Descripcion</th>
+                    <th>Dependencias</th>
+                    <th>Complejidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td>Base de Datos</td><td>Ninguna</td><td><span class="badge badge-success">Baja</span></td></tr>
+                <tr><td>2</td><td>Clases PHP</td><td>Fase 1</td><td><span class="badge badge-warning">Media</span></td></tr>
+                <tr><td>3</td><td>Endpoints AJAX</td><td>Fase 2</td><td><span class="badge badge-success">Baja</span></td></tr>
+                <tr><td>4</td><td>Templates</td><td>Fases 2, 3</td><td><span class="badge badge-warning">Media</span></td></tr>
+                <tr><td>5</td><td>PDF Trazabilidad</td><td>Fases 1, 2</td><td><span class="badge badge-danger">Alta</span></td></tr>
+                <tr><td>6</td><td>Testing</td><td>Todas</td><td><span class="badge badge-warning">Media</span></td></tr>
+            </tbody>
+        </table>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 13: DEPENDENCIAS -->
+        <h2 id="sec13">13. Dependencias y Orden de Implementacion</h2>
+
+        <h3>13.1 Grafo de Dependencias</h3>
+        <div class="diagram">Migracion 009 ---+
+Migracion 010 ---+---&gt; Clases PHP ---&gt; Templates ---&gt; Testing
+Migracion 011 ---+                        |
+Migracion 012 ---+                        |
+                                          |
+                     AJAX Endpoints ------+
+                           |
+                           v
+                    PDF Trazabilidad</div>
+
+        <h3>13.2 Orden de Ejecucion de Migraciones</h3>
+        <pre># 1. Ejecutar en orden:
+mysql -u barrcl_cocholg -p barrcl_cocholg &lt; db/migrations/009_productos_linea_productiva.sql
+mysql -u barrcl_cocholg -p barrcl_cocholg &lt; db/migrations/010_batches_ml_fields.sql
+mysql -u barrcl_cocholg -p barrcl_cocholg &lt; db/migrations/011_insumos_fichas_certificados.sql
+mysql -u barrcl_cocholg -p barrcl_cocholg &lt; db/migrations/012_sistema_limpiezas.sql
+
+# 2. Verificar:
+mysql -u barrcl_cocholg -p barrcl_cocholg -e "DESCRIBE productos;"
+mysql -u barrcl_cocholg -p barrcl_cocholg -e "DESCRIBE batches;"
+mysql -u barrcl_cocholg -p barrcl_cocholg -e "DESCRIBE insumos;"
+mysql -u barrcl_cocholg -p barrcl_cocholg -e "DESCRIBE activos;"
+mysql -u barrcl_cocholg -p barrcl_cocholg -e "SHOW TABLES LIKE '%limpieza%';"</pre>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 14: PLAN DE PRUEBAS -->
+        <h2 id="sec14">14. Plan de Pruebas</h2>
+
+        <h3>14.1 Pruebas de Base de Datos</h3>
+        <pre>-- Test 1: Verificar campo linea_productiva en productos
+INSERT INTO productos (nombre, tipo, linea_productiva) VALUES ('Test', 'Barril', 'alcoholica');
+SELECT * FROM productos WHERE nombre = 'Test';
+DELETE FROM productos WHERE nombre = 'Test';
+
+-- Test 2: Verificar campos ML en batches
+UPDATE batches SET abv_final = 5.5, ibu_final = 45 WHERE id = (SELECT MIN(id) FROM batches);
+SELECT abv_final, ibu_final FROM batches WHERE abv_final IS NOT NULL;
+
+-- Test 3: Verificar sistema de limpiezas
+INSERT INTO registros_limpiezas (id_activos, tipo_limpieza, id_usuarios) VALUES (1, 'General', 1);
+SELECT * FROM registros_limpiezas ORDER BY id DESC LIMIT 1;</pre>
+
+        <h3>14.2 Checklist de Pruebas Manuales</h3>
+
+        <h4>PDF de Trazabilidad:</h4>
+        <ul class="checklist">
+            <li>Titulo muestra normas correctas segun linea</li>
+            <li>ID Batch con fecha visible</li>
+            <li>"Codigo de barril" / "Codigo de caja" segun tipo</li>
+            <li>Lista todos los insumos (no solo granos)</li>
+            <li>Links a fichas tecnicas funcionan</li>
+            <li>Links a certificados Halal funcionan</li>
+            <li>Badge de linea junto a cada activo (sin texto "Linea:")</li>
+            <li>Calculo Empaque&rarr;Entrega correcto</li>
+            <li>Seccion de limpieza Halal visible cuando aplica</li>
+        </ul>
+
+        <h4>Sistema de Limpiezas:</h4>
+        <ul class="checklist">
+            <li>Registrar limpieza general</li>
+            <li>Registrar limpieza Halal con certificado</li>
+            <li>Ver historial de limpiezas</li>
+            <li>Validacion antes de produccion Halal</li>
+            <li>Campos de limpieza actualizados en activo</li>
+        </ul>
+
+        <h4>Insumos:</h4>
+        <ul class="checklist">
+            <li>Agregar URL de ficha tecnica</li>
+            <li>Agregar certificado Halal</li>
+            <li>Indicador de Halal vigente</li>
+            <li>Alerta de certificados por vencer</li>
+        </ul>
+
+        <div class="page-break"></div>
+
+        <!-- SECTION 15: RIESGOS Y MITIGACIONES -->
+        <h2 id="sec15">15. Riesgos y Mitigaciones</h2>
+
+        <h3>15.1 Riesgos Identificados</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Riesgo</th>
+                    <th>Probabilidad</th>
+                    <th>Impacto</th>
+                    <th>Mitigacion</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Migracion falla en produccion</td>
+                    <td><span class="badge badge-warning">Media</span></td>
+                    <td><span class="badge badge-danger">Alto</span></td>
+                    <td>Backup antes de migrar, scripts de rollback</td>
+                </tr>
+                <tr>
+                    <td>URLs de fichas inaccesibles</td>
+                    <td><span class="badge badge-danger">Alta</span></td>
+                    <td><span class="badge badge-success">Bajo</span></td>
+                    <td>Validar URLs, cache local opcional</td>
+                </tr>
+                <tr>
+                    <td>Calculo tiempos sigue fallando</td>
+                    <td><span class="badge badge-warning">Media</span></td>
+                    <td><span class="badge badge-warning">Medio</span></td>
+                    <td>Logs detallados, casos de prueba exhaustivos</td>
+                </tr>
+                <tr>
+                    <td>Certificados Halal vencidos</td>
+                    <td><span class="badge badge-danger">Alta</span></td>
+                    <td><span class="badge badge-danger">Alto</span></td>
+                    <td>Alertas automaticas, dashboard de vencimientos</td>
+                </tr>
+                <tr>
+                    <td>Performance con muchos insumos</td>
+                    <td><span class="badge badge-success">Baja</span></td>
+                    <td><span class="badge badge-warning">Medio</span></td>
+                    <td>Lazy loading, paginacion</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>15.2 Scripts de Rollback</h3>
+        <pre>-- Rollback Migracion 009
+ALTER TABLE productos DROP COLUMN linea_productiva;
+
+-- Rollback Migracion 010
+ALTER TABLE batches
+  DROP COLUMN abv_final,
+  DROP COLUMN ibu_final,
+  DROP COLUMN color_ebc,
+  DROP COLUMN rendimiento_litros_final,
+  DROP COLUMN merma_total_litros,
+  DROP COLUMN densidad_final_verificada,
+  DROP COLUMN calificacion_sensorial,
+  DROP COLUMN notas_cata,
+  DROP COLUMN temperatura_ambiente_promedio,
+  DROP COLUMN humedad_relativa_promedio;
+
+-- Rollback Migracion 011
+ALTER TABLE insumos
+  DROP COLUMN url_ficha_tecnica,
+  DROP COLUMN url_certificado_halal,
+  DROP COLUMN certificado_halal_numero,
+  DROP COLUMN certificado_halal_vencimiento,
+  DROP COLUMN certificado_halal_emisor,
+  DROP COLUMN es_halal_certificado;
+
+-- Rollback Migracion 012
+DROP TABLE IF EXISTS registros_limpiezas;
+DROP TABLE IF EXISTS procedimientos_limpieza;
+ALTER TABLE activos
+  DROP COLUMN fecha_ultima_limpieza,
+  DROP COLUMN proxima_limpieza,
+  DROP COLUMN limpieza_procedimiento,
+  DROP COLUMN limpieza_periodicidad,
+  DROP COLUMN fecha_ultima_limpieza_halal,
+  DROP COLUMN certificado_limpieza_halal,
+  DROP COLUMN uso_exclusivo_halal;</pre>
+
+        <div class="page-break"></div>
+
+        <!-- ANEXOS -->
+        <h2>Anexos</h2>
+
+        <h3>A. Lista de Archivos a Crear</h3>
+        <ol>
+            <li><span class="file-path">db/migrations/009_productos_linea_productiva.sql</span></li>
+            <li><span class="file-path">db/migrations/010_batches_ml_fields.sql</span></li>
+            <li><span class="file-path">db/migrations/011_insumos_fichas_certificados.sql</span></li>
+            <li><span class="file-path">db/migrations/012_sistema_limpiezas.sql</span></li>
+            <li><span class="file-path">php/classes/RegistroLimpieza.php</span></li>
+            <li><span class="file-path">php/classes/ProcedimientoLimpieza.php</span></li>
+            <li><span class="file-path">ajax/ajax_registrarLimpieza.php</span></li>
+            <li><span class="file-path">ajax/ajax_obtenerHistorialLimpiezas.php</span></li>
+            <li><span class="file-path">ajax/ajax_validarLimpiezaHalal.php</span></li>
+        </ol>
+
+        <h3>B. Lista de Archivos a Modificar</h3>
+        <ol>
+            <li><span class="file-path">php/classes/Producto.php</span></li>
+            <li><span class="file-path">php/classes/Insumo.php</span></li>
+            <li><span class="file-path">php/classes/Batch.php</span></li>
+            <li><span class="file-path">php/classes/Activo.php</span></li>
+            <li><span class="file-path">php/classes/TrazabilidadPDF.php</span></li>
+            <li><span class="file-path">templates/detalle-insumos.php</span></li>
+            <li><span class="file-path">templates/detalle-activos.php</span></li>
+            <li><span class="file-path">templates/nuevo-productos.php</span></li>
+            <li><span class="file-path">templates/detalle-productos.php</span></li>
+            <li><span class="file-path">templates/nuevo-batches.php</span></li>
+        </ol>
+
+        <h3>C. Normas de Referencia</h3>
+        <div class="info-box">
+            <strong>Linea Alcoholica:</strong>
+            <ul>
+                <li>ISO 22005:2007 - Trazabilidad en la cadena alimentaria</li>
+                <li>ISO 22000:2018 - Sistemas de gestion de inocuidad alimentaria</li>
+                <li>FSSC 22000 - Certificacion de sistemas de seguridad alimentaria</li>
+                <li>BRCGS - British Retail Consortium Global Standards</li>
+                <li>IFS - International Featured Standards</li>
+            </ul>
+        </div>
+
+        <div class="success-box">
+            <strong>Linea Sin Alcohol (Halal):</strong>
+            <ul>
+                <li>OIC/SMIIC 1 - Guia general para Halal</li>
+                <li>GSO 2055-1 - Requisitos generales para alimentos Halal</li>
+                <li>(mas las normas de linea alcoholica)</li>
+            </ul>
+        </div>
+
+        <hr>
+
+        <div style="text-align: center; color: #95a5a6; font-size: 10pt; margin-top: 40px;">
+            <p><em>Documento generado: 2025-12-04</em></p>
+            <p><em>Sistema: Barril.cl ERP v1.1</em></p>
+            <p><em>Autor: Claude Code</em></p>
+        </div>
+
+    </div>
+</body>
+</html>

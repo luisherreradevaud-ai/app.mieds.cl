@@ -62,6 +62,38 @@
 
     public $finalizacion_date = '';
 
+    // Campos ML - Métricas de producto final
+    public $abv_final = null;
+    public $ibu_final = null;
+    public $color_ebc = null;
+
+    // Campos ML - Rendimiento
+    public $rendimiento_litros_final = null;
+    public $merma_total_litros = null;
+    public $densidad_final_verificada = null;
+
+    // Campos ML - Calidad sensorial
+    public $calificacion_sensorial = null;
+    public $notas_cata = "";
+
+    // Campos ML - Condiciones ambientales
+    public $temperatura_ambiente_promedio = null;
+    public $humedad_relativa_promedio = null;
+
+    // Campos ML - Cocción
+    public $tiempo_hervido_total_min = null;
+    public $densidad_pre_hervor = null;
+    public $densidad_pre_hervor_unidad = 'SG';
+    public $densidad_post_hervor = null;
+    public $densidad_post_hervor_unidad = 'SG';
+    public $volumen_pre_hervor_l = null;
+    public $volumen_post_hervor_l = null;
+    public $evaporacion_pct = null;
+    public $eficiencia_coccion_pct = null;
+    public $energia_coccion_kwh = null;
+    public $sensor_temp_id = null;
+    public $resumen_json = null;
+
     public function __construct($id = null) {
       $this->tableName("batches");
       if($id) {
@@ -74,7 +106,36 @@
       }
     }
 
+    public function setPropertiesNoId($fields) {
+      parent::setPropertiesNoId($fields);
+
+      // Limpiar campos que deben ser NULL cuando están vacíos
+      $nullableFields = [
+        'sensor_temp_id', 'resumen_json', 'tiempo_hervido_total_min',
+        'densidad_pre_hervor', 'densidad_post_hervor', 'volumen_pre_hervor_l',
+        'volumen_post_hervor_l', 'evaporacion_pct', 'eficiencia_coccion_pct',
+        'energia_coccion_kwh', 'temperatura_ambiente_promedio', 'humedad_relativa_promedio',
+        'densidad_final_verificada'
+      ];
+      foreach($nullableFields as $field) {
+        if(property_exists($this, $field) && $this->{$field} === '') {
+          $this->{$field} = null;
+        }
+      }
+    }
+
     public function setSpecifics($post) {
+
+      // Decodificar JSON strings si vienen como strings (desde AJAX)
+      $jsonFields = ['insumos', 'lupulizaciones', 'enfriados', 'traspasos', 'fermentacion_fermentadores'];
+      foreach($jsonFields as $field) {
+        if(isset($post[$field]) && is_string($post[$field])) {
+          $decoded = json_decode($post[$field], true);
+          if($decoded !== null) {
+            $post[$field] = $decoded;
+          }
+        }
+      }
 
       if($this->id == "") {
         $this->save();
@@ -110,22 +171,48 @@
       }
 
       if(isset($post['insumos']) && is_array($post['insumos'])) {
+        // Eliminar registros de levadura anteriores de este batch
+        $levaduras_anteriores = BatchLevadura::getAll("WHERE id_batches='" . $this->id . "'");
+        foreach($levaduras_anteriores as $lev) {
+          $lev->delete();
+        }
+
         foreach($post['insumos'] as $etapa_key => $etapa) {
-          foreach($etapa as $insumo) {
+          foreach($etapa as $insumo_data) {
 
             $batch_insumo = new BatchInsumo;
             $batch_insumo->id_batches = $this->id;
-            $batch_insumo->id_insumos = $insumo['id'];
-            $batch_insumo->cantidad = $insumo['cantidad'];
+            $batch_insumo->id_insumos = $insumo_data['id'];
+            $batch_insumo->cantidad = $insumo_data['cantidad'];
             $batch_insumo->tipo = "Receta";
             $batch_insumo->etapa = $etapa_key;
-            $batch_insumo->etapa_index = $insumo['etapa_index'];
+            $batch_insumo->etapa_index = $insumo_data['etapa_index'];
             $batch_insumo->date = date('Y-m-d');
             $batch_insumo->save();
 
-            $insumo = new Insumo($batch_insumo->id_insumos);
-            $insumo->bodega -= $batch_insumo->cantidad;
-            $insumo->save();
+            // Si tiene datos de levadura, crear registro de BatchLevadura
+            if(isset($insumo_data['es_levadura']) && $insumo_data['es_levadura'] && isset($insumo_data['levadura_data'])) {
+              $lev_data = $insumo_data['levadura_data'];
+              $batch_levadura = new BatchLevadura;
+              $batch_levadura->id_batches = $this->id;
+              $batch_levadura->id_batches_insumos = $batch_insumo->id;
+              $batch_levadura->generacion = isset($lev_data['generacion']) ? intval($lev_data['generacion']) : 1;
+              $batch_levadura->origen_batch = isset($lev_data['origen_batch']) ? $lev_data['origen_batch'] : '';
+              $batch_levadura->cantidad_gramos = floatval($insumo_data['cantidad']); // Usar la cantidad del insumo
+              $batch_levadura->tasa_inoculacion = isset($lev_data['tasa_inoculacion']) ? floatval($lev_data['tasa_inoculacion']) : 0;
+              $batch_levadura->viabilidad_medida = isset($lev_data['viabilidad_medida']) ? floatval($lev_data['viabilidad_medida']) : 0;
+              $batch_levadura->vitalidad_medida = isset($lev_data['vitalidad_medida']) ? floatval($lev_data['vitalidad_medida']) : 0;
+              $batch_levadura->uso_starter = isset($lev_data['uso_starter']) ? intval($lev_data['uso_starter']) : 0;
+              $batch_levadura->volumen_starter_ml = isset($lev_data['volumen_starter_ml']) ? intval($lev_data['volumen_starter_ml']) : 0;
+              $batch_levadura->atenuacion_real = isset($lev_data['atenuacion_real']) ? floatval($lev_data['atenuacion_real']) : 0;
+              $batch_levadura->tiempo_lag_h = isset($lev_data['tiempo_lag_h']) ? floatval($lev_data['tiempo_lag_h']) : 0;
+              $batch_levadura->observaciones = isset($lev_data['observaciones']) ? $lev_data['observaciones'] : '';
+              $batch_levadura->save();
+            }
+
+            $insumo_obj = new Insumo($batch_insumo->id_insumos);
+            $insumo_obj->bodega -= $batch_insumo->cantidad;
+            $insumo_obj->save();
 
           }
         }
@@ -192,7 +279,8 @@
           $fermentador->save();
         }
       }
-      
+
+
 
       /*$receta = new Receta($this->id_recetas);
       foreach($receta->insumos_arr as $ri) {
@@ -365,7 +453,81 @@
 
       $batch_activo->delete();
 
-      
+
+    }
+
+    /**
+     * Calcula la eficiencia del batch (rendimiento final / objetivo)
+     * @return float|null
+     */
+    public function calcularEficiencia() {
+      $litros = floatval($this->batch_litros);
+      $rendimiento = floatval($this->rendimiento_litros_final);
+      if($litros > 0 && $rendimiento > 0) {
+        return round(($rendimiento / $litros) * 100, 2);
+      }
+      return null;
+    }
+
+    /**
+     * Calcula el porcentaje de merma
+     * @return float|null
+     */
+    public function calcularMermaPorcentual() {
+      $litros = floatval($this->batch_litros);
+      $merma = floatval($this->merma_total_litros);
+      if($litros > 0 && $merma > 0) {
+        return round(($merma / $litros) * 100, 2);
+      }
+      return null;
+    }
+
+    /**
+     * Determina la línea productiva del batch basado en activos o receta
+     * @return string 'alcoholica'|'analcoholica'|'general'
+     */
+    public function getLineaProductiva() {
+      // Prioridad 1: Desde el primer activo asignado
+      $batches_activos = BatchActivo::getAll("WHERE id_batches='" . $this->id . "' LIMIT 1");
+      if(count($batches_activos) > 0) {
+        $activo = new Activo($batches_activos[0]->id_activos);
+        if(!empty($activo->linea_productiva)) {
+          return $activo->linea_productiva;
+        }
+      }
+      // Prioridad 2: Inferir de la clasificación de receta
+      if($this->id_recetas > 0) {
+        $receta = new Receta($this->id_recetas);
+        if(in_array($receta->clasificacion, ['Cerveza', 'Cerveza Artesanal'])) {
+          return 'alcoholica';
+        }
+        if(in_array($receta->clasificacion, ['Kombucha', 'Agua saborizada', 'Agua fermentada'])) {
+          return 'analcoholica';
+        }
+      }
+      return 'general';
+    }
+
+    /**
+     * Obtiene el label de la línea productiva
+     * @return string
+     */
+    public function getLineaProductivaLabel() {
+      $linea = $this->getLineaProductiva();
+      $lineas = [
+        'alcoholica' => 'Alcohólica',
+        'analcoholica' => 'Sin Alcohol',
+        'general' => 'General'
+      ];
+      return isset($lineas[$linea]) ? $lineas[$linea] : 'General';
+    }
+
+    /**
+     * Verifica si el batch es de línea sin alcohol (para Halal)
+     * @return bool
+     */
+    public function esLineaSinAlcohol() {
+      return $this->getLineaProductiva() == 'analcoholica';
     }
 
   }

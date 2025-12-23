@@ -25,12 +25,13 @@ if($_SERVER['HTTP_HOST']=="localhost") {
 }
 
 spl_autoload_register(function($clase){
-  $ruta = $GLOBALS['base_dir']."/php/classes/".str_replace("\\","/",$clase).".php";
+  // Ignorar clases con namespace (como Dompdf\*, FontLib\*, Svg\*)
+  if(strpos($clase, '\\') !== false) {
+    return;
+  }
+  $ruta = $GLOBALS['base_dir']."/php/classes/".$clase.".php";
   if(is_readable($ruta)){
     require_once($ruta);
-  } else {
-    print $ruta;
-    echo "El archivo de clase no existe";
   }
 });
 
@@ -266,7 +267,7 @@ function text2html($text) {
       $titulo_html = "<h4>".ucwords(strtolower(replaceTildes($element)))."</h4>";
       $texto_html = $texto_html.$titulo_html;
 
-    } else if($element[0]=="-"){
+    } else if(strlen($element) > 0 && $element[0]=="-"){
 
       $lista = explode("\n",$element);
 
@@ -322,7 +323,7 @@ function datetime2fecha($datetime) {
 
 function fecha2date($fecha) {
   $r_fecha = explode("/",$fecha);
-  if(count($r_fecha==3)){
+  if(count($r_fecha)==3){
     if( strlen($r_fecha[2]) == 4 && strlen($r_fecha[1]) == 2 && strlen($r_fecha[0]) == 2 ){
       if( is_numeric($r_fecha[2]) && is_numeric($r_fecha[1]) && is_numeric($r_fecha[0]) ) {
         $fecha = $r_fecha[2]."-".$r_fecha[1]."-".$r_fecha[0];
@@ -491,12 +492,12 @@ function validaFechas($fechas) {
 
 function validaFecha($fecha) {
 
-  $explode_fecha[$i] = explode("/",$fecha);
-  if( count($explode_fecha[$i])==3 ) {
-    if( $explode_fecha[$i][1] > 0 && $explode_fecha[$i][1] <= 12 ) {
-      if( $explode_fecha[$i][2] >= date("Y") ) {
-        $dias_mes = cal_days_in_month(CAL_GREGORIAN, $explode_fecha[$i][1], $explode_fecha[$i][2]);
-        if( $explode_fecha[$i][0] > 0 && $explode_fecha[$i][0] <= $dias_mes ) {
+  $explode_fecha = explode("/",$fecha);
+  if( count($explode_fecha)==3 ) {
+    if( $explode_fecha[1] > 0 && $explode_fecha[1] <= 12 ) {
+      if( $explode_fecha[2] >= date("Y") ) {
+        $dias_mes = cal_days_in_month(CAL_GREGORIAN, $explode_fecha[1], $explode_fecha[2]);
+        if( $explode_fecha[0] > 0 && $explode_fecha[0] <= $dias_mes ) {
           return true;
         }
       }
@@ -574,7 +575,7 @@ function postData($url,$data) {
   $ch = curl_init();
 
   curl_setopt($ch, CURLOPT_URL, $url);
-  curl_setopt($ch, CURLOPT_POST, count($fields));
+  curl_setopt($ch, CURLOPT_POST, count($data));
   curl_setopt($ch, CURLOPT_POSTFIELDS, $postvars);
 
   $result = curl_exec($ch);

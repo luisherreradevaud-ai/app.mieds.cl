@@ -10,7 +10,8 @@
     $ano = $_GET['ano'];
     }
 
-    $batches = Batch::getAll("WHERE tipo='Batch' AND finalizacion_date='0000-00-00'");
+    $batches = Batch::getAll();
+    //$batches = Batch::getAll();
 
 ?>
 <style>

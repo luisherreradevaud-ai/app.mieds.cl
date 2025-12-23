@@ -14,6 +14,7 @@
     public $clasificacion = "";
     public $litraje = 0;
     public $litros_cargados = 0;
+    public $fecha_llenado = null;
 
     public function __construct($id = null) {
       $this->tableName("barriles");

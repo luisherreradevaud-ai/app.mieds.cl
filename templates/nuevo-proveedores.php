@@ -128,9 +128,8 @@ $(document).on('click','#guardar-btn',function(e){
   var url = "./ajax/ajax_guardarEntidad.php";
   var data = getDataForm("proveedores");
 
-  $.post(url,data,function(response_raw){
-    console.log(response_raw);
-    var response = JSON.parse(response_raw);
+  $.post(url,data,function(response){
+    console.log(response);
     if(response.mensaje!="OK") {
       alert("Algo fallo");
       return false;
@@ -174,9 +173,8 @@ $(document).on('click','#guardar-y-agregar-btn',function(e){
   var url = "./ajax/ajax_guardarEntidad.php";
   var data = getDataForm("proveedores");
 
-  $.post(url,data,function(response_raw){
-    console.log(response_raw);
-    var response = JSON.parse(response_raw);
+  $.post(url,data,function(response){
+    console.log(response);
     if(response.mensaje!="OK") {
       alert("Algo fallo");
       return false;
