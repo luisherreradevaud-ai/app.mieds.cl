@@ -59,104 +59,21 @@ $transbank['codigo_comercio'] = "597047933778";
 $transbank['api_secret_key'] = "b520a2a3-59e9-476e-8c01-9df2a231658b";
 
 
-$estados = array(
-  "Venta y entrega en tienda",
-  "Pendiente retiro en tienda",
-  "Pendiente despacho",
-  "Retirado en tienda",
-  "Despachado"
-);
-
-$tipos_barril = array(
-  "20L",
-  "30L",
-  "50L"
-);
-
-$tipos_barril_cerveza = array(
-  "Ambar",
-  "IPA",
-  "PaleAle",
-  "Calafate",
-  "BIPA"
-);
-
-$estados_barril = array(
-  "En planta",
-  "En despacho",
-  "En terreno",
-  "Pinchado",
-  "Perdido",
-  "Devuelto a planta"
-);
-
-// Estados que el repartidor puede asignar a barriles del cliente
-$estados_barril_repartidor = array(
-  "En terreno",
-  "En despacho",
-  "Pinchado",
-  "Perdido",
-  "Devuelto a planta"
-);
-
-$tipos_caja = array(
-  "Unidad",
-  "6 pack",
-  "12 pack",
-  "24",
-  "Tripack"
-);
-
-$tipos_caja_cerveza = array(
-  "Ambar",
-  "IPA",
-  "PaleAle",
-  "Calafate",
-  "BIPA",
-  "Mix"
-);
-
 $niveles_usuario = array(
   "Administrador",
-  "Jefe de Planta",
-  "Cliente",
-  "Jefe de Cocina",
-  "Operario",
-  "Repartidor",
-  "Vendedor",
+  "Concesionario",
   "Visita"
 );
 
 $tipos_de_gasto = array(
-  "Agua",
-  "Arriendo",
-  "Caja Chica",
-  "Combustible",
-  "Envios",
-  "Gas",
-  "Inversion",
-  "Luz",
-  "RRHH Marketing",
-  "RRHH Tecnicos",
-  "Sueldos"
+  "General"
 );
 
-$insumos_unidades_de_medida = array(
-  "Unidades",
-  "Kg",
-  "Gr",
-  "L",
-  "Ml"
-);
 
 $secciones_clasificacion = [
   'Administraci&oacute;n',
   'Central Cliente',
-  'Central de Despacho',
-  'Inventario',
-  'Mantenimiento',
   'Usuarios',
-  'Vendedor',
   'Tareas',
   'Supervisi&oacute;n',
   'Configuraci&oacute;n',
@@ -590,20 +507,7 @@ function postData($url,$data) {
   curl_close($ch);
 }
 
-function gotoError($url=NULL) {
-  $base_dir = $GLOBALS['base_dir'];
-  if(!$url) {
-    header("Location: https://www.drgrass.cl/error");
-  }
-  header("Location: https://www.drgrass.cl/error-".$url);
-  die();
-}
 
-function goto404() {
-  $base_dir = $GLOBALS['base_dir'];
-  header("Location: https://drgrass.cl/404");
-  die();
-}
 
 function include404() {
   $base_dir = $GLOBALS['base_dir'];
@@ -627,59 +531,14 @@ function curl_get_file_contents($URL) {
 
 function createObjFromTableName($table_name,$id){
 
-  if($table_name=="entregas") {
-    $obj = new Entrega($id);
-  } else
-  if($table_name=="barriles") {
-    $obj = new Barril($id);
-  } else
-  if($table_name=="cajas") {
-    $obj = new Caja($id);
-  } else
   if($table_name=="clientes") {
     $obj = new Cliente($id);
   } else
   if($table_name=="usuarios") {
     $obj = new Usuario($id);
   } else
-  if($table_name=="despachos") {
-    $obj = new Despacho($id);
-  } else
-  if($table_name=="pedidos") {
-    $obj = new Pedido($id);
-  } else
-  if($table_name=="proveedores") {
-    $obj = new Proveedor($id);
-  } else
   if($table_name=="gastos") {
     $obj = new Gasto($id);
-  } else
-  if($table_name=="insumos") {
-    $obj = new Insumo($id);
-  } else
-  if($table_name=="tipos_de_insumos") {
-    $obj = new TipoDeInsumo($id);
-  } else
-  if($table_name=="compras_de_insumos") {
-    $obj = new CompraDeInsumo($id);
-  } else
-  if($table_name=="activos") {
-    $obj = new Activo($id);
-  } else
-  if($table_name=="mantenciones") {
-    $obj = new Mantencion($id);
-  } else 
-  if($table_name=="recetas") {
-    $obj = new Receta($id);
-  } else
-  if($table_name=="batches") {
-    $obj = new Batch($id);
-  } else
-  if($table_name=="vendedores") {
-    $obj = new Vendedor($id);
-  } else
-  if($table_name=="operarios") {
-    $obj = new Operario($id);
   } else
   if($table_name=="tipos_de_gastos") {
     $obj = new TipoDeGasto($id);
@@ -687,23 +546,11 @@ function createObjFromTableName($table_name,$id){
   if($table_name=="tareas") {
     $obj = new Tarea($id);
   } else
-  if($table_name=="productos") {
-    $obj =  new Producto($id);
-  } else
   if($table_name=="usuarios_nivel") {
     $obj = new UsuarioNivel($id);
   } else
   if($table_name=="configuraciones") {
     $obj = new Configuracion($id);
-  } else 
-  if($table_name=="proyectos") {
-    $obj = new Proyecto($id);
-  } else 
-  if($table_name=="proyectos_ingresos") {
-    $obj = new ProyectoIngreso($id);
-  } else 
-  if($table_name=="proyectos_productos") {
-    $obj = new ProyectoProducto($id);
   } else 
   if($table_name=="documentos") {
     $obj = new Documento($id);
@@ -711,27 +558,6 @@ function createObjFromTableName($table_name,$id){
   if($table_name=="tareas_comentarios") {
     $obj = new TareaComentario($id);
   } else 
-  if($table_name=="gastos-fijos") {
-    $obj = new GastoFijo($id);
-  } else
-  if($table_name=="gastos_fijos") {
-    $obj = new GastoFijo($id);
-  } else 
-  if($table_name=="gastos_fijos_mes") {
-    $obj = new GastoFijoMes($id);
-  } else 
-  if($table_name=="lineas_de_negocio") {
-    $obj = new LineaDeNegocio($id);
-  } else 
-  if($table_name=="gastos_lineas_de_negocio") {
-    $obj = new GastoLineaDeNegocio($id);
-  } else 
-  if($table_name=="accesorios") {
-    $obj = new Accesorio($id);
-  } else 
-  if($table_name=="barriles_estados") {
-    $obj = new BarrilEstado($id);
-  } else
   if($table_name=="kanban_tableros") {
     $obj = new KanbanTablero($id);
   } else
