@@ -587,6 +587,27 @@ function createObjFromTableName($table_name,$id){
   } else
   if($table_name=="tableros") {
     $obj = new Tablero($id);
+  } else
+  if($table_name=="turnos") {
+    $obj = new Turno($id);
+  } else
+  if($table_name=="turnos_faltantes") {
+    $obj = new TurnoFaltante($id);
+  } else
+  if($table_name=="turnos_anticipos") {
+    $obj = new TurnoAnticipo($id);
+  } else
+  if($table_name=="turnos_facturas_credito") {
+    $obj = new TurnoFacturaCredito($id);
+  } else
+  if($table_name=="turnos_ingresos_prosegur") {
+    $obj = new TurnoIngresoProsegur($id);
+  } else
+  if($table_name=="turnos_gastos_caja_chica") {
+    $obj = new TurnoGastoCajaChica($id);
+  } else
+  if($table_name=="turnos_comisiones") {
+    $obj = new TurnoComision($id);
   }
 
   return $obj;
