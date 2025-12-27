@@ -17,9 +17,18 @@ if($debug || isset($_GET['debug'])) {
 
 date_default_timezone_set('America/Santiago');
 
+
+  $mysqli_user = "barrcl_cocholg"; 
+  $mysqli_pass = "rglgd8ZdWWiP";
+  $mysqli_db = "barrcl_cocholg";
+
+
 // Definir base_dir antes del autoloader
 if($_SERVER['HTTP_HOST']=="localhost") {
   $base_dir = realpath($_SERVER["DOCUMENT_ROOT"])."/app.barril.cl";
+  $mysqli_user = "barrcl_cocholg"; 
+  $mysqli_pass = "rglgd8ZdWWiP";
+  $mysqli_db = "barrcl_cocholg";
 } else {
   $base_dir = realpath($_SERVER["DOCUMENT_ROOT"]);
 }
@@ -48,9 +57,7 @@ $usuario->checkSession();*/
 $passwordHash = "mister420";
 $transbank['codigo_comercio'] = "597047933778";
 $transbank['api_secret_key'] = "b520a2a3-59e9-476e-8c01-9df2a231658b";
-$mysqli_user = "barrcl_cocholg"; 
-$mysqli_pass = "rglgd8ZdWWiP";
-$mysqli_db = "barrcl_cocholg";
+
 
 $estados = array(
   "Venta y entrega en tienda",
