@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 05, 2025 at 09:39 AM
+-- Generation Time: Dec 27, 2025 at 02:51 PM
 -- Server version: 10.4.34-MariaDB
 -- PHP Version: 7.2.30
 
@@ -24,59 +24,6 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `accesorios`
---
-
-CREATE TABLE `accesorios` (
-  `id` int(11) NOT NULL,
-  `id_activos` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL,
-  `marca` varchar(100) DEFAULT NULL,
-  `creada` datetime NOT NULL DEFAULT current_timestamp(),
-  `observaciones` text DEFAULT NULL,
-  `ultimo_cambio` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `activos`
---
-
-CREATE TABLE `activos` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(200) NOT NULL,
-  `marca` varchar(100) NOT NULL,
-  `modelo` mediumtext NOT NULL,
-  `codigo` varchar(100) NOT NULL,
-  `capacidad` varchar(100) NOT NULL,
-  `clasificacion` varchar(100) NOT NULL,
-  `estado` varchar(100) NOT NULL,
-  `propietario` varchar(100) NOT NULL,
-  `adquisicion_date` date DEFAULT NULL,
-  `valorizacion` varchar(100) NOT NULL,
-  `ultima_inspeccion` date DEFAULT NULL,
-  `proxima_inspeccion` date DEFAULT NULL,
-  `inspeccion_procedimiento` mediumtext NOT NULL,
-  `inspeccion_periodicidad` varchar(100) NOT NULL,
-  `ultima_mantencion` date DEFAULT NULL,
-  `proxima_mantencion` date DEFAULT NULL,
-  `mantencion_procedimiento` mediumtext NOT NULL,
-  `mantencion_periodicidad` varchar(100) NOT NULL,
-  `creada` date DEFAULT NULL,
-  `id_media_header` int(11) NOT NULL,
-  `id_usuarios_control` int(11) NOT NULL DEFAULT 0,
-  `ubicacion` varchar(100) NOT NULL,
-  `id_clientes_ubicacion` int(11) NOT NULL,
-  `clase` varchar(255) NOT NULL,
-  `linea_productiva` enum('alcoholica','analcoholica','general') DEFAULT 'general',
-  `id_batches` int(11) NOT NULL DEFAULT 0,
-  `litraje` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `alertas`
 --
 
@@ -87,315 +34,6 @@ CREATE TABLE `alertas` (
   `estado` varchar(20) NOT NULL,
   `id_usuarios` int(11) NOT NULL,
   `usuarios_nivel` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `barriles`
---
-
-CREATE TABLE `barriles` (
-  `id` int(11) NOT NULL,
-  `tipo_barril` varchar(30) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `estado` varchar(50) NOT NULL,
-  `codigo` varchar(30) NOT NULL,
-  `id_clientes` int(11) NOT NULL,
-  `id_batches` int(11) NOT NULL DEFAULT 0,
-  `clasificacion` varchar(100) NOT NULL,
-  `litraje` int(11) NOT NULL DEFAULT 0,
-  `litros_cargados` int(11) NOT NULL DEFAULT 0,
-  `fecha_llenado` datetime DEFAULT NULL,
-  `id_activos` int(11) NOT NULL DEFAULT 0,
-  `id_batches_activos` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `barriles_estados`
---
-
-CREATE TABLE `barriles_estados` (
-  `id` int(11) NOT NULL,
-  `id_barriles` int(11) NOT NULL,
-  `id_clientes` int(11) NOT NULL,
-  `inicio_date` datetime DEFAULT NULL,
-  `finalizacion_date` datetime DEFAULT NULL,
-  `tiempo_transcurrido` varchar(255) NOT NULL,
-  `estado` varchar(100) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `id_usuarios` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `barriles_reemplazos`
---
-
-CREATE TABLE `barriles_reemplazos` (
-  `id` int(11) NOT NULL,
-  `id_barriles_devuelto` int(11) NOT NULL,
-  `id_barriles_reemplazo` int(11) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `motivo` varchar(500) NOT NULL,
-  `id_entregas_productos` int(11) NOT NULL,
-  `id_entregas` int(11) NOT NULL,
-  `id_clientes` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `batches`
---
-
-CREATE TABLE `batches` (
-  `id` int(11) NOT NULL,
-  `batch_date` date DEFAULT NULL,
-  `batch_id_usuarios_cocinero` int(11) DEFAULT 0,
-  `id_recetas` int(11) DEFAULT 0,
-  `batch_nombre` varchar(255) NOT NULL,
-  `batch_litros` int(11) NOT NULL DEFAULT 0,
-  `licor_temperatura` decimal(5,2) DEFAULT 0.00,
-  `licor_ph` decimal(4,2) DEFAULT 0.00,
-  `licor_litros` decimal(10,2) DEFAULT 0.00,
-  `maceracion_hora_inicio` varchar(10) DEFAULT NULL,
-  `maceracion_temperatura` decimal(5,2) DEFAULT 0.00,
-  `maceracion_litros` decimal(10,2) DEFAULT 0.00,
-  `maceracion_ph` decimal(4,2) DEFAULT 0.00,
-  `maceracion_hora_finalizacion` varchar(10) DEFAULT NULL,
-  `lavado_de_granos_hora_inicio` varchar(10) DEFAULT NULL,
-  `lavado_de_granos_mosto` decimal(10,2) DEFAULT 0.00,
-  `lavado_de_granos_densidad` decimal(5,3) DEFAULT 0.000,
-  `lavado_de_granos_tipo_de_densidad` varchar(50) DEFAULT NULL,
-  `lavado_de_granos_hora_termino` varchar(10) DEFAULT NULL,
-  `coccion_ph_inicial` decimal(4,2) DEFAULT 0.00,
-  `coccion_ph_final` decimal(4,2) DEFAULT 0.00,
-  `coccion_recilar` decimal(10,2) DEFAULT 0.00,
-  `combustible_gas` decimal(10,2) DEFAULT 0.00,
-  `inoculacion_temperatura` decimal(5,2) DEFAULT 0.00,
-  `fermentacion_date` date DEFAULT NULL,
-  `fermentacion_hora_inicio` varchar(10) DEFAULT NULL,
-  `inoculacion_temperatura_inicio` decimal(5,2) DEFAULT 0.00,
-  `fermentacion_id_activos` text DEFAULT '0',
-  `fermentacion_temperatura` decimal(5,2) DEFAULT 0.00,
-  `fermentacion_hora_finalizacion` varchar(10) DEFAULT NULL,
-  `fermentacion_ph` decimal(4,2) DEFAULT 0.00,
-  `fermentacion_densidad` decimal(5,3) DEFAULT 0.000,
-  `fermentacion_tipo_de_densidad` varchar(50) DEFAULT NULL,
-  `fermentacion_finalizada` int(11) NOT NULL DEFAULT 0,
-  `fermentacion_finalizada_datetime` datetime DEFAULT NULL,
-  `traspaso_datetime` datetime DEFAULT NULL,
-  `maduracion_date` date DEFAULT NULL,
-  `maduracion_temperatura_inicio` decimal(5,2) DEFAULT 0.00,
-  `maduracion_hora_inicio` varchar(10) DEFAULT NULL,
-  `maduracion_temperatura_finalizacion` decimal(5,2) DEFAULT 0.00,
-  `maduracion_hora_finalizacion` varchar(10) DEFAULT NULL,
-  `datetime_finalizacion` datetime DEFAULT NULL,
-  `observaciones` text DEFAULT NULL,
-  `creada` timestamp NOT NULL DEFAULT current_timestamp(),
-  `etapa_seleccionada` varchar(30) NOT NULL DEFAULT 'batch',
-  `tipo` varchar(255) NOT NULL,
-  `finalizacion_date` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `batches_2`
---
-
-CREATE TABLE `batches_2` (
-  `id` int(11) NOT NULL,
-  `id_recetas` int(11) NOT NULL,
-  `fecha_inicio` date DEFAULT NULL,
-  `fecha_termino` date DEFAULT NULL,
-  `id_usuarios_ejecutor` int(11) NOT NULL,
-  `estado` varchar(100) NOT NULL,
-  `id_activos` int(11) NOT NULL,
-  `observaciones` mediumtext NOT NULL,
-  `creada` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `batches_activos`
---
-
-CREATE TABLE `batches_activos` (
-  `id` int(11) NOT NULL,
-  `id_batches` int(11) NOT NULL DEFAULT 0,
-  `id_activos` int(11) NOT NULL DEFAULT 0,
-  `estado` varchar(100) NOT NULL,
-  `litraje` int(11) NOT NULL DEFAULT 0,
-  `creada` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `batches_barriles`
---
-
-CREATE TABLE `batches_barriles` (
-  `id` int(11) NOT NULL,
-  `id_barriles` int(11) NOT NULL,
-  `id_batches` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `batches_cajas`
---
-
-CREATE TABLE `batches_cajas` (
-  `id` int(11) NOT NULL,
-  `id_batches` int(11) NOT NULL,
-  `cantidad` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `batches_de_envases`
---
-
-CREATE TABLE `batches_de_envases` (
-  `id` int(11) NOT NULL,
-  `tipo` varchar(20) NOT NULL DEFAULT 'Lata' COMMENT 'Tipo de envase: Lata, Botella',
-  `id_batches` int(11) NOT NULL DEFAULT 0 COMMENT 'Batch de cerveza origen',
-  `id_activos` int(11) NOT NULL DEFAULT 0 COMMENT 'Fermentador origen (si aplica)',
-  `id_barriles` int(11) NOT NULL DEFAULT 0 COMMENT 'Barril origen (si aplica)',
-  `id_batches_activos` int(11) NOT NULL DEFAULT 0 COMMENT 'BatchActivo origen (si aplica)',
-  `id_formatos_de_envases` int(11) NOT NULL COMMENT 'Formato de envase utilizado',
-  `id_recetas` int(11) NOT NULL DEFAULT 0 COMMENT 'Receta del batch',
-  `cantidad_de_envases` int(11) NOT NULL COMMENT 'Cantidad total de envases creados',
-  `volumen_origen_ml` int(11) NOT NULL DEFAULT 0 COMMENT 'Volumen disponible antes de enlatar (ml)',
-  `rendimiento_ml` int(11) NOT NULL DEFAULT 0 COMMENT 'Volumen efectivamente enlatado (ml)',
-  `merma_ml` int(11) NOT NULL DEFAULT 0 COMMENT 'Volumen perdido (origen - rendimiento)',
-  `id_usuarios` int(11) NOT NULL COMMENT 'Usuario que realizó el enlatado',
-  `estado` varchar(50) NOT NULL DEFAULT 'Cargado en planta' COMMENT 'Cargado en planta, Sin latas',
-  `creada` datetime NOT NULL DEFAULT current_timestamp(),
-  `actualizada` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `batches_enfriado`
---
-
-CREATE TABLE `batches_enfriado` (
-  `id` int(11) NOT NULL,
-  `date` date DEFAULT NULL,
-  `temperatura_inicio` int(11) NOT NULL DEFAULT 0,
-  `hora_inicio` varchar(10) NOT NULL,
-  `ph` int(11) NOT NULL DEFAULT 0,
-  `densidad` varchar(50) NOT NULL,
-  `ph_enfriado` int(11) NOT NULL DEFAULT 0,
-  `seq_index` int(11) NOT NULL DEFAULT 0,
-  `creada` datetime DEFAULT NULL,
-  `id_batches` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `batches_historial`
---
-
-CREATE TABLE `batches_historial` (
-  `id` int(11) NOT NULL,
-  `contenido` text NOT NULL,
-  `creada` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `batches_insumos`
---
-
-CREATE TABLE `batches_insumos` (
-  `id` int(11) NOT NULL,
-  `id_batches` int(11) NOT NULL,
-  `id_insumos` int(11) NOT NULL,
-  `cantidad` float NOT NULL,
-  `tipo` varchar(100) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `date` date NOT NULL DEFAULT current_timestamp(),
-  `etapa` varchar(100) NOT NULL,
-  `etapa_index` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `batches_lupulizacion`
---
-
-CREATE TABLE `batches_lupulizacion` (
-  `id` int(11) NOT NULL,
-  `tipo` varchar(100) NOT NULL,
-  `seq_index` int(11) NOT NULL DEFAULT 0,
-  `creada` datetime DEFAULT NULL,
-  `hora` varchar(5) NOT NULL,
-  `date` date DEFAULT NULL,
-  `id_batches` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `batches_traspasos`
---
-
-CREATE TABLE `batches_traspasos` (
-  `id` int(11) NOT NULL,
-  `id_batches` int(11) DEFAULT 0,
-  `cantidad` int(11) DEFAULT 0,
-  `merma_litros` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Litros perdidos durante el traspaso',
-  `id_fermentadores_inicio` int(11) DEFAULT 0,
-  `id_fermentadores_final` int(11) DEFAULT 0,
-  `creada` timestamp NOT NULL DEFAULT current_timestamp(),
-  `date` date DEFAULT NULL,
-  `hora` time NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `cajas`
---
-
-CREATE TABLE `cajas` (
-  `id` int(11) NOT NULL,
-  `id_productos` int(11) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `estado` varchar(50) NOT NULL,
-  `codigo` varchar(30) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `cajas_de_envases`
---
-
-CREATE TABLE `cajas_de_envases` (
-  `id` int(11) NOT NULL,
-  `codigo` varchar(50) NOT NULL COMMENT 'Código único de la caja (ej: CL-2025-0001)',
-  `id_productos` int(11) NOT NULL COMMENT 'Producto asociado',
-  `cantidad_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Cantidad de envases en la caja',
-  `id_usuarios` int(11) NOT NULL DEFAULT 0 COMMENT 'Usuario que creó la caja',
-  `estado` varchar(50) NOT NULL DEFAULT 'En planta' COMMENT 'En planta, En despacho, Entregada',
-  `creada` datetime NOT NULL DEFAULT current_timestamp(),
-  `actualizada` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -429,54 +67,6 @@ CREATE TABLE `clientes` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `clientes_productos_precios`
---
-
-CREATE TABLE `clientes_productos_precios` (
-  `id` int(11) NOT NULL,
-  `id_clientes` int(11) NOT NULL,
-  `id_productos` int(11) NOT NULL,
-  `precio` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `compras_de_insumos`
---
-
-CREATE TABLE `compras_de_insumos` (
-  `id` int(11) NOT NULL,
-  `id_usuarios` int(11) NOT NULL,
-  `date` date DEFAULT NULL,
-  `creada` datetime DEFAULT NULL,
-  `monto` int(11) NOT NULL,
-  `factura` varchar(100) NOT NULL,
-  `estado` varchar(30) NOT NULL,
-  `comentarios` varchar(500) NOT NULL,
-  `id_proveedores` int(11) NOT NULL,
-  `id_gastos` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `compras_de_insumos_insumos`
---
-
-CREATE TABLE `compras_de_insumos_insumos` (
-  `id` int(11) NOT NULL,
-  `id_compras_de_insumos` int(11) NOT NULL,
-  `monto` int(11) NOT NULL,
-  `id_insumos` int(11) NOT NULL,
-  `id_proveedores` int(11) NOT NULL,
-  `id_tipos_de_insumos` int(11) NOT NULL,
-  `cantidad` float NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `configuraciones`
 --
 
@@ -497,6 +87,13 @@ CREATE TABLE `configuraciones` (
   `rut_empresa` varchar(50) NOT NULL,
   `giro_empresa` varchar(300) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `configuraciones`
+--
+
+INSERT INTO `configuraciones` (`id`, `nombre_empresa`, `duracion_historial`, `duracion_notificaciones`, `id_media_header`, `login_color_fondo`, `login_color_texto`, `email_header`, `email_footer`, `email_empresa`, `telefono_empresa`, `direccion_empresa`, `representante_empresa`, `rut_empresa`, `giro_empresa`) VALUES
+(1, 'Cerveza Cocholgue', '1 MONTHS', '7 DAYS', 0, '#000000', '#bf1d1d', '<img alt=\"\" src=\"https://admin.cervezacocholgue.cl/media/images/278.jpg\" style=\"height:285px; width:300px\" />', 'Footer', 'contacto@cervezacocholgue.cl', '9999', 'Cocholgue 657', 'Rodrigo Arriagada', '77637907-7', 'CervecerÃ­a');
 
 -- --------------------------------------------------------
 
@@ -569,44 +166,6 @@ CREATE TABLE `conversaciones_internas_tags` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `despachos`
---
-
-CREATE TABLE `despachos` (
-  `id` int(11) NOT NULL,
-  `id_usuarios_repartidor` int(11) NOT NULL,
-  `id_clientes` int(11) NOT NULL DEFAULT 0 COMMENT 'Cliente destino del despacho',
-  `estado` varchar(30) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `id_pedidos` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `despachos_productos`
---
-
-CREATE TABLE `despachos_productos` (
-  `id` int(11) NOT NULL,
-  `tipo` varchar(50) NOT NULL,
-  `cantidad` varchar(50) NOT NULL,
-  `tipos_cerveza` varchar(50) NOT NULL,
-  `id_despachos` int(11) NOT NULL,
-  `codigo` varchar(70) NOT NULL,
-  `id_barriles` int(11) NOT NULL,
-  `estado` varchar(60) NOT NULL,
-  `id_productos` int(11) NOT NULL DEFAULT 0,
-  `id_cajas_de_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Caja de envases asociada (si tipo=CajaEnvases)',
-  `clasificacion` varchar(100) NOT NULL,
-  `id_pedidos` int(11) NOT NULL DEFAULT 0,
-  `id_pedidos_productos` int(11) NOT NULL DEFAULT 0,
-  `creada` datetime NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `documentos`
 --
 
@@ -625,109 +184,6 @@ CREATE TABLE `documentos` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `dte`
---
-
-CREATE TABLE `dte` (
-  `id` int(11) NOT NULL,
-  `folio` int(11) NOT NULL,
-  `emisor` int(11) NOT NULL,
-  `receptor` int(11) NOT NULL,
-  `dte` int(11) NOT NULL,
-  `certificacion` int(11) NOT NULL,
-  `tasa` int(11) NOT NULL,
-  `fecha` date DEFAULT NULL,
-  `neto` int(11) NOT NULL,
-  `iva` int(11) NOT NULL,
-  `total` int(11) NOT NULL,
-  `usuario` int(11) NOT NULL,
-  `track_id` int(11) NOT NULL,
-  `fecha_hora_creacion` datetime DEFAULT NULL,
-  `id_entregas` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `entidades`
---
-
-CREATE TABLE `entidades` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL,
-  `table_name` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `entregas`
---
-
-CREATE TABLE `entregas` (
-  `id` int(11) NOT NULL,
-  `id_usuarios_repartidor` int(11) NOT NULL,
-  `id_clientes` int(11) NOT NULL,
-  `tipo_de_entrega` varchar(50) NOT NULL,
-  `estado` varchar(30) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `monto` int(11) NOT NULL,
-  `factura` varchar(60) NOT NULL,
-  `fecha_vencimiento` date DEFAULT NULL,
-  `abonado` int(11) NOT NULL DEFAULT 0,
-  `datetime_abonado` datetime DEFAULT NULL,
-  `rand_int` int(11) NOT NULL,
-  `receptor_nombre` varchar(100) NOT NULL,
-  `id_usuarios_vendedor` int(11) NOT NULL DEFAULT 0,
-  `observaciones` mediumtext NOT NULL,
-  `id_despachos` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `entregas_productos`
---
-
-CREATE TABLE `entregas_productos` (
-  `id` int(11) NOT NULL,
-  `tipo` varchar(50) NOT NULL,
-  `cantidad` varchar(50) NOT NULL,
-  `tipos_cerveza` varchar(50) NOT NULL,
-  `id_entregas` int(11) NOT NULL,
-  `codigo` varchar(70) NOT NULL,
-  `monto` int(11) NOT NULL,
-  `id_barriles` int(11) NOT NULL,
-  `id_cajas_de_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Caja de envases entregada',
-  `QtyItem` int(11) NOT NULL DEFAULT 1,
-  `id_productos` int(11) NOT NULL DEFAULT 0,
-  `id_pedidos_productos` int(11) NOT NULL DEFAULT 0,
-  `id_despachos_productos` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `envases`
---
-
-CREATE TABLE `envases` (
-  `id` int(11) NOT NULL,
-  `id_formatos_de_envases` int(11) NOT NULL COMMENT 'Formato del envase',
-  `volumen_ml` int(11) NOT NULL COMMENT 'Volumen de la lata en ml',
-  `id_batches_de_envases` int(11) NOT NULL COMMENT 'Batch de envases al que pertenece',
-  `id_batches` int(11) NOT NULL DEFAULT 0 COMMENT 'Batch de cerveza origen',
-  `id_barriles` int(11) NOT NULL DEFAULT 0 COMMENT 'Barril origen (si aplica)',
-  `id_activos` int(11) NOT NULL DEFAULT 0 COMMENT 'Fermentador origen (si aplica)',
-  `id_cajas_de_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Caja a la que pertenece (0 si no está en caja)',
-  `estado` varchar(50) NOT NULL DEFAULT 'Enlatada' COMMENT 'Enlatada, En caja en planta, En despacho, Entregada',
-  `creada` datetime NOT NULL DEFAULT current_timestamp(),
-  `actualizada` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `errores`
 --
 
@@ -735,49 +191,6 @@ CREATE TABLE `errores` (
   `id` int(11) NOT NULL,
   `descripcion` mediumtext NOT NULL,
   `url` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `fermentadores`
---
-
-CREATE TABLE `fermentadores` (
-  `id` int(11) NOT NULL,
-  `tipo` varchar(100) NOT NULL,
-  `codigo` varchar(100) NOT NULL,
-  `id_batches` int(11) NOT NULL DEFAULT 0,
-  `clasificacion` varchar(100) NOT NULL,
-  `activo` int(11) NOT NULL DEFAULT 1,
-  `creada` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `formatos`
---
-
-CREATE TABLE `formatos` (
-  `id` int(11) NOT NULL,
-  `nombre` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `formatos_de_envases`
---
-
-CREATE TABLE `formatos_de_envases` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL COMMENT 'Nombre descriptivo (ej: Lata 350ml)',
-  `tipo` varchar(20) NOT NULL DEFAULT 'Lata' COMMENT 'Tipo de envase: Lata, Botella',
-  `volumen_ml` int(11) NOT NULL COMMENT 'Volumen en mililitros',
-  `estado` varchar(50) NOT NULL DEFAULT 'activo',
-  `creada` datetime NOT NULL DEFAULT current_timestamp(),
-  `actualizada` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -803,53 +216,6 @@ CREATE TABLE `gastos` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `gastos_fijos`
---
-
-CREATE TABLE `gastos_fijos` (
-  `id` int(11) NOT NULL,
-  `tipo_de_gasto` varchar(300) NOT NULL,
-  `item` varchar(300) NOT NULL,
-  `comentarios` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `gastos_fijos_mes`
---
-
-CREATE TABLE `gastos_fijos_mes` (
-  `id` int(11) NOT NULL,
-  `id_gastos_fijos` int(11) NOT NULL DEFAULT 0,
-  `mes` int(11) NOT NULL DEFAULT 0,
-  `ano` int(11) NOT NULL DEFAULT 0,
-  `proyectado_neto` int(11) NOT NULL DEFAULT 0,
-  `proyectado_impuesto` int(11) NOT NULL DEFAULT 0,
-  `proyectado_bruto` int(11) NOT NULL DEFAULT 0,
-  `real_neto` int(11) NOT NULL DEFAULT 0,
-  `real_impuesto` int(11) NOT NULL DEFAULT 0,
-  `real_bruto` int(11) NOT NULL DEFAULT 0,
-  `creada` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `gastos_lineas_de_negocio`
---
-
-CREATE TABLE `gastos_lineas_de_negocio` (
-  `id` int(11) NOT NULL,
-  `id_gastos` int(11) NOT NULL DEFAULT 0,
-  `id_gastos_fijos` int(11) NOT NULL DEFAULT 0,
-  `id_lineas_de_negocio` int(11) NOT NULL DEFAULT 0,
-  `porcentaje` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `historial`
 --
 
@@ -858,24 +224,6 @@ CREATE TABLE `historial` (
   `accion` varchar(300) NOT NULL,
   `id_usuarios` int(11) NOT NULL,
   `creada` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `insumos`
---
-
-CREATE TABLE `insumos` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL,
-  `id_tipos_de_insumos` int(11) NOT NULL,
-  `comentarios` varchar(300) NOT NULL,
-  `unidad_de_medida` varchar(30) NOT NULL,
-  `despacho` float NOT NULL,
-  `bodega` float NOT NULL,
-  `last_modified` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `last_modified_mensaje` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -985,17 +333,6 @@ CREATE TABLE `kanban_tareas_usuarios` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `lineas_de_negocio`
---
-
-CREATE TABLE `lineas_de_negocio` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(300) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `locaciones`
 --
 
@@ -1023,26 +360,6 @@ CREATE TABLE `mailing` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `mantenciones`
---
-
-CREATE TABLE `mantenciones` (
-  `id` int(11) NOT NULL,
-  `date` date DEFAULT NULL,
-  `ejecutor` varchar(100) NOT NULL,
-  `observaciones` mediumtext NOT NULL,
-  `tarea` varchar(100) NOT NULL,
-  `id_activos` int(11) NOT NULL,
-  `hora_inicio` time NOT NULL,
-  `hora_termino` time NOT NULL,
-  `ubicacion` varchar(100) NOT NULL,
-  `id_clientes_ubicacion` int(11) NOT NULL DEFAULT 0,
-  `accesorios_renovados` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '[]'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `media`
 --
 
@@ -1052,18 +369,6 @@ CREATE TABLE `media` (
   `descripcion` mediumtext NOT NULL,
   `url` mediumtext NOT NULL,
   `tipo` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `media_activos`
---
-
-CREATE TABLE `media_activos` (
-  `id` int(11) NOT NULL,
-  `id_activos` int(11) NOT NULL,
-  `id_media` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1081,18 +386,6 @@ CREATE TABLE `media_configuraciones` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `media_documentos`
---
-
-CREATE TABLE `media_documentos` (
-  `id` int(11) NOT NULL,
-  `id_media` int(11) NOT NULL,
-  `id_documentos` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `media_gastos`
 --
 
@@ -1100,18 +393,6 @@ CREATE TABLE `media_gastos` (
   `id` int(11) NOT NULL,
   `id_media` int(11) NOT NULL,
   `id_gastos` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `media_gastos_fijos_mes`
---
-
-CREATE TABLE `media_gastos_fijos_mes` (
-  `id` int(11) NOT NULL,
-  `id_media` int(11) NOT NULL DEFAULT 0,
-  `id_gastos_fijos_mes` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1129,18 +410,6 @@ CREATE TABLE `media_kanban_tareas` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `media_mantenciones`
---
-
-CREATE TABLE `media_mantenciones` (
-  `id` int(11) NOT NULL,
-  `id_media` int(11) NOT NULL,
-  `id_mantenciones` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `menus`
 --
 
@@ -1150,6 +419,21 @@ CREATE TABLE `menus` (
   `icon` varchar(100) NOT NULL,
   `link` varchar(300) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `menus`
+--
+
+INSERT INTO `menus` (`id`, `nombre`, `icon`, `link`) VALUES
+(1, 'Administraci&oacute;n', 'globe', ''),
+(2, 'Central Cliente', 'folder', ''),
+(3, 'Central de Despacho', 'truck', ''),
+(4, 'Configuraci&oacute;n', 'trello', ''),
+(5, 'Inventario', 'database', ''),
+(6, 'Mantenimiento', 'check-square', ''),
+(7, 'Vendedor', 'folder', ''),
+(8, 'Planificaci&oacute;n', 'calendar', ''),
+(9, 'Desarrollo', 'monitor-smartphone', '');
 
 -- --------------------------------------------------------
 
@@ -1207,35 +491,6 @@ CREATE TABLE `pagos` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `pedidos`
---
-
-CREATE TABLE `pedidos` (
-  `id` int(11) NOT NULL,
-  `id_clientes` int(11) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `estado` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `pedidos_productos`
---
-
-CREATE TABLE `pedidos_productos` (
-  `id` int(11) NOT NULL,
-  `tipo` varchar(50) NOT NULL,
-  `cantidad` varchar(50) NOT NULL,
-  `tipos_cerveza` varchar(50) NOT NULL,
-  `id_pedidos` int(11) NOT NULL,
-  `estado` varchar(50) NOT NULL,
-  `id_productos` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `permisos`
 --
 
@@ -1246,19 +501,1219 @@ CREATE TABLE `permisos` (
   `acceso` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `precios`
+-- Dumping data for table `permisos`
 --
 
-CREATE TABLE `precios` (
-  `id` int(11) NOT NULL,
-  `id_clientes` int(11) NOT NULL,
-  `tipo_barril` varchar(30) NOT NULL,
-  `tipo_cerveza` varchar(30) NOT NULL,
-  `precio` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+INSERT INTO `permisos` (`id`, `id_secciones`, `id_usuarios_niveles`, `acceso`) VALUES
+(142580, 3249, 10, 1),
+(142581, 3249, 7, 0),
+(142582, 3249, 5, 0),
+(142583, 3249, 1, 0),
+(142584, 3249, 2, 0),
+(142585, 3249, 6, 0),
+(142586, 3249, 9, 0),
+(142587, 3249, 8, 0),
+(142588, 3250, 10, 1),
+(142589, 3250, 7, 0),
+(142590, 3250, 5, 0),
+(142591, 3250, 1, 0),
+(142592, 3250, 2, 0),
+(142593, 3250, 6, 0),
+(142594, 3250, 9, 0),
+(142595, 3250, 8, 0),
+(142596, 3251, 10, 1),
+(142597, 3251, 7, 0),
+(142598, 3251, 5, 0),
+(142599, 3251, 1, 1),
+(142600, 3251, 2, 0),
+(142601, 3251, 6, 0),
+(142602, 3251, 9, 0),
+(142603, 3251, 8, 0),
+(142604, 3242, 10, 1),
+(142605, 3242, 7, 0),
+(142606, 3242, 5, 0),
+(142607, 3242, 1, 0),
+(142608, 3242, 2, 0),
+(142609, 3242, 6, 0),
+(142610, 3242, 9, 0),
+(142611, 3242, 8, 0),
+(142612, 3226, 10, 1),
+(142613, 3226, 7, 0),
+(142614, 3226, 5, 0),
+(142615, 3226, 1, 1),
+(142616, 3226, 2, 0),
+(142617, 3226, 6, 0),
+(142618, 3226, 9, 0),
+(142619, 3226, 8, 0),
+(142620, 3124, 10, 1),
+(142621, 3124, 7, 0),
+(142622, 3124, 5, 0),
+(142623, 3124, 1, 1),
+(142624, 3124, 2, 0),
+(142625, 3124, 6, 0),
+(142626, 3124, 9, 0),
+(142627, 3124, 8, 0),
+(142628, 3151, 10, 1),
+(142629, 3151, 7, 0),
+(142630, 3151, 5, 0),
+(142631, 3151, 1, 1),
+(142632, 3151, 2, 0),
+(142633, 3151, 6, 0),
+(142634, 3151, 9, 0),
+(142635, 3151, 8, 0),
+(142636, 3198, 10, 1),
+(142637, 3198, 7, 0),
+(142638, 3198, 5, 0),
+(142639, 3198, 1, 1),
+(142640, 3198, 2, 0),
+(142641, 3198, 6, 0),
+(142642, 3198, 9, 0),
+(142643, 3198, 8, 0),
+(142644, 3271, 10, 1),
+(142645, 3271, 7, 0),
+(142646, 3271, 5, 0),
+(142647, 3271, 1, 0),
+(142648, 3271, 2, 0),
+(142649, 3271, 6, 0),
+(142650, 3271, 9, 0),
+(142651, 3271, 8, 0),
+(142652, 3193, 10, 1),
+(142653, 3193, 7, 0),
+(142654, 3193, 5, 0),
+(142655, 3193, 1, 0),
+(142656, 3193, 2, 0),
+(142657, 3193, 6, 0),
+(142658, 3193, 9, 0),
+(142659, 3193, 8, 0),
+(142660, 3204, 10, 1),
+(142661, 3204, 7, 0),
+(142662, 3204, 5, 0),
+(142663, 3204, 1, 0),
+(142664, 3204, 2, 0),
+(142665, 3204, 6, 0),
+(142666, 3204, 9, 0),
+(142667, 3204, 8, 0),
+(142668, 3219, 10, 1),
+(142669, 3219, 7, 0),
+(142670, 3219, 5, 0),
+(142671, 3219, 1, 0),
+(142672, 3219, 2, 0),
+(142673, 3219, 6, 0),
+(142674, 3219, 9, 0),
+(142675, 3219, 8, 0),
+(142676, 3273, 10, 1),
+(142677, 3273, 7, 0),
+(142678, 3273, 5, 0),
+(142679, 3273, 1, 0),
+(142680, 3273, 2, 0),
+(142681, 3273, 6, 0),
+(142682, 3273, 9, 0),
+(142683, 3273, 8, 0),
+(142684, 3186, 10, 1),
+(142685, 3186, 7, 0),
+(142686, 3186, 5, 0),
+(142687, 3186, 1, 0),
+(142688, 3186, 2, 0),
+(142689, 3186, 6, 0),
+(142690, 3186, 9, 0),
+(142691, 3186, 8, 0),
+(142692, 3224, 10, 1),
+(142693, 3224, 7, 0),
+(142694, 3224, 5, 0),
+(142695, 3224, 1, 1),
+(142696, 3224, 2, 0),
+(142697, 3224, 6, 0),
+(142698, 3224, 9, 0),
+(142699, 3224, 8, 0),
+(142700, 3227, 10, 1),
+(142701, 3227, 7, 0),
+(142702, 3227, 5, 0),
+(142703, 3227, 1, 1),
+(142704, 3227, 2, 0),
+(142705, 3227, 6, 0),
+(142706, 3227, 9, 0),
+(142707, 3227, 8, 0),
+(142708, 3123, 10, 1),
+(142709, 3123, 7, 0),
+(142710, 3123, 5, 0),
+(142711, 3123, 1, 1),
+(142712, 3123, 2, 0),
+(142713, 3123, 6, 0),
+(142714, 3123, 9, 0),
+(142715, 3123, 8, 0),
+(142716, 3244, 10, 1),
+(142717, 3244, 7, 0),
+(142718, 3244, 5, 0),
+(142719, 3244, 1, 0),
+(142720, 3244, 2, 0),
+(142721, 3244, 6, 0),
+(142722, 3244, 9, 0),
+(142723, 3244, 8, 0),
+(142724, 3149, 10, 1),
+(142725, 3149, 7, 0),
+(142726, 3149, 5, 0),
+(142727, 3149, 1, 1),
+(142728, 3149, 2, 0),
+(142729, 3149, 6, 0),
+(142730, 3149, 9, 0),
+(142731, 3149, 8, 0),
+(142732, 3246, 10, 1),
+(142733, 3246, 7, 0),
+(142734, 3246, 5, 0),
+(142735, 3246, 1, 0),
+(142736, 3246, 2, 0),
+(142737, 3246, 6, 0),
+(142738, 3246, 9, 0),
+(142739, 3246, 8, 0),
+(142740, 3196, 10, 1),
+(142741, 3196, 7, 0),
+(142742, 3196, 5, 0),
+(142743, 3196, 1, 1),
+(142744, 3196, 2, 0),
+(142745, 3196, 6, 0),
+(142746, 3196, 9, 0),
+(142747, 3196, 8, 0),
+(142748, 3247, 10, 1),
+(142749, 3247, 7, 0),
+(142750, 3247, 5, 0),
+(142751, 3247, 1, 0),
+(142752, 3247, 2, 0),
+(142753, 3247, 6, 0),
+(142754, 3247, 9, 0),
+(142755, 3247, 8, 0),
+(142756, 3248, 10, 1),
+(142757, 3248, 7, 0),
+(142758, 3248, 5, 0),
+(142759, 3248, 1, 0),
+(142760, 3248, 2, 0),
+(142761, 3248, 6, 0),
+(142762, 3248, 9, 0),
+(142763, 3248, 8, 0),
+(142764, 3270, 10, 1),
+(142765, 3270, 7, 0),
+(142766, 3270, 5, 0),
+(142767, 3270, 1, 0),
+(142768, 3270, 2, 0),
+(142769, 3270, 6, 0),
+(142770, 3270, 9, 0),
+(142771, 3270, 8, 0),
+(142772, 3225, 10, 1),
+(142773, 3225, 7, 0),
+(142774, 3225, 5, 0),
+(142775, 3225, 1, 1),
+(142776, 3225, 2, 0),
+(142777, 3225, 6, 0),
+(142778, 3225, 9, 0),
+(142779, 3225, 8, 0),
+(142780, 3150, 10, 1),
+(142781, 3150, 7, 0),
+(142782, 3150, 5, 0),
+(142783, 3150, 1, 1),
+(142784, 3150, 2, 0),
+(142785, 3150, 6, 0),
+(142786, 3150, 9, 0),
+(142787, 3150, 8, 0),
+(142788, 3228, 10, 1),
+(142789, 3228, 7, 0),
+(142790, 3228, 5, 0),
+(142791, 3228, 1, 0),
+(142792, 3228, 2, 0),
+(142793, 3228, 6, 0),
+(142794, 3228, 9, 0),
+(142795, 3228, 8, 0),
+(142796, 3243, 10, 1),
+(142797, 3243, 7, 0),
+(142798, 3243, 5, 0),
+(142799, 3243, 1, 0),
+(142800, 3243, 2, 0),
+(142801, 3243, 6, 0),
+(142802, 3243, 9, 0),
+(142803, 3243, 8, 0),
+(142804, 3203, 10, 1),
+(142805, 3203, 7, 0),
+(142806, 3203, 5, 0),
+(142807, 3203, 1, 0),
+(142808, 3203, 2, 0),
+(142809, 3203, 6, 0),
+(142810, 3203, 9, 0),
+(142811, 3203, 8, 0),
+(142812, 3218, 10, 1),
+(142813, 3218, 7, 0),
+(142814, 3218, 5, 0),
+(142815, 3218, 1, 0),
+(142816, 3218, 2, 0),
+(142817, 3218, 6, 0),
+(142818, 3218, 9, 0),
+(142819, 3218, 8, 0),
+(142820, 3136, 10, 1),
+(142821, 3136, 7, 0),
+(142822, 3136, 5, 0),
+(142823, 3136, 1, 0),
+(142824, 3136, 2, 0),
+(142825, 3136, 6, 0),
+(142826, 3136, 9, 0),
+(142827, 3136, 8, 0),
+(142828, 3202, 10, 1),
+(142829, 3202, 7, 0),
+(142830, 3202, 5, 0),
+(142831, 3202, 1, 1),
+(142832, 3202, 2, 0),
+(142833, 3202, 6, 0),
+(142834, 3202, 9, 0),
+(142835, 3202, 8, 0),
+(142836, 3217, 10, 1),
+(142837, 3217, 7, 0),
+(142838, 3217, 5, 0),
+(142839, 3217, 1, 0),
+(142840, 3217, 2, 0),
+(142841, 3217, 6, 0),
+(142842, 3217, 9, 0),
+(142843, 3217, 8, 0),
+(142844, 3245, 10, 1),
+(142845, 3245, 7, 0),
+(142846, 3245, 5, 0),
+(142847, 3245, 1, 0),
+(142848, 3245, 2, 0),
+(142849, 3245, 6, 0),
+(142850, 3245, 9, 0),
+(142851, 3245, 8, 0),
+(142852, 3252, 10, 1),
+(142853, 3252, 7, 0),
+(142854, 3252, 5, 0),
+(142855, 3252, 1, 0),
+(142856, 3252, 2, 0),
+(142857, 3252, 6, 1),
+(142858, 3252, 9, 0),
+(142859, 3252, 8, 0),
+(142860, 3144, 10, 1),
+(142861, 3144, 7, 0),
+(142862, 3144, 5, 0),
+(142863, 3144, 1, 1),
+(142864, 3144, 2, 0),
+(142865, 3144, 6, 0),
+(142866, 3144, 9, 0),
+(142867, 3144, 8, 0),
+(142868, 3145, 10, 1),
+(142869, 3145, 7, 0),
+(142870, 3145, 5, 0),
+(142871, 3145, 1, 1),
+(142872, 3145, 2, 0),
+(142873, 3145, 6, 0),
+(142874, 3145, 9, 0),
+(142875, 3145, 8, 0),
+(142876, 3143, 10, 1),
+(142877, 3143, 7, 0),
+(142878, 3143, 5, 0),
+(142879, 3143, 1, 1),
+(142880, 3143, 2, 0),
+(142881, 3143, 6, 0),
+(142882, 3143, 9, 0),
+(142883, 3143, 8, 0),
+(142884, 3272, 10, 1),
+(142885, 3272, 7, 0),
+(142886, 3272, 5, 0),
+(142887, 3272, 1, 0),
+(142888, 3272, 2, 0),
+(142889, 3272, 6, 0),
+(142890, 3272, 9, 0),
+(142891, 3272, 8, 0),
+(142892, 3140, 10, 1),
+(142893, 3140, 7, 0),
+(142894, 3140, 5, 0),
+(142895, 3140, 1, 1),
+(142896, 3140, 2, 0),
+(142897, 3140, 6, 0),
+(142898, 3140, 9, 0),
+(142899, 3140, 8, 0),
+(142900, 3197, 10, 1),
+(142901, 3197, 7, 0),
+(142902, 3197, 5, 0),
+(142903, 3197, 1, 1),
+(142904, 3197, 2, 0),
+(142905, 3197, 6, 0),
+(142906, 3197, 9, 0),
+(142907, 3197, 8, 0),
+(142908, 3134, 10, 0),
+(142909, 3134, 7, 1),
+(142910, 3134, 5, 0),
+(142911, 3134, 1, 0),
+(142912, 3134, 2, 0),
+(142913, 3134, 6, 0),
+(142914, 3134, 9, 0),
+(142915, 3134, 8, 0),
+(142916, 3138, 10, 0),
+(142917, 3138, 7, 0),
+(142918, 3138, 5, 0),
+(142919, 3138, 1, 0),
+(142920, 3138, 2, 0),
+(142921, 3138, 6, 0),
+(142922, 3138, 9, 0),
+(142923, 3138, 8, 0),
+(142924, 3209, 10, 0),
+(142925, 3209, 7, 1),
+(142926, 3209, 5, 0),
+(142927, 3209, 1, 0),
+(142928, 3209, 2, 0),
+(142929, 3209, 6, 0),
+(142930, 3209, 9, 0),
+(142931, 3209, 8, 0),
+(142932, 3232, 10, 1),
+(142933, 3232, 7, 0),
+(142934, 3232, 5, 0),
+(142935, 3232, 1, 1),
+(142936, 3232, 2, 0),
+(142937, 3232, 6, 1),
+(142938, 3232, 9, 0),
+(142939, 3232, 8, 0),
+(142940, 3260, 10, 1),
+(142941, 3260, 7, 0),
+(142942, 3260, 5, 0),
+(142943, 3260, 1, 1),
+(142944, 3260, 2, 0),
+(142945, 3260, 6, 0),
+(142946, 3260, 9, 0),
+(142947, 3260, 8, 0),
+(142948, 3116, 10, 1),
+(142949, 3116, 7, 0),
+(142950, 3116, 5, 0),
+(142951, 3116, 1, 1),
+(142952, 3116, 2, 0),
+(142953, 3116, 6, 0),
+(142954, 3116, 9, 0),
+(142955, 3116, 8, 0),
+(142956, 3118, 10, 1),
+(142957, 3118, 7, 0),
+(142958, 3118, 5, 0),
+(142959, 3118, 1, 1),
+(142960, 3118, 2, 0),
+(142961, 3118, 6, 0),
+(142962, 3118, 9, 0),
+(142963, 3118, 8, 0),
+(142964, 3279, 10, 1),
+(142965, 3279, 7, 0),
+(142966, 3279, 5, 0),
+(142967, 3279, 1, 1),
+(142968, 3279, 2, 0),
+(142969, 3279, 6, 0),
+(142970, 3279, 9, 0),
+(142971, 3279, 8, 0),
+(142972, 3139, 10, 1),
+(142973, 3139, 7, 0),
+(142974, 3139, 5, 0),
+(142975, 3139, 1, 0),
+(142976, 3139, 2, 0),
+(142977, 3139, 6, 0),
+(142978, 3139, 9, 0),
+(142979, 3139, 8, 0),
+(142980, 3128, 10, 0),
+(142981, 3128, 7, 0),
+(142982, 3128, 5, 0),
+(142983, 3128, 1, 0),
+(142984, 3128, 2, 0),
+(142985, 3128, 6, 1),
+(142986, 3128, 9, 0),
+(142987, 3128, 8, 0),
+(142988, 3194, 10, 0),
+(142989, 3194, 7, 0),
+(142990, 3194, 5, 0),
+(142991, 3194, 1, 0),
+(142992, 3194, 2, 0),
+(142993, 3194, 6, 1),
+(142994, 3194, 9, 0),
+(142995, 3194, 8, 0),
+(142996, 3253, 10, 1),
+(142997, 3253, 7, 0),
+(142998, 3253, 5, 0),
+(142999, 3253, 1, 0),
+(143000, 3253, 2, 0),
+(143001, 3253, 6, 0),
+(143002, 3253, 9, 0),
+(143003, 3253, 8, 0),
+(143004, 3117, 10, 1),
+(143005, 3117, 7, 0),
+(143006, 3117, 5, 0),
+(143007, 3117, 1, 1),
+(143008, 3117, 2, 0),
+(143009, 3117, 6, 0),
+(143010, 3117, 9, 0),
+(143011, 3117, 8, 0),
+(143012, 3254, 10, 1),
+(143013, 3254, 7, 0),
+(143014, 3254, 5, 0),
+(143015, 3254, 1, 1),
+(143016, 3254, 2, 0),
+(143017, 3254, 6, 0),
+(143018, 3254, 9, 0),
+(143019, 3254, 8, 0),
+(143020, 3131, 10, 1),
+(143021, 3131, 7, 0),
+(143022, 3131, 5, 0),
+(143023, 3131, 1, 1),
+(143024, 3131, 2, 0),
+(143025, 3131, 6, 0),
+(143026, 3131, 9, 0),
+(143027, 3131, 8, 0),
+(143028, 3237, 10, 1),
+(143029, 3237, 7, 0),
+(143030, 3237, 5, 0),
+(143031, 3237, 1, 0),
+(143032, 3237, 2, 0),
+(143033, 3237, 6, 0),
+(143034, 3237, 9, 0),
+(143035, 3237, 8, 0),
+(143036, 3231, 10, 1),
+(143037, 3231, 7, 0),
+(143038, 3231, 5, 0),
+(143039, 3231, 1, 1),
+(143040, 3231, 2, 0),
+(143041, 3231, 6, 1),
+(143042, 3231, 9, 0),
+(143043, 3231, 8, 0),
+(143044, 3187, 10, 1),
+(143045, 3187, 7, 0),
+(143046, 3187, 5, 0),
+(143047, 3187, 1, 1),
+(143048, 3187, 2, 0),
+(143049, 3187, 6, 0),
+(143050, 3187, 9, 0),
+(143051, 3187, 8, 0),
+(143052, 3161, 10, 1),
+(143053, 3161, 7, 0),
+(143054, 3161, 5, 1),
+(143055, 3161, 1, 1),
+(143056, 3161, 2, 1),
+(143057, 3161, 6, 1),
+(143058, 3161, 9, 0),
+(143059, 3161, 8, 0),
+(143060, 3114, 10, 1),
+(143061, 3114, 7, 0),
+(143062, 3114, 5, 0),
+(143063, 3114, 1, 0),
+(143064, 3114, 2, 0),
+(143065, 3114, 6, 0),
+(143066, 3114, 9, 0),
+(143067, 3114, 8, 0),
+(143068, 3195, 10, 1),
+(143069, 3195, 7, 0),
+(143070, 3195, 5, 0),
+(143071, 3195, 1, 0),
+(143072, 3195, 2, 0),
+(143073, 3195, 6, 0),
+(143074, 3195, 9, 0),
+(143075, 3195, 8, 0),
+(143076, 3206, 10, 1),
+(143077, 3206, 7, 0),
+(143078, 3206, 5, 0),
+(143079, 3206, 1, 1),
+(143080, 3206, 2, 0),
+(143081, 3206, 6, 1),
+(143082, 3206, 9, 0),
+(143083, 3206, 8, 0),
+(143084, 3172, 10, 1),
+(143085, 3172, 7, 0),
+(143086, 3172, 5, 1),
+(143087, 3172, 1, 1),
+(143088, 3172, 2, 0),
+(143089, 3172, 6, 0),
+(143090, 3172, 9, 0),
+(143091, 3172, 8, 0),
+(143092, 3115, 10, 1),
+(143093, 3115, 7, 0),
+(143094, 3115, 5, 0),
+(143095, 3115, 1, 0),
+(143096, 3115, 2, 0),
+(143097, 3115, 6, 0),
+(143098, 3115, 9, 0),
+(143099, 3115, 8, 0),
+(143100, 3259, 10, 1),
+(143101, 3259, 7, 0),
+(143102, 3259, 5, 1),
+(143103, 3259, 1, 1),
+(143104, 3259, 2, 0),
+(143105, 3259, 6, 0),
+(143106, 3259, 9, 0),
+(143107, 3259, 8, 0),
+(143108, 3264, 10, 1),
+(143109, 3264, 7, 0),
+(143110, 3264, 5, 0),
+(143111, 3264, 1, 0),
+(143112, 3264, 2, 0),
+(143113, 3264, 6, 0),
+(143114, 3264, 9, 0),
+(143115, 3264, 8, 0),
+(143116, 3257, 10, 1),
+(143117, 3257, 7, 0),
+(143118, 3257, 5, 1),
+(143119, 3257, 1, 1),
+(143120, 3257, 2, 0),
+(143121, 3257, 6, 1),
+(143122, 3257, 9, 0),
+(143123, 3257, 8, 0),
+(143124, 3258, 10, 1),
+(143125, 3258, 7, 0),
+(143126, 3258, 5, 1),
+(143127, 3258, 1, 1),
+(143128, 3258, 2, 0),
+(143129, 3258, 6, 0),
+(143130, 3258, 9, 0),
+(143131, 3258, 8, 0),
+(143132, 3158, 10, 1),
+(143133, 3158, 7, 0),
+(143134, 3158, 5, 1),
+(143135, 3158, 1, 1),
+(143136, 3158, 2, 0),
+(143137, 3158, 6, 0),
+(143138, 3158, 9, 0),
+(143139, 3158, 8, 0),
+(143140, 3163, 10, 1),
+(143141, 3163, 7, 0),
+(143142, 3163, 5, 1),
+(143143, 3163, 1, 1),
+(143144, 3163, 2, 1),
+(143145, 3163, 6, 1),
+(143146, 3163, 9, 0),
+(143147, 3163, 8, 0),
+(143148, 3119, 10, 1),
+(143149, 3119, 7, 0),
+(143150, 3119, 5, 0),
+(143151, 3119, 1, 0),
+(143152, 3119, 2, 0),
+(143153, 3119, 6, 0),
+(143154, 3119, 9, 0),
+(143155, 3119, 8, 0),
+(143156, 3207, 10, 1),
+(143157, 3207, 7, 0),
+(143158, 3207, 5, 0),
+(143159, 3207, 1, 1),
+(143160, 3207, 2, 0),
+(143161, 3207, 6, 0),
+(143162, 3207, 9, 0),
+(143163, 3207, 8, 0),
+(143164, 3233, 10, 1),
+(143165, 3233, 7, 0),
+(143166, 3233, 5, 0),
+(143167, 3233, 1, 1),
+(143168, 3233, 2, 0),
+(143169, 3233, 6, 1),
+(143170, 3233, 9, 0),
+(143171, 3233, 8, 0),
+(143172, 3174, 10, 1),
+(143173, 3174, 7, 0),
+(143174, 3174, 5, 1),
+(143175, 3174, 1, 1),
+(143176, 3174, 2, 0),
+(143177, 3174, 6, 0),
+(143178, 3174, 9, 0),
+(143179, 3174, 8, 0),
+(143180, 3120, 10, 1),
+(143181, 3120, 7, 0),
+(143182, 3120, 5, 0),
+(143183, 3120, 1, 0),
+(143184, 3120, 2, 0),
+(143185, 3120, 6, 0),
+(143186, 3120, 9, 0),
+(143187, 3120, 8, 0),
+(143188, 3160, 10, 1),
+(143189, 3160, 7, 0),
+(143190, 3160, 5, 1),
+(143191, 3160, 1, 1),
+(143192, 3160, 2, 0),
+(143193, 3160, 6, 0),
+(143194, 3160, 9, 0),
+(143195, 3160, 8, 0),
+(143196, 3157, 10, 1),
+(143197, 3157, 7, 0),
+(143198, 3157, 5, 1),
+(143199, 3157, 1, 1),
+(143200, 3157, 2, 0),
+(143201, 3157, 6, 0),
+(143202, 3157, 9, 0),
+(143203, 3157, 8, 0),
+(143204, 3167, 10, 1),
+(143205, 3167, 7, 0),
+(143206, 3167, 5, 1),
+(143207, 3167, 1, 1),
+(143208, 3167, 2, 0),
+(143209, 3167, 6, 1),
+(143210, 3167, 9, 0),
+(143211, 3167, 8, 0),
+(143212, 3148, 10, 1),
+(143213, 3148, 7, 0),
+(143214, 3148, 5, 0),
+(143215, 3148, 1, 0),
+(143216, 3148, 2, 0),
+(143217, 3148, 6, 0),
+(143218, 3148, 9, 0),
+(143219, 3148, 8, 0),
+(143220, 3171, 10, 1),
+(143221, 3171, 7, 0),
+(143222, 3171, 5, 1),
+(143223, 3171, 1, 1),
+(143224, 3171, 2, 0),
+(143225, 3171, 6, 0),
+(143226, 3171, 9, 0),
+(143227, 3171, 8, 0),
+(143228, 3263, 10, 1),
+(143229, 3263, 7, 0),
+(143230, 3263, 5, 0),
+(143231, 3263, 1, 0),
+(143232, 3263, 2, 0),
+(143233, 3263, 6, 0),
+(143234, 3263, 9, 0),
+(143235, 3263, 8, 0),
+(143236, 3154, 10, 1),
+(143237, 3154, 7, 0),
+(143238, 3154, 5, 0),
+(143239, 3154, 1, 0),
+(143240, 3154, 2, 0),
+(143241, 3154, 6, 0),
+(143242, 3154, 9, 0),
+(143243, 3154, 8, 0),
+(143244, 3164, 10, 1),
+(143245, 3164, 7, 0),
+(143246, 3164, 5, 1),
+(143247, 3164, 1, 1),
+(143248, 3164, 2, 1),
+(143249, 3164, 6, 1),
+(143250, 3164, 9, 0),
+(143251, 3164, 8, 0),
+(143252, 3155, 10, 1),
+(143253, 3155, 7, 0),
+(143254, 3155, 5, 1),
+(143255, 3155, 1, 1),
+(143256, 3155, 2, 0),
+(143257, 3155, 6, 0),
+(143258, 3155, 9, 0),
+(143259, 3155, 8, 0),
+(143260, 3255, 10, 1),
+(143261, 3255, 7, 0),
+(143262, 3255, 5, 0),
+(143263, 3255, 1, 1),
+(143264, 3255, 2, 0),
+(143265, 3255, 6, 0),
+(143266, 3255, 9, 0),
+(143267, 3255, 8, 0),
+(143268, 3256, 10, 1),
+(143269, 3256, 7, 0),
+(143270, 3256, 5, 0),
+(143271, 3256, 1, 1),
+(143272, 3256, 2, 0),
+(143273, 3256, 6, 0),
+(143274, 3256, 9, 0),
+(143275, 3256, 8, 0),
+(143276, 3216, 10, 1),
+(143277, 3216, 7, 0),
+(143278, 3216, 5, 0),
+(143279, 3216, 1, 0),
+(143280, 3216, 2, 0),
+(143281, 3216, 6, 0),
+(143282, 3216, 9, 0),
+(143283, 3216, 8, 0),
+(143284, 3159, 10, 1),
+(143285, 3159, 7, 0),
+(143286, 3159, 5, 1),
+(143287, 3159, 1, 1),
+(143288, 3159, 2, 0),
+(143289, 3159, 6, 0),
+(143290, 3159, 9, 0),
+(143291, 3159, 8, 0),
+(143292, 3166, 10, 1),
+(143293, 3166, 7, 0),
+(143294, 3166, 5, 1),
+(143295, 3166, 1, 1),
+(143296, 3166, 2, 1),
+(143297, 3166, 6, 1),
+(143298, 3166, 9, 0),
+(143299, 3166, 8, 0),
+(143300, 3170, 10, 1),
+(143301, 3170, 7, 0),
+(143302, 3170, 5, 1),
+(143303, 3170, 1, 0),
+(143304, 3170, 2, 0),
+(143305, 3170, 6, 0),
+(143306, 3170, 9, 0),
+(143307, 3170, 8, 0),
+(143308, 3208, 10, 1),
+(143309, 3208, 7, 0),
+(143310, 3208, 5, 0),
+(143311, 3208, 1, 1),
+(143312, 3208, 2, 0),
+(143313, 3208, 6, 0),
+(143314, 3208, 9, 0),
+(143315, 3208, 8, 0),
+(143316, 3173, 10, 1),
+(143317, 3173, 7, 0),
+(143318, 3173, 5, 1),
+(143319, 3173, 1, 1),
+(143320, 3173, 2, 0),
+(143321, 3173, 6, 0),
+(143322, 3173, 9, 0),
+(143323, 3173, 8, 0),
+(143324, 3265, 10, 1),
+(143325, 3265, 7, 0),
+(143326, 3265, 5, 0),
+(143327, 3265, 1, 0),
+(143328, 3265, 2, 0),
+(143329, 3265, 6, 0),
+(143330, 3265, 9, 0),
+(143331, 3265, 8, 0),
+(143332, 3156, 10, 1),
+(143333, 3156, 7, 0),
+(143334, 3156, 5, 0),
+(143335, 3156, 1, 1),
+(143336, 3156, 2, 0),
+(143337, 3156, 6, 0),
+(143338, 3156, 9, 0),
+(143339, 3156, 8, 0),
+(143340, 3147, 10, 1),
+(143341, 3147, 7, 0),
+(143342, 3147, 5, 0),
+(143343, 3147, 1, 0),
+(143344, 3147, 2, 0),
+(143345, 3147, 6, 0),
+(143346, 3147, 9, 0),
+(143347, 3147, 8, 0),
+(143348, 3153, 10, 1),
+(143349, 3153, 7, 0),
+(143350, 3153, 5, 0),
+(143351, 3153, 1, 0),
+(143352, 3153, 2, 0),
+(143353, 3153, 6, 0),
+(143354, 3153, 9, 0),
+(143355, 3153, 8, 0),
+(143356, 3146, 10, 1),
+(143357, 3146, 7, 0),
+(143358, 3146, 5, 0),
+(143359, 3146, 1, 0),
+(143360, 3146, 2, 0),
+(143361, 3146, 6, 0),
+(143362, 3146, 9, 0),
+(143363, 3146, 8, 0),
+(143364, 3169, 10, 1),
+(143365, 3169, 7, 0),
+(143366, 3169, 5, 1),
+(143367, 3169, 1, 1),
+(143368, 3169, 2, 0),
+(143369, 3169, 6, 0),
+(143370, 3169, 9, 0),
+(143371, 3169, 8, 0),
+(143372, 3238, 10, 1),
+(143373, 3238, 7, 0),
+(143374, 3238, 5, 0),
+(143375, 3238, 1, 0),
+(143376, 3238, 2, 0),
+(143377, 3238, 6, 0),
+(143378, 3238, 9, 0),
+(143379, 3238, 8, 0),
+(143380, 3261, 10, 1),
+(143381, 3261, 7, 0),
+(143382, 3261, 5, 0),
+(143383, 3261, 1, 0),
+(143384, 3261, 2, 0),
+(143385, 3261, 6, 0),
+(143386, 3261, 9, 0),
+(143387, 3261, 8, 0),
+(143388, 3262, 10, 1),
+(143389, 3262, 7, 0),
+(143390, 3262, 5, 0),
+(143391, 3262, 1, 0),
+(143392, 3262, 2, 0),
+(143393, 3262, 6, 0),
+(143394, 3262, 9, 0),
+(143395, 3262, 8, 0),
+(143396, 3152, 10, 1),
+(143397, 3152, 7, 0),
+(143398, 3152, 5, 1),
+(143399, 3152, 1, 0),
+(143400, 3152, 2, 0),
+(143401, 3152, 6, 0),
+(143402, 3152, 9, 0),
+(143403, 3152, 8, 0),
+(143404, 3165, 10, 1),
+(143405, 3165, 7, 0),
+(143406, 3165, 5, 1),
+(143407, 3165, 1, 1),
+(143408, 3165, 2, 1),
+(143409, 3165, 6, 1),
+(143410, 3165, 9, 0),
+(143411, 3165, 8, 0),
+(143412, 3168, 10, 1),
+(143413, 3168, 7, 0),
+(143414, 3168, 5, 1),
+(143415, 3168, 1, 1),
+(143416, 3168, 2, 1),
+(143417, 3168, 6, 1),
+(143418, 3168, 9, 0),
+(143419, 3168, 8, 0),
+(143420, 3162, 10, 1),
+(143421, 3162, 7, 0),
+(143422, 3162, 5, 0),
+(143423, 3162, 1, 1),
+(143424, 3162, 2, 0),
+(143425, 3162, 6, 1),
+(143426, 3162, 9, 0),
+(143427, 3162, 8, 0),
+(143428, 3184, 10, 1),
+(143429, 3184, 7, 0),
+(143430, 3184, 5, 0),
+(143431, 3184, 1, 0),
+(143432, 3184, 2, 0),
+(143433, 3184, 6, 0),
+(143434, 3184, 9, 0),
+(143435, 3184, 8, 0),
+(143436, 3185, 10, 1),
+(143437, 3185, 7, 0),
+(143438, 3185, 5, 0),
+(143439, 3185, 1, 0),
+(143440, 3185, 2, 0),
+(143441, 3185, 6, 0),
+(143442, 3185, 9, 0),
+(143443, 3185, 8, 0),
+(143444, 3182, 10, 0),
+(143445, 3182, 7, 0),
+(143446, 3182, 5, 0),
+(143447, 3182, 1, 0),
+(143448, 3182, 2, 0),
+(143449, 3182, 6, 0),
+(143450, 3182, 9, 1),
+(143451, 3182, 8, 0),
+(143452, 3183, 10, 0),
+(143453, 3183, 7, 0),
+(143454, 3183, 5, 0),
+(143455, 3183, 1, 0),
+(143456, 3183, 2, 0),
+(143457, 3183, 6, 0),
+(143458, 3183, 9, 1),
+(143459, 3183, 8, 0),
+(143460, 3181, 10, 0),
+(143461, 3181, 7, 0),
+(143462, 3181, 5, 0),
+(143463, 3181, 1, 0),
+(143464, 3181, 2, 0),
+(143465, 3181, 6, 0),
+(143466, 3181, 9, 1),
+(143467, 3181, 8, 0),
+(143468, 3180, 10, 0),
+(143469, 3180, 7, 0),
+(143470, 3180, 5, 0),
+(143471, 3180, 1, 0),
+(143472, 3180, 2, 0),
+(143473, 3180, 6, 0),
+(143474, 3180, 9, 1),
+(143475, 3180, 8, 0),
+(143476, 3179, 10, 0),
+(143477, 3179, 7, 0),
+(143478, 3179, 5, 0),
+(143479, 3179, 1, 0),
+(143480, 3179, 2, 0),
+(143481, 3179, 6, 0),
+(143482, 3179, 9, 1),
+(143483, 3179, 8, 0),
+(143484, 3277, 10, 1),
+(143485, 3277, 7, 0),
+(143486, 3277, 5, 1),
+(143487, 3277, 1, 1),
+(143488, 3277, 2, 1),
+(143489, 3277, 6, 1),
+(143490, 3277, 9, 1),
+(143491, 3277, 8, 1),
+(143492, 3275, 10, 1),
+(143493, 3275, 7, 0),
+(143494, 3275, 5, 1),
+(143495, 3275, 1, 1),
+(143496, 3275, 2, 1),
+(143497, 3275, 6, 1),
+(143498, 3275, 9, 0),
+(143499, 3275, 8, 1),
+(143500, 3268, 10, 1),
+(143501, 3268, 7, 0),
+(143502, 3268, 5, 1),
+(143503, 3268, 1, 1),
+(143504, 3268, 2, 1),
+(143505, 3268, 6, 1),
+(143506, 3268, 9, 0),
+(143507, 3268, 8, 1),
+(143508, 3190, 10, 1),
+(143509, 3190, 7, 0),
+(143510, 3190, 5, 1),
+(143511, 3190, 1, 1),
+(143512, 3190, 2, 1),
+(143513, 3190, 6, 1),
+(143514, 3190, 9, 0),
+(143515, 3190, 8, 1),
+(143516, 3278, 10, 1),
+(143517, 3278, 7, 0),
+(143518, 3278, 5, 0),
+(143519, 3278, 1, 0),
+(143520, 3278, 2, 0),
+(143521, 3278, 6, 0),
+(143522, 3278, 9, 0),
+(143523, 3278, 8, 0),
+(143524, 3189, 10, 1),
+(143525, 3189, 7, 0),
+(143526, 3189, 5, 1),
+(143527, 3189, 1, 1),
+(143528, 3189, 2, 1),
+(143529, 3189, 6, 1),
+(143530, 3189, 9, 0),
+(143531, 3189, 8, 1),
+(143532, 3267, 10, 1),
+(143533, 3267, 7, 0),
+(143534, 3267, 5, 0),
+(143535, 3267, 1, 0),
+(143536, 3267, 2, 0),
+(143537, 3267, 6, 0),
+(143538, 3267, 9, 0),
+(143539, 3267, 8, 1),
+(143540, 3230, 10, 1),
+(143541, 3230, 7, 0),
+(143542, 3230, 5, 1),
+(143543, 3230, 1, 1),
+(143544, 3230, 2, 1),
+(143545, 3230, 6, 1),
+(143546, 3230, 9, 0),
+(143547, 3230, 8, 1),
+(143548, 3274, 10, 1),
+(143549, 3274, 7, 0),
+(143550, 3274, 5, 1),
+(143551, 3274, 1, 1),
+(143552, 3274, 2, 0),
+(143553, 3274, 6, 1),
+(143554, 3274, 9, 0),
+(143555, 3274, 8, 1),
+(143556, 3266, 10, 1),
+(143557, 3266, 7, 0),
+(143558, 3266, 5, 1),
+(143559, 3266, 1, 1),
+(143560, 3266, 2, 1),
+(143561, 3266, 6, 1),
+(143562, 3266, 9, 0),
+(143563, 3266, 8, 1),
+(143564, 3188, 10, 1),
+(143565, 3188, 7, 0),
+(143566, 3188, 5, 1),
+(143567, 3188, 1, 1),
+(143568, 3188, 2, 1),
+(143569, 3188, 6, 1),
+(143570, 3188, 9, 0),
+(143571, 3188, 8, 1),
+(143572, 3192, 10, 1),
+(143573, 3192, 7, 0),
+(143574, 3192, 5, 1),
+(143575, 3192, 1, 1),
+(143576, 3192, 2, 1),
+(143577, 3192, 6, 1),
+(143578, 3192, 9, 0),
+(143579, 3192, 8, 1),
+(143580, 3205, 10, 1),
+(143581, 3205, 7, 0),
+(143582, 3205, 5, 1),
+(143583, 3205, 1, 1),
+(143584, 3205, 2, 1),
+(143585, 3205, 6, 1),
+(143586, 3205, 9, 0),
+(143587, 3205, 8, 1),
+(143588, 3191, 10, 1),
+(143589, 3191, 7, 0),
+(143590, 3191, 5, 1),
+(143591, 3191, 1, 1),
+(143592, 3191, 2, 1),
+(143593, 3191, 6, 1),
+(143594, 3191, 9, 0),
+(143595, 3191, 8, 1),
+(143596, 3269, 10, 1),
+(143597, 3269, 7, 0),
+(143598, 3269, 5, 0),
+(143599, 3269, 1, 0),
+(143600, 3269, 2, 0),
+(143601, 3269, 6, 0),
+(143602, 3269, 9, 0),
+(143603, 3269, 8, 0),
+(143604, 3121, 10, 1),
+(143605, 3121, 7, 0),
+(143606, 3121, 5, 0),
+(143607, 3121, 1, 0),
+(143608, 3121, 2, 0),
+(143609, 3121, 6, 0),
+(143610, 3121, 9, 0),
+(143611, 3121, 8, 0),
+(143612, 3215, 10, 1),
+(143613, 3215, 7, 0),
+(143614, 3215, 5, 0),
+(143615, 3215, 1, 0),
+(143616, 3215, 2, 0),
+(143617, 3215, 6, 0),
+(143618, 3215, 9, 0),
+(143619, 3215, 8, 0),
+(143620, 3221, 10, 1),
+(143621, 3221, 7, 0),
+(143622, 3221, 5, 0),
+(143623, 3221, 1, 0),
+(143624, 3221, 2, 0),
+(143625, 3221, 6, 0),
+(143626, 3221, 9, 0),
+(143627, 3221, 8, 0),
+(143628, 3220, 10, 1),
+(143629, 3220, 7, 0),
+(143630, 3220, 5, 0),
+(143631, 3220, 1, 0),
+(143632, 3220, 2, 0),
+(143633, 3220, 6, 0),
+(143634, 3220, 9, 0),
+(143635, 3220, 8, 0),
+(143636, 3222, 10, 1),
+(143637, 3222, 7, 0),
+(143638, 3222, 5, 0),
+(143639, 3222, 1, 0),
+(143640, 3222, 2, 0),
+(143641, 3222, 6, 0),
+(143642, 3222, 9, 0),
+(143643, 3222, 8, 0),
+(143644, 3122, 10, 1),
+(143645, 3122, 7, 0),
+(143646, 3122, 5, 0),
+(143647, 3122, 1, 0),
+(143648, 3122, 2, 0),
+(143649, 3122, 6, 0),
+(143650, 3122, 9, 0),
+(143651, 3122, 8, 0),
+(143652, 3241, 10, 1),
+(143653, 3241, 7, 0),
+(143654, 3241, 5, 0),
+(143655, 3241, 1, 0),
+(143656, 3241, 2, 0),
+(143657, 3241, 6, 0),
+(143658, 3241, 9, 0),
+(143659, 3241, 8, 0),
+(143660, 3127, 10, 1),
+(143661, 3127, 7, 0),
+(143662, 3127, 5, 0),
+(143663, 3127, 1, 0),
+(143664, 3127, 2, 0),
+(143665, 3127, 6, 0),
+(143666, 3127, 9, 0),
+(143667, 3127, 8, 0),
+(143668, 3213, 10, 1),
+(143669, 3213, 7, 0),
+(143670, 3213, 5, 0),
+(143671, 3213, 1, 0),
+(143672, 3213, 2, 0),
+(143673, 3213, 6, 0),
+(143674, 3213, 9, 0),
+(143675, 3213, 8, 0),
+(143676, 3176, 10, 1),
+(143677, 3176, 7, 0),
+(143678, 3176, 5, 0),
+(143679, 3176, 1, 0),
+(143680, 3176, 2, 0),
+(143681, 3176, 6, 0),
+(143682, 3176, 9, 0),
+(143683, 3176, 8, 0),
+(143684, 3126, 10, 1),
+(143685, 3126, 7, 0),
+(143686, 3126, 5, 0),
+(143687, 3126, 1, 0),
+(143688, 3126, 2, 0),
+(143689, 3126, 6, 0),
+(143690, 3126, 9, 0),
+(143691, 3126, 8, 0),
+(143692, 3214, 10, 1),
+(143693, 3214, 7, 0),
+(143694, 3214, 5, 0),
+(143695, 3214, 1, 0),
+(143696, 3214, 2, 0),
+(143697, 3214, 6, 0),
+(143698, 3214, 9, 0),
+(143699, 3214, 8, 0),
+(143700, 3239, 10, 1),
+(143701, 3239, 7, 0),
+(143702, 3239, 5, 0),
+(143703, 3239, 1, 0),
+(143704, 3239, 2, 0),
+(143705, 3239, 6, 0),
+(143706, 3239, 9, 0),
+(143707, 3239, 8, 0),
+(143708, 3212, 10, 1),
+(143709, 3212, 7, 0),
+(143710, 3212, 5, 0),
+(143711, 3212, 1, 0),
+(143712, 3212, 2, 0),
+(143713, 3212, 6, 0),
+(143714, 3212, 9, 0),
+(143715, 3212, 8, 0),
+(143716, 3240, 10, 1),
+(143717, 3240, 7, 0),
+(143718, 3240, 5, 0),
+(143719, 3240, 1, 0),
+(143720, 3240, 2, 0),
+(143721, 3240, 6, 0),
+(143722, 3240, 9, 0),
+(143723, 3240, 8, 0),
+(143724, 3129, 10, 1),
+(143725, 3129, 7, 0),
+(143726, 3129, 5, 0),
+(143727, 3129, 1, 0),
+(143728, 3129, 2, 0),
+(143729, 3129, 6, 0),
+(143730, 3129, 9, 0),
+(143731, 3129, 8, 0),
+(143732, 3210, 10, 1),
+(143733, 3210, 7, 0),
+(143734, 3210, 5, 0),
+(143735, 3210, 1, 0),
+(143736, 3210, 2, 0),
+(143737, 3210, 6, 0),
+(143738, 3210, 9, 0),
+(143739, 3210, 8, 0),
+(143740, 3125, 10, 1),
+(143741, 3125, 7, 0),
+(143742, 3125, 5, 0),
+(143743, 3125, 1, 0),
+(143744, 3125, 2, 0),
+(143745, 3125, 6, 0),
+(143746, 3125, 9, 0),
+(143747, 3125, 8, 0),
+(143748, 3175, 10, 1),
+(143749, 3175, 7, 0),
+(143750, 3175, 5, 0),
+(143751, 3175, 1, 0),
+(143752, 3175, 2, 0),
+(143753, 3175, 6, 0),
+(143754, 3175, 9, 0),
+(143755, 3175, 8, 0),
+(143756, 3236, 10, 1),
+(143757, 3236, 7, 1),
+(143758, 3236, 5, 1),
+(143759, 3236, 1, 1),
+(143760, 3236, 2, 1),
+(143761, 3236, 6, 1),
+(143762, 3236, 9, 1),
+(143763, 3236, 8, 1),
+(143764, 3229, 10, 1),
+(143765, 3229, 7, 1),
+(143766, 3229, 5, 1),
+(143767, 3229, 1, 1),
+(143768, 3229, 2, 1),
+(143769, 3229, 6, 1),
+(143770, 3229, 9, 1),
+(143771, 3229, 8, 1),
+(143772, 3234, 10, 1),
+(143773, 3234, 7, 1),
+(143774, 3234, 5, 1),
+(143775, 3234, 1, 1),
+(143776, 3234, 2, 1),
+(143777, 3234, 6, 1),
+(143778, 3234, 9, 1),
+(143779, 3234, 8, 1),
+(143780, 3211, 10, 1),
+(143781, 3211, 7, 1),
+(143782, 3211, 5, 1),
+(143783, 3211, 1, 1),
+(143784, 3211, 2, 1),
+(143785, 3211, 6, 1),
+(143786, 3211, 9, 1),
+(143787, 3211, 8, 1);
 
 -- --------------------------------------------------------
 
@@ -1273,180 +1728,6 @@ CREATE TABLE `prevlinks` (
   `datetime` datetime DEFAULT NULL,
   `count` int(11) NOT NULL,
   `id_secciones` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `productos`
---
-
-CREATE TABLE `productos` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(300) NOT NULL,
-  `tipo` varchar(300) NOT NULL,
-  `id_recetas` int(11) NOT NULL DEFAULT 0,
-  `clasificacion` varchar(100) NOT NULL,
-  `cantidad` varchar(30) NOT NULL,
-  `monto` int(11) NOT NULL DEFAULT 0,
-  `codigo_de_barra` varchar(100) NOT NULL,
-  `id_formatos_de_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Formato de envase para este producto',
-  `cantidad_de_envases` int(11) NOT NULL DEFAULT 0 COMMENT 'Cantidad de envases por caja/pack',
-  `tipo_envase` varchar(20) NOT NULL DEFAULT 'Lata' COMMENT 'Tipo de envase: Lata, Botella',
-  `es_mixto` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1 = producto mixto que acepta multiples recetas (mismo formato)'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `productos_items`
---
-
-CREATE TABLE `productos_items` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(300) NOT NULL,
-  `impuesto` varchar(100) NOT NULL DEFAULT 'IVA',
-  `monto_bruto` int(11) NOT NULL DEFAULT 0,
-  `id_productos` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `proveedores`
---
-
-CREATE TABLE `proveedores` (
-  `id` int(11) NOT NULL,
-  `id_usuarios` int(11) NOT NULL,
-  `nombre` varchar(300) NOT NULL,
-  `email` varchar(200) NOT NULL,
-  `telefono` varchar(20) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `comentarios` varchar(300) NOT NULL,
-  `numero_cuenta` varchar(100) NOT NULL,
-  `rut_empresa` varchar(50) NOT NULL,
-  `ids_tipos_de_insumos` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `proyectos`
---
-
-CREATE TABLE `proyectos` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL,
-  `descripcion` varchar(500) NOT NULL,
-  `clasificacion` varchar(100) NOT NULL,
-  `estado` varchar(100) NOT NULL,
-  `date_inicio` date DEFAULT NULL,
-  `date_finalizacion` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `proyectos_gastos`
---
-
-CREATE TABLE `proyectos_gastos` (
-  `id` int(11) NOT NULL,
-  `id_proyectos` int(11) NOT NULL,
-  `id_gastos` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `proyectos_ingresos`
---
-
-CREATE TABLE `proyectos_ingresos` (
-  `id` int(11) NOT NULL,
-  `id_proyectos` int(11) NOT NULL,
-  `monto` int(11) NOT NULL,
-  `forma_de_pago` varchar(100) NOT NULL,
-  `impuestos` varchar(100) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `item` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `proyectos_productos`
---
-
-CREATE TABLE `proyectos_productos` (
-  `id` int(11) NOT NULL,
-  `id_proyectos` int(11) NOT NULL,
-  `id_relation` int(11) NOT NULL,
-  `id_productos` int(11) NOT NULL,
-  `monto` int(11) NOT NULL,
-  `formato` varchar(40) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `id_gastos` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `recetas`
---
-
-CREATE TABLE `recetas` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(300) NOT NULL,
-  `codigo` varchar(100) NOT NULL,
-  `clasificacion` varchar(100) NOT NULL,
-  `litros` float NOT NULL,
-  `observaciones` mediumtext NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `recetas_insumos`
---
-
-CREATE TABLE `recetas_insumos` (
-  `id` int(11) NOT NULL,
-  `id_recetas` int(11) NOT NULL,
-  `id_insumos` int(11) NOT NULL,
-  `cantidad` float NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `registro_asistencia`
---
-
-CREATE TABLE `registro_asistencia` (
-  `id` int(11) NOT NULL,
-  `id_usuarios` int(11) NOT NULL DEFAULT 0,
-  `date` date DEFAULT NULL,
-  `entrada` varchar(10) NOT NULL,
-  `salida` varchar(10) NOT NULL,
-  `creada` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `reportes_diarios`
---
-
-CREATE TABLE `reportes_diarios` (
-  `id` int(11) NOT NULL,
-  `creada` datetime DEFAULT NULL,
-  `json_reporte` text NOT NULL,
-  `json_discrepancias` text NOT NULL,
-  `id_usuarios` int(11) NOT NULL,
-  `date` date DEFAULT NULL,
-  `estado` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -1530,53 +1811,6 @@ CREATE TABLE `tareas_comentarios` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tipos_de_gastos`
---
-
-CREATE TABLE `tipos_de_gastos` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `tipos_de_insumos`
---
-
-CREATE TABLE `tipos_de_insumos` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL,
-  `comentarios` varchar(300) NOT NULL,
-  `visible` int(11) NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `tipos_de_notificaciones`
---
-
-CREATE TABLE `tipos_de_notificaciones` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(200) NOT NULL,
-  `texto` varchar(500) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `tipos_de_pago`
---
-
-CREATE TABLE `tipos_de_pago` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `transacciones`
 --
 
@@ -1621,6 +1855,67 @@ CREATE TABLE `usuarios` (
   `registro_asistencia` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `usuarios`
+--
+
+INSERT INTO `usuarios` (`id`, `nombre`, `apellido`, `telefono`, `email`, `password`, `fecha_creacion`, `nivel`, `verificacion`, `social_network`, `app_id`, `recuperacion`, `id_clientes`, `invitacion`, `estado`, `vendedor_meta_barriles`, `vendedor_meta_cajas`, `prevlink_direction`, `prevlink_count`, `id_secciones`, `registro_asistencia`) VALUES
+(6, 'Luis Herrera', '', '56945822328', 'luisherreradevaud@gmail.com', 'miG.nUqC71xBU', '2023-05-23', 'Administrador', '\'', '\'', '\'', 'mib.tsyXcRG.w', 0, '', 'Activo', 0, 0, 'in', 1, 3173, 1),
+(10, 'Luis Herrera', '', '56945822328', 'luis@super45.cl', 'miG.nUqC71xBU', '2023-05-23', 'Cliente', '\'', '\'', '\'', '', 26, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(22, 'Rodrigo Arriagada', '', '56969069616', 'rodriarriagadah@gmail.com', 'mihP0FshHCNLk', '2023-05-25', 'Administrador', '\'', '\'', '\'', '', 0, '', 'Activo', 0, 0, 'in', 0, 3116, 0),
+(42, 'Jennifer Novoa', '', '56962606571', 'jennnovoa01@gmail.com', 'miach6Z7fNTi2', '2023-06-01', 'Cliente', '\'', '\'', '\'', '', 28, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(43, 'Jandery Skybar', '', '956724647 ', 'Operaciones.skybaraventura@gmail.com', '', '2023-06-01', 'Cliente', '\'', '\'', '\'', '', 29, 'miDNFMF.Qz7rw', 'Activo', 0, 0, '0', 0, 0, 0),
+(44, 'Eliseo ', '', '963432931', 'pizzerialantica@gmail.com', '', '2023-06-01', 'Cliente', '\'', '\'', '\'', '', 30, 'mizHp01tvBBWE', 'Activo', 0, 0, '0', 0, 0, 0),
+(45, 'Emilio', '', '956688689', 'refugiorpp@gmail.com', 'miX4zouhmtT1o', '2023-06-01', 'Cliente', '\'', '\'', '\'', '', 31, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(46, 'Gonzalo', '', '56 9 7672 7883', 'crisanta.contacto@gmail.com', 'miELbfKPp0v7M', '2023-06-01', 'Cliente', '\'', '\'', '\'', '', 33, '', 'Activo', 0, 0, 'in', 0, 3209, 0),
+(47, 'Mauricio Castillo', '', '99716801', 'mauricio.castillocatalan@gmail.com', '', '2023-06-01', 'Cliente', '\'', '\'', '\'', '', 34, 'mitYSESZp02o6', 'Activo', 0, 0, '0', 0, 0, 0),
+(48, 'Pepo Estrada', '', '+5695772 8491', 'joseestradaoyarzun@gmail.com', '', '2023-06-01', 'Cliente', '\'', '\'', '\'', '', 35, 'mi8GVyX0avno.', 'Activo', 0, 0, '0', 0, 0, 0),
+(50, 'Violeta', '', '9999999', 'rest.puestadesolcocholgue@gmail.com', 'miLgg6l7cI0BM', '2023-06-01', 'Cliente', '\'', '\'', '\'', '', 36, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(51, 'Faro Cocholgue', '', '99999999', 'Elfarococholgue@gmail.com', '', '2023-06-01', 'Cliente', '\'', '\'', '\'', '', 50, 'mia3ZKTmI0o7U', 'Activo', 0, 0, '0', 0, 0, 0),
+(53, 'Nestor Paredes', '', '+56 9 9582 5564', 'nestorwalls@hotmail.com', 'mi5pbY8/6rlr.', '2023-06-01', 'Cliente', '\'', '\'', '\'', '', 22, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(54, 'Matias Herrera Vallejos', '', '972818216', 'matiashmecanico@gmail.com', 'mi8k4X8p5zVUc', '2023-06-01', 'Jefe de Planta', '\'', '\'', '\'', '', 0, '', 'Activo', 0, 0, 'in', 0, 3116, 0),
+(56, 'Manuel Gomez', '', '5692045 6246', 'Magomezs91@gmail.com', '', '2023-06-02', 'Cliente', '\'', '\'', '\'', '', 41, 'mi.Ne4Q/6bn02', 'Activo', 0, 0, '0', 0, 0, 0),
+(58, 'Alejandra ', '', '56944404912', 'alemalpaso130@gmail.com', 'miAek0g3XxTGg', '2023-06-08', 'Cliente', '', '', '', '', 42, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(59, 'Gustavo Marquez', '', '+56 9 5537 9455', 'Tavicho777@gmail.com', '', '2023-06-13', 'Cliente', '\'', '\'', '\'', '', 29, 'mi3xCBZfmjFIw', 'Activo', 0, 0, '0', 0, 0, 0),
+(62, 'Matias Diaz', '', '56995104691', 'antonio.-es@hotmail.es', 'mibRB7rLQpoR2', '2023-06-15', 'Cliente', '\'', '\'', '\'', '', 35, '', 'Activo', 0, 0, 'in', 0, 3209, 0),
+(63, 'Juan Pablo Germany', '', '88888888888', 'Jpgermanycaro@gmail.com', '', '2023-06-16', 'Cliente', '\'', '\'', '\'', '', 21, 'miNd/4ZxytOVg', 'Activo', 0, 0, '0', 0, 0, 0),
+(65, 'Kristoffer Gallegos', '', '56 9 5829 1838', 'Kgallegos@gmail.com', 'misfe5IH3pwEw', '2023-07-03', 'Cliente', '\'', '\'', '\'', '', 32, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(67, 'Miguel Parra', '', '5671951514', 'miguelparraopazo@gmail.com', 'miskbOg8YHHOs', '2023-07-12', 'Cliente', '\'', '\'', '\'', '', 27, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(69, 'Gabriel', '', '+56Â 9Â 3419Â 2', 'Abastecimiento@caminodelagua.cl', 'miDRLcbpz0Aq6', '2023-07-15', 'Cliente', '\'', '\'', '\'', 'miYz204mCSjbc', 45, '', 'Activo', 0, 0, 'in', 0, 3209, 0),
+(70, 'Nury', '', '+56Â 9Â 7549Â 3', 'Contacto@santatienda.cl', 'miaPudGXdtYCk', '2023-07-26', 'Cliente', '\'', '\'', '\'', '', 47, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(72, 'Sebastian', '', '998896757', 'Sebachavez@live.com', 'mi66KGzjk7loo', '2023-08-01', 'Repartidor', '\'', '\'', '\'', '', 0, '', 'Activo', 0, 0, 'in', 0, 3128, 0),
+(73, 'Felipe Santo bar', '', '56Â 9Â 4351Â 12', 'Santo.barchile@gmail.com', 'mi5fflpSVhwss', '2023-08-20', 'Cliente', '\'', '\'', '\'', '', 48, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(74, 'Felipe Santo bar', '', '56943511216', 'Felipemarin8.fm@gmail.com', 'miCSgEkVJIfGY', '2023-08-22', 'Cliente', '\'', '\'', '\'', '', 48, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(77, 'Marcos Marchetti', '', '+56 9 3007 6349', 'Marcosgiovanni.o.m@gmail.com', '', '2023-11-29', 'Cliente', '\'', '\'', '\'', '', 21, 'miM6lnJzARooQ', 'Activo', 0, 0, '0', 0, 0, 0),
+(79, 'Cesar Baeza', '', '+56998189192', 'cesarbaezac@gmail.com', 'miPd/wngZVC9Q', '2023-12-26', 'Jefe de Cocina', '\'', '\'', '\'', '', 0, '', 'Activo', 0, 0, 'in', 1, 3173, 0),
+(80, 'Luis Herrera Reparto', '', '99999999', 'premiumbananamusic@gmail.com', 'miG.nUqC71xBU', '2024-01-02', 'Cliente', '\'', '\'', '\'', '', 41, '', 'Activo', 100, 100, 'in', 0, 3209, 0),
+(82, 'Sofia Catalan', '', '5699410 8109', 'Hola.Arboleda@gmail.com', 'misjlh.cgX35o', '2024-01-16', 'Cliente', '\'', '\'', '\'', '', 52, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(85, 'Matias', '', '+56 9 7998 7727', 'chilcobarcultural@gmail.com', 'mirC4I4oiORno', '2024-01-30', 'Cliente', '\'', '\'', '\'', '', 53, '', 'Activo', 0, 0, 'in', 0, 3209, 0),
+(86, 'Luis Alfredo Burgos Vazquez', '', '+56 9 9935 3833', 'l.burvaz@gmail.com', 'mi38Mwf7IgZDQ', '2024-02-01', 'Cliente', '\'', '\'', '\'', '', 56, '', 'Activo', 0, 0, '0', 0, 0, 0),
+(87, 'Melina Denisse Moreno SÃ¡nchez', '', 'â€ª+56Â 9Â 9884', 'pizzalosalamosbiobio@gmail.com', 'mi1rCYygfb5pc', '2024-02-20', 'Cliente', '\'', '\'', '\'', '', 59, '', 'Activo', 0, 0, '8537', 0, 0, 0),
+(88, 'Raul Roa', '', '+56 9 6566 0899', 'fuentepenquistavl@gmail.com', 'mi7pvvww1H.Kg', '2024-06-24', 'Cliente', '\'', '\'', '\'', 'mifG8v.F1JLoc', 35, '', 'Activo', 0, 0, 'in', 0, 3209, 0),
+(90, 'Marcelo Baeza', '', '+56 9 8158 7561', 'marcelobaecont@gmail.com', 'mi/uySsULvMeo', '2025-01-07', 'Jefe de Planta', '\'', '\'', '\'', '', 0, '', 'Activo', 0, 0, 'in', 0, 3197, 0),
+(91, 'Marcelo Repartidor', '', '999999999', 'Marcelitchu@gmail.com', 'mi/uySsULvMeo', '2025-01-11', 'Repartidor', '\'', '\'', '\'', '', 0, '', 'Bloqueado', 0, 0, 'in', 0, 3128, 0),
+(92, 'Barbara aviles', '', '+56 9 9235 3620', 'barbaraviles@gmail.com', '', '2025-01-14', 'Cliente', '\'', '\'', '\'', '', 70, 'miQfqPoaMg9yA', 'Activo', 0, 0, 'in', 0, 0, 0),
+(93, 'Kari', '', '+56 9 7748 5337', 'alendomargastrobar@gmail.com', '', '2025-01-14', 'Cliente', '\'', '\'', '\'', '', 75, 'mi1oVGsMyYbUI', 'Activo', 0, 0, 'in', 0, 0, 0),
+(94, 'Angela', '', '+56 9 8727 5978', 'Araneda.cruzat@gmail.com', '', '2025-01-14', 'Cliente', '\'', '\'', '\'', '', 77, 'miJEuzr4sYrng', 'Activo', 0, 0, 'in', 0, 0, 0),
+(96, 'Felipe', '', '56995080443‬', 'Elavernobar.conce@gmail.com', 'mivk2tpEWz93c', '2025-01-30', 'Cliente', '\'', '\'', '\'', '', 64, '', 'Activo', 0, 0, 'in', 0, 3209, 0),
+(100, 'jorge sandoval', '', '+56 9 7942 3609', 'Jsandoval370@gmail.com', 'miAek0g3XxTGg', '2025-02-05', 'Cliente', '\'', '\'', '\'', '', 80, '', 'Activo', 0, 0, 'in', 0, 3209, 0),
+(102, 'Natalia Neira Pelen', '', '56963549569', 'Galeriaaura@gmail.com', '', '2025-03-06', 'Cliente', '\'', '\'', '\'', '', 83, 'miwit8/Ib.OnE', 'Activo', 0, 0, 'in', 0, 0, 0),
+(103, 'Kata Muñoz', '', '+56 9 5075 4163', 'Kata.aura2022@gmail.com', 'miQY9Ir7p50ZM', '2025-03-14', 'Cliente', '\'', '\'', '\'', '', 83, '', 'Activo', 0, 0, 'in', 0, 3209, 0),
+(104, 'Luis Herrera Reparto 2', '', '99999999', 'luisantonioherreradevaud@gmail.com', 'miG.nUqC71xBU', '2024-01-02', 'Repartidor', '\'', '\'', '\'', '', 35, '', 'Activo', 100, 100, 'in', 0, 3128, 0),
+(105, 'Juan Domingo de la Sotta', '', '+56 9 4902 9990', 'Dds@comercializadoralaobra.cl', 'miAek0g3XxTGg', '2025-05-07', 'Cliente', '\'', '\'', '\'', '', 86, '', 'Activo', 0, 0, 'in', 1, 3236, 0),
+(107, 'rodrigo pruebas', '', '+56 9 8158 7561', 'rodrigo@barril.cl', 'miAek0g3XxTGg', '2025-06-10', 'Cliente', '\'', '\'', '\'', '', 87, '', 'Activo', 0, 0, 'in', 0, 3209, 0),
+(108, 'Andrés Jara', '', '+56 9 7149 7175', 'ajara@empresasadm.com', 'miAek0g3XxTGg', '2025-06-10', 'Cliente', '\'', '\'', '\'', '', 90, '', 'Activo', 0, 0, 'in', 0, 3209, 0),
+(109, 'Edgardo Sepúlveda', '', '77693402-K', 'Lomoalemanbaquedano@gmail.com', 'miAek0g3XxTGg', '2025-06-11', 'Cliente', '', '', '', '', 92, '', 'Activo', 0, 0, 'in', 0, 0, 0),
+(110, 'Claudio Perez', '', '+56997012275', 'infoprismatico@gmail.com', 'mi4HjiZXEhJzc', '2025-08-12', 'Administrador', '\'', '\'', '\'', '', 0, '', 'Activo', 0, 0, 'in', 0, 3187, 0),
+(111, 'Edu', '', '+56 9 4865 1016', 'Casadesaludspa@gmail.com', 'miAek0g3XxTGg', '2025-08-19', 'Cliente', '', '', '', '', 21, '', 'Activo', 0, 0, 'in', 0, 0, 0),
+(112, 'Gabriel', '', '+56984150886', 'Administracion@rusti-co.cl', 'miAek0g3XxTGg', '2025-09-24', 'Cliente', '\'', '\'', '\'', '', 88, '', 'Activo', 0, 0, 'in', 0, 3209, 0),
+(113, 'Claudio Brito', '', '+56 9 9673 3327', 'claudiobritor@gmail.com', 'miAek0g3XxTGg', '2025-10-23', 'Jefe de Planta', '\'', '\'', '\'', '', 0, '', 'Activo', 0, 0, 'in', 0, 3224, 0),
+(114, 'Genaro Donoso', '', '12345678', 'genarodonoso@gmail.com', 'miAek0g3XxTGg', '2025-11-18', 'Administrador', NULL, NULL, NULL, NULL, 0, NULL, 'Activo', 0, 0, 'in', 0, 0, 0),
+(115, 'Rocio Guevara', '', '+56 9 5735 6340', 'roguevarapinto@gmail.com', 'mi78eK7mANgEI', '2025-11-18', 'Visita', '\'', '\'', '\'', '', 0, '', 'Activo', 0, 0, 'in', 1, 3266, 0),
+(116, 'ro', '', '+569 9075 6767', 'rodri@odio.cl', 'mihP0FshHCNLk', '2025-12-01', 'Cliente', NULL, NULL, NULL, NULL, 35, NULL, 'Activo', 0, 0, 'in', 0, 0, 0);
+
 -- --------------------------------------------------------
 
 --
@@ -1647,22 +1942,19 @@ CREATE TABLE `usuarios_niveles` (
   `creada` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `vendedores`
+-- Dumping data for table `usuarios_niveles`
 --
 
-CREATE TABLE `vendedores` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `telefono` varchar(100) NOT NULL,
-  `estado` varchar(30) NOT NULL,
-  `meta_barriles_mensuales` int(11) NOT NULL,
-  `meta_cajas_mensuales` int(11) NOT NULL,
-  `creada` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+INSERT INTO `usuarios_niveles` (`id`, `nombre`, `editable`, `comentarios`, `creada`) VALUES
+(1, 'Jefe de Planta', 0, '', '0000-00-00 00:00:00'),
+(2, 'Operario', 0, '', '0000-00-00 00:00:00'),
+(5, 'Jefe de Cocina', 0, '', '0000-00-00 00:00:00'),
+(6, 'Repartidor', 0, '', '0000-00-00 00:00:00'),
+(7, 'Cliente', 0, '', '0000-00-00 00:00:00'),
+(8, 'Visita', 0, '', '0000-00-00 00:00:00'),
+(9, 'Vendedor', 0, '', '0000-00-00 00:00:00'),
+(10, 'Administrador', 0, '', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -1681,153 +1973,15 @@ CREATE TABLE `visitas` (
 --
 
 --
--- Indexes for table `accesorios`
---
-ALTER TABLE `accesorios`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `activos`
---
-ALTER TABLE `activos`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_activos_linea_productiva` (`linea_productiva`);
-
---
 -- Indexes for table `alertas`
 --
 ALTER TABLE `alertas`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `barriles`
---
-ALTER TABLE `barriles`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_barriles_fecha_llenado` (`fecha_llenado`);
-
---
--- Indexes for table `barriles_estados`
---
-ALTER TABLE `barriles_estados`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `barriles_reemplazos`
---
-ALTER TABLE `barriles_reemplazos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `batches`
---
-ALTER TABLE `batches`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `batches_2`
---
-ALTER TABLE `batches_2`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `batches_activos`
---
-ALTER TABLE `batches_activos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `batches_barriles`
---
-ALTER TABLE `batches_barriles`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `batches_cajas`
---
-ALTER TABLE `batches_cajas`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `batches_de_envases`
---
-ALTER TABLE `batches_de_envases`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_id_batches` (`id_batches`),
-  ADD KEY `idx_id_activos` (`id_activos`),
-  ADD KEY `idx_id_barriles` (`id_barriles`),
-  ADD KEY `idx_id_formatos_de_latas` (`id_formatos_de_envases`),
-  ADD KEY `idx_estado` (`estado`),
-  ADD KEY `idx_id_recetas` (`id_recetas`),
-  ADD KEY `idx_tipo` (`tipo`);
-
---
--- Indexes for table `batches_enfriado`
---
-ALTER TABLE `batches_enfriado`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `batches_historial`
---
-ALTER TABLE `batches_historial`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `batches_insumos`
---
-ALTER TABLE `batches_insumos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `batches_lupulizacion`
---
-ALTER TABLE `batches_lupulizacion`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `batches_traspasos`
---
-ALTER TABLE `batches_traspasos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `cajas`
---
-ALTER TABLE `cajas`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `cajas_de_envases`
---
-ALTER TABLE `cajas_de_envases`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uk_codigo` (`codigo`),
-  ADD KEY `idx_id_productos` (`id_productos`),
-  ADD KEY `idx_estado` (`estado`);
-
---
 -- Indexes for table `clientes`
 --
 ALTER TABLE `clientes`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `clientes_productos_precios`
---
-ALTER TABLE `clientes_productos_precios`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `compras_de_insumos`
---
-ALTER TABLE `compras_de_insumos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `compras_de_insumos_insumos`
---
-ALTER TABLE `compras_de_insumos_insumos`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -1872,81 +2026,10 @@ ALTER TABLE `conversaciones_internas_tags`
   ADD KEY `idx_creado_por` (`id_creado_por`);
 
 --
--- Indexes for table `despachos`
---
-ALTER TABLE `despachos`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_id_clientes` (`id_clientes`);
-
---
--- Indexes for table `despachos_productos`
---
-ALTER TABLE `despachos_productos`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_id_cajas_de_envases` (`id_cajas_de_envases`);
-
---
 -- Indexes for table `documentos`
 --
 ALTER TABLE `documentos`
   ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `dte`
---
-ALTER TABLE `dte`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `entidades`
---
-ALTER TABLE `entidades`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `entregas`
---
-ALTER TABLE `entregas`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `entregas_productos`
---
-ALTER TABLE `entregas_productos`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_id_cajas_de_envases` (`id_cajas_de_envases`);
-
---
--- Indexes for table `envases`
---
-ALTER TABLE `envases`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_id_batches_de_latas` (`id_batches_de_envases`),
-  ADD KEY `idx_id_cajas_de_latas` (`id_cajas_de_envases`),
-  ADD KEY `idx_estado` (`estado`),
-  ADD KEY `idx_id_batches` (`id_batches`),
-  ADD KEY `idx_id_formatos_de_latas` (`id_formatos_de_envases`);
-
---
--- Indexes for table `fermentadores`
---
-ALTER TABLE `fermentadores`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `formatos`
---
-ALTER TABLE `formatos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `formatos_de_envases`
---
-ALTER TABLE `formatos_de_envases`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_estado` (`estado`),
-  ADD KEY `idx_volumen_ml` (`volumen_ml`),
-  ADD KEY `idx_tipo` (`tipo`);
 
 --
 -- Indexes for table `gastos`
@@ -1955,33 +2038,9 @@ ALTER TABLE `gastos`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `gastos_fijos`
---
-ALTER TABLE `gastos_fijos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `gastos_fijos_mes`
---
-ALTER TABLE `gastos_fijos_mes`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `gastos_lineas_de_negocio`
---
-ALTER TABLE `gastos_lineas_de_negocio`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `historial`
 --
 ALTER TABLE `historial`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `insumos`
---
-ALTER TABLE `insumos`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -2040,12 +2099,6 @@ ALTER TABLE `kanban_tareas_usuarios`
   ADD KEY `id_usuarios` (`id_usuarios`);
 
 --
--- Indexes for table `lineas_de_negocio`
---
-ALTER TABLE `lineas_de_negocio`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `locaciones`
 --
 ALTER TABLE `locaciones`
@@ -2058,21 +2111,9 @@ ALTER TABLE `mailing`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `mantenciones`
---
-ALTER TABLE `mantenciones`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `media`
 --
 ALTER TABLE `media`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `media_activos`
---
-ALTER TABLE `media_activos`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -2082,21 +2123,9 @@ ALTER TABLE `media_configuraciones`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `media_documentos`
---
-ALTER TABLE `media_documentos`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `media_gastos`
 --
 ALTER TABLE `media_gastos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `media_gastos_fijos_mes`
---
-ALTER TABLE `media_gastos_fijos_mes`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -2106,12 +2135,6 @@ ALTER TABLE `media_kanban_tareas`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_media` (`id_media`),
   ADD KEY `id_kanban_tareas` (`id_kanban_tareas`);
-
---
--- Indexes for table `media_mantenciones`
---
-ALTER TABLE `media_mantenciones`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `menus`
@@ -2138,18 +2161,6 @@ ALTER TABLE `pagos`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `pedidos`
---
-ALTER TABLE `pedidos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `pedidos_productos`
---
-ALTER TABLE `pedidos_productos`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `permisos`
 --
 ALTER TABLE `permisos`
@@ -2159,86 +2170,11 @@ ALTER TABLE `permisos`
   ADD KEY `acceso` (`acceso`);
 
 --
--- Indexes for table `precios`
---
-ALTER TABLE `precios`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `prevlinks`
 --
 ALTER TABLE `prevlinks`
   ADD PRIMARY KEY (`id`),
   ADD KEY `prev` (`count`);
-
---
--- Indexes for table `productos`
---
-ALTER TABLE `productos`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_id_formatos_de_latas` (`id_formatos_de_envases`),
-  ADD KEY `idx_tipo_envase` (`tipo_envase`),
-  ADD KEY `idx_es_mixto` (`es_mixto`);
-
---
--- Indexes for table `productos_items`
---
-ALTER TABLE `productos_items`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `proveedores`
---
-ALTER TABLE `proveedores`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `proyectos`
---
-ALTER TABLE `proyectos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `proyectos_gastos`
---
-ALTER TABLE `proyectos_gastos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `proyectos_ingresos`
---
-ALTER TABLE `proyectos_ingresos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `proyectos_productos`
---
-ALTER TABLE `proyectos_productos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `recetas`
---
-ALTER TABLE `recetas`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `recetas_insumos`
---
-ALTER TABLE `recetas_insumos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `registro_asistencia`
---
-ALTER TABLE `registro_asistencia`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `reportes_diarios`
---
-ALTER TABLE `reportes_diarios`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `return_urls`
@@ -2271,30 +2207,6 @@ ALTER TABLE `tareas_comentarios`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `tipos_de_gastos`
---
-ALTER TABLE `tipos_de_gastos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tipos_de_insumos`
---
-ALTER TABLE `tipos_de_insumos`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tipos_de_notificaciones`
---
-ALTER TABLE `tipos_de_notificaciones`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `tipos_de_pago`
---
-ALTER TABLE `tipos_de_pago`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `transacciones`
 --
 ALTER TABLE `transacciones`
@@ -2319,12 +2231,6 @@ ALTER TABLE `usuarios_niveles`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `vendedores`
---
-ALTER TABLE `vendedores`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `visitas`
 --
 ALTER TABLE `visitas`
@@ -2335,117 +2241,9 @@ ALTER TABLE `visitas`
 --
 
 --
--- AUTO_INCREMENT for table `accesorios`
---
-ALTER TABLE `accesorios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `activos`
---
-ALTER TABLE `activos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `alertas`
 --
 ALTER TABLE `alertas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `barriles`
---
-ALTER TABLE `barriles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `barriles_estados`
---
-ALTER TABLE `barriles_estados`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `barriles_reemplazos`
---
-ALTER TABLE `barriles_reemplazos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `batches`
---
-ALTER TABLE `batches`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `batches_2`
---
-ALTER TABLE `batches_2`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `batches_activos`
---
-ALTER TABLE `batches_activos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `batches_barriles`
---
-ALTER TABLE `batches_barriles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `batches_cajas`
---
-ALTER TABLE `batches_cajas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `batches_de_envases`
---
-ALTER TABLE `batches_de_envases`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `batches_enfriado`
---
-ALTER TABLE `batches_enfriado`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `batches_historial`
---
-ALTER TABLE `batches_historial`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `batches_insumos`
---
-ALTER TABLE `batches_insumos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `batches_lupulizacion`
---
-ALTER TABLE `batches_lupulizacion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `batches_traspasos`
---
-ALTER TABLE `batches_traspasos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `cajas`
---
-ALTER TABLE `cajas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `cajas_de_envases`
---
-ALTER TABLE `cajas_de_envases`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -2455,28 +2253,10 @@ ALTER TABLE `clientes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `clientes_productos_precios`
---
-ALTER TABLE `clientes_productos_precios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `compras_de_insumos`
---
-ALTER TABLE `compras_de_insumos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `compras_de_insumos_insumos`
---
-ALTER TABLE `compras_de_insumos_insumos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `configuraciones`
 --
 ALTER TABLE `configuraciones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `conversaciones_internas`
@@ -2503,69 +2283,9 @@ ALTER TABLE `conversaciones_internas_tags`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `despachos`
---
-ALTER TABLE `despachos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `despachos_productos`
---
-ALTER TABLE `despachos_productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `documentos`
 --
 ALTER TABLE `documentos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `dte`
---
-ALTER TABLE `dte`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `entidades`
---
-ALTER TABLE `entidades`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `entregas`
---
-ALTER TABLE `entregas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `entregas_productos`
---
-ALTER TABLE `entregas_productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `envases`
---
-ALTER TABLE `envases`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `fermentadores`
---
-ALTER TABLE `fermentadores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `formatos`
---
-ALTER TABLE `formatos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `formatos_de_envases`
---
-ALTER TABLE `formatos_de_envases`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -2575,33 +2295,9 @@ ALTER TABLE `gastos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `gastos_fijos`
---
-ALTER TABLE `gastos_fijos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `gastos_fijos_mes`
---
-ALTER TABLE `gastos_fijos_mes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `gastos_lineas_de_negocio`
---
-ALTER TABLE `gastos_lineas_de_negocio`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `historial`
 --
 ALTER TABLE `historial`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `insumos`
---
-ALTER TABLE `insumos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -2647,12 +2343,6 @@ ALTER TABLE `kanban_tareas_usuarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `lineas_de_negocio`
---
-ALTER TABLE `lineas_de_negocio`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `locaciones`
 --
 ALTER TABLE `locaciones`
@@ -2665,21 +2355,9 @@ ALTER TABLE `mailing`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `mantenciones`
---
-ALTER TABLE `mantenciones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `media`
 --
 ALTER TABLE `media`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `media_activos`
---
-ALTER TABLE `media_activos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -2689,21 +2367,9 @@ ALTER TABLE `media_configuraciones`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `media_documentos`
---
-ALTER TABLE `media_documentos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `media_gastos`
 --
 ALTER TABLE `media_gastos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `media_gastos_fijos_mes`
---
-ALTER TABLE `media_gastos_fijos_mes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -2713,16 +2379,10 @@ ALTER TABLE `media_kanban_tareas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `media_mantenciones`
---
-ALTER TABLE `media_mantenciones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `menus`
 --
 ALTER TABLE `menus`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `notificaciones`
@@ -2743,99 +2403,15 @@ ALTER TABLE `pagos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `pedidos`
---
-ALTER TABLE `pedidos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `pedidos_productos`
---
-ALTER TABLE `pedidos_productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `permisos`
 --
 ALTER TABLE `permisos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `precios`
---
-ALTER TABLE `precios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=143788;
 
 --
 -- AUTO_INCREMENT for table `prevlinks`
 --
 ALTER TABLE `prevlinks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `productos`
---
-ALTER TABLE `productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `productos_items`
---
-ALTER TABLE `productos_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `proveedores`
---
-ALTER TABLE `proveedores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `proyectos`
---
-ALTER TABLE `proyectos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `proyectos_gastos`
---
-ALTER TABLE `proyectos_gastos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `proyectos_ingresos`
---
-ALTER TABLE `proyectos_ingresos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `proyectos_productos`
---
-ALTER TABLE `proyectos_productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `recetas`
---
-ALTER TABLE `recetas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `recetas_insumos`
---
-ALTER TABLE `recetas_insumos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `registro_asistencia`
---
-ALTER TABLE `registro_asistencia`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `reportes_diarios`
---
-ALTER TABLE `reportes_diarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -2869,30 +2445,6 @@ ALTER TABLE `tareas_comentarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `tipos_de_gastos`
---
-ALTER TABLE `tipos_de_gastos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tipos_de_insumos`
---
-ALTER TABLE `tipos_de_insumos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tipos_de_notificaciones`
---
-ALTER TABLE `tipos_de_notificaciones`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `tipos_de_pago`
---
-ALTER TABLE `tipos_de_pago`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `transacciones`
 --
 ALTER TABLE `transacciones`
@@ -2902,7 +2454,7 @@ ALTER TABLE `transacciones`
 -- AUTO_INCREMENT for table `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
 
 --
 -- AUTO_INCREMENT for table `usuarios_clientes`
@@ -2914,13 +2466,7 @@ ALTER TABLE `usuarios_clientes`
 -- AUTO_INCREMENT for table `usuarios_niveles`
 --
 ALTER TABLE `usuarios_niveles`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `vendedores`
---
-ALTER TABLE `vendedores`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `visitas`

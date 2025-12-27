@@ -18,14 +18,14 @@ if($debug || isset($_GET['debug'])) {
 date_default_timezone_set('America/Santiago');
 
 
-  $mysqli_user = "barrcl_cocholg"; 
-  $mysqli_pass = "rglgd8ZdWWiP";
-  $mysqli_db = "barrcl_cocholg";
+  $mysqli_user = "miedscl_prod"; 
+  $mysqli_pass = "ybcqjEwzueXQ";
+  $mysqli_db = "miedscl_prod";
 
 
 // Definir base_dir antes del autoloader
 if($_SERVER['HTTP_HOST']=="localhost") {
-  $base_dir = realpath($_SERVER["DOCUMENT_ROOT"])."/app.barril.cl";
+  $base_dir = realpath($_SERVER["DOCUMENT_ROOT"])."/app.mieds.cl";
   $mysqli_user = "barrcl_cocholg"; 
   $mysqli_pass = "rglgd8ZdWWiP";
   $mysqli_db = "barrcl_cocholg";
