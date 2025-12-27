@@ -125,11 +125,11 @@
           $this->init_user($info_usuario);
         }
         else {
-          header("Location: https://app.barril.cl/login.php?msg=1");
+          header("Location: https://app.mieds.cl/login.php?msg=1");
           die();
         }
       } else {
-        header("Location: https://app.barril.cl/login.php?msg=3");
+        header("Location: https://app.mieds.cl/login.php?msg=3");
         die();
       }
     }
@@ -272,7 +272,7 @@
       $prevlink->id_secciones = $this->id_secciones;
       $prevlink->count = $this->prevlink_count;
       $prevlink->datetime = date('Y-m-d H:i:s');
-      $prevlink->url = "https://app.barril.cl".$_SERVER['REQUEST_URI'];
+      $prevlink->url = "https://app.mieds.cl".$_SERVER['REQUEST_URI'];
       $prevlink->save();
 
 
@@ -303,7 +303,7 @@
           $prevlink->id_secciones = $this->id_secciones;
           $prevlink->count = $this->prevlink_count;
           $prevlink->datetime = date('Y-m-d H:i:s');
-          $prevlink->url = "https://app.barril.cl".$_SERVER['REQUEST_URI'];
+          $prevlink->url = "https://app.mieds.cl".$_SERVER['REQUEST_URI'];
           $prevlink->save();
         }
 

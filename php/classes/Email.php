@@ -103,11 +103,11 @@ ini_set('display_errors', 0);
         </head>
         <body>
           <center>
-            <img src='https://app.barril.cl/img/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/img/cocholgue.png' width='200'>
             <br /><br />
             Estimado(a) ".$usuario->nombre.":<br /><br />
             Has solicitado recuperar tu cuenta. Sigue el link que esta
-            <a href='https://app.barril.cl/recuperar.php?recuperacion=".$usuario->recuperacion."'>ac&aacute;</a>.
+            <a href='https://app.mieds.cl/recuperar.php?recuperacion=".$usuario->recuperacion."'>ac&aacute;</a>.
           </center>
         </body>
       </html>";
@@ -132,13 +132,13 @@ ini_set('display_errors', 0);
         <body>
 
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado Cliente:<br />
             Esperamos que est&eacute; bien. Nos complace invitarle a registrarse como usuario en nuestra
             WebApp de Cerveza Cocholgue. Aqu&iacute; le explicamos como hacerlo:<br/>
-            Ingrese al siguiente <a href='https://app.barril.cl/crear.php?h=".$usuario->invitacion."'>
+            Ingrese al siguiente <a href='https://app.mieds.cl/crear.php?h=".$usuario->invitacion."'>
             LINK</a>.<br/>
             Genere su clave personal e intransferible.<br />
             Acceda a la WebApp Cocholgue para ver su estado de cuenta, facturaci&oacute;n, gestionar pedidos y realizar pagos.<br />
@@ -178,7 +178,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado Cliente:<br /><br />
@@ -244,11 +244,11 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Nuestro cliente <b>".$cliente->nombre."</b> ha realizado un <b>pedido</b> por medio de nuestra plataforma,
-            dirijase a revisarlo en la <a href='https://app.barril.cl' target='_BLANK'>WebApp</a>.
+            dirijase a revisarlo en la <a href='https://app.mieds.cl' target='_BLANK'>WebApp</a>.
             <br /><br/>
             <table style='width: 100%;' border=1>";
               foreach($pedidos_productos as $pp) {
@@ -300,7 +300,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado Cliente:<br />
@@ -356,11 +356,11 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Nuestro cliente <b>".$cliente->nombre."</b> ha realizado una <b>sugerencia o reclamo</b> por medio de nuestra plataforma,
-            dirijase a revisarlo en la <a href='https://app.barril.cl' target='_BLANK'>WebApp</a>.
+            dirijase a revisarlo en la <a href='https://app.mieds.cl' target='_BLANK'>WebApp</a>.
             <br /><br/>
             <b>".$sugerencia->contenido."</b><br/><br/>
         </body>
@@ -398,7 +398,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado Cliente:<br /><br />
@@ -464,7 +464,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Se ha realizado una entrega al cliente <b>".$cliente->nombre."</b>:<br /><br />
@@ -518,7 +518,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado Cliente:<br />
@@ -590,11 +590,11 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Nuestro cliente <b>".$cliente->nombre."</b> ha realizado el siguiente <b>pago</b> por medio de nuestra plataforma,
-            dirijase a revisarlo en la <a href='https://app.barril.cl' target='_BLANK'>WebApp</a>.
+            dirijase a revisarlo en la <a href='https://app.mieds.cl' target='_BLANK'>WebApp</a>.
             <br /><br/>
             <table style='width:100%' border=1>
               <tr>
@@ -660,7 +660,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado cliente:<br/><br/>
@@ -742,7 +742,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado cliente:<br/><br/>
@@ -818,7 +818,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br/><br/>
@@ -826,7 +826,7 @@ ini_set('display_errors', 0);
             <br /><br/>
             Tarea: <b>".$tarea->tarea."</b>
             <br/><br/>
-            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.barril.cl/?s=tareas'>WebApp</a>
+            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.mieds.cl/?s=tareas'>WebApp</a>
         </body>
       </html>";
 
@@ -880,7 +880,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br/><br/>
@@ -892,7 +892,7 @@ ini_set('display_errors', 0);
       }
         
       $this->mensaje .=      "<br/><br/>
-            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.barril.cl/?s=tareas'>WebApp</a>
+            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.mieds.cl/?s=tareas'>WebApp</a>
         </body>
       </html>";
 
@@ -949,7 +949,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado Cliente:<br /><br />
@@ -1012,7 +1012,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Se ha realizado una entrega al cliente <b>".$cliente->nombre."</b>:<br /><br />
@@ -1064,7 +1064,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado Cliente:<br /><br />
@@ -1119,7 +1119,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br /><br />
@@ -1171,7 +1171,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br /><br />
@@ -1226,7 +1226,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br /><br />
@@ -1281,7 +1281,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado Cliente:<br />
@@ -1330,11 +1330,11 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Nuestro cliente <b>".$cliente->nombre."</b> ha realizado una <b>sugerencia o reclamo</b> por medio de nuestra plataforma,
-            dirijase a revisarlo en la <a href='https://app.barril.cl' target='_BLANK'>WebApp</a>.
+            dirijase a revisarlo en la <a href='https://app.mieds.cl' target='_BLANK'>WebApp</a>.
             <br /><br/>
             <b>".$sugerencia->contenido."</b><br/><br/>
         </body>
@@ -1370,7 +1370,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br /><br />
@@ -1424,7 +1424,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br /><br />
@@ -1475,7 +1475,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br /><br />
@@ -1536,7 +1536,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado Cliente:<br /><br />
@@ -1598,11 +1598,11 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Nuestro cliente <b>".$cliente->nombre."</b> ha realizado un <b>pedido</b> por medio de nuestra plataforma,
-            dirijase a revisarlo en la <a href='https://app.barril.cl' target='_BLANK'>WebApp</a>.
+            dirijase a revisarlo en la <a href='https://app.mieds.cl' target='_BLANK'>WebApp</a>.
             <br /><br/>
             <table style='width: 100%;' border=1>";
               foreach($pedidos_productos as $pp) {
@@ -1651,7 +1651,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado Cliente:<br />
@@ -1720,11 +1720,11 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Nuestro cliente <b>".$cliente->nombre."</b> ha realizado el siguiente <b>pago</b> por medio de nuestra plataforma,
-            dirijase a revisarlo en la <a href='https://app.barril.cl' target='_BLANK'>WebApp</a>.
+            dirijase a revisarlo en la <a href='https://app.mieds.cl' target='_BLANK'>WebApp</a>.
             <br /><br/>
             <table style='width:100%' border=1>
               <tr>
@@ -1781,7 +1781,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br/><br/>
@@ -1789,7 +1789,7 @@ ini_set('display_errors', 0);
             <br /><br/>
             Tarea: <b>".$obj->tarea."</b>
             <br/><br/>
-            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.barril.cl/?s=tareas'>WebApp</a>
+            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.mieds.cl/?s=tareas'>WebApp</a>
         </body>
       </html>";
 
@@ -1820,13 +1820,13 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br/><br/>
             No se dispone de insumos para la realizaci&oacute;n de algunas recetas. Por favor, revisar Inventario de Insumos.
             <br /><br/>
-            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.barril.cl/?s=tareas'>WebApp</a>
+            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.mieds.cl/?s=tareas'>WebApp</a>
         </body>
       </html>";
 
@@ -1857,7 +1857,7 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br/><br/>
@@ -1881,7 +1881,7 @@ ini_set('display_errors', 0);
                 </td>
               </tr>
             </table><br/><br/>
-            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.barril.cl/?s=tareas'>WebApp</a>
+            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.mieds.cl/?s=tareas'>WebApp</a>
         </body>
       </html>";
 
@@ -1915,13 +1915,13 @@ ini_set('display_errors', 0);
         </head>
         <body>
             <center>
-            <img src='https://app.barril.cl/img/cocholgue.png' width='200'>
+            <img src='https://app.mieds.cl/img/cocholgue.png' width='200'>
             </center>
             <br /><br />
             Estimado:<br/><br/>
             ".$usuario_emisor->nombre." ha realizado un nuevo comentario en Tarea #".$tarea->id.".
             <br/><br/>
-            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.barril.cl/?s=detalle-tareas&id=".$tarea->id."'>WebApp</a>
+            Para m&aacute;s detalles, dirijase a nuestra <a href='https://app.mieds.cl/?s=detalle-tareas&id=".$tarea->id."'>WebApp</a>
         </body>
       </html>";
 

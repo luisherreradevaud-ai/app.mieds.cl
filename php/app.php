@@ -531,6 +531,9 @@ function curl_get_file_contents($URL) {
 
 function createObjFromTableName($table_name,$id){
 
+  if($table_name=="atendedores") {
+    $obj = new Atendedor($id);
+  } else
   if($table_name=="clientes") {
     $obj = new Cliente($id);
   } else
