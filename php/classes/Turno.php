@@ -1,8 +1,8 @@
 <?php
 /**
- * Turno (Shift) Class
+ * Turno (Cierre de Turno) Class
  *
- * Main class for managing work shifts with cash counting,
+ * Main class for managing shift closings with cash counting,
  * workflow states, and related financial records.
  *
  * Workflow: Abierto → Cerrado (Admin) → Aprobado (Concesionario)
@@ -11,10 +11,7 @@ class Turno extends Base {
 
   // Basic info
   public $id = "";
-  public $id_atendedores = "";
   public $fecha = "";
-  public $hora_inicio = "";
-  public $hora_fin = "";
 
   // Cash counting - Bills (Billetes)
   public $billetes_20000 = 0;
@@ -81,10 +78,7 @@ class Turno extends Base {
    * Override save to calculate totals before saving
    */
   public function save() {
-    // Convertir strings vacíos a NULL para campos TIME/DATE/INT que no aceptan ''
-    if($this->hora_inicio === '') $this->hora_inicio = null;
-    if($this->hora_fin === '') $this->hora_fin = null;
-    if($this->id_atendedores === '' || $this->id_atendedores === '0') $this->id_atendedores = null;
+    // Convertir strings vacíos a NULL para campos INT que no aceptan ''
     if($this->cerrado_por === '') $this->cerrado_por = null;
     if($this->aprobado_por === '') $this->aprobado_por = null;
 
@@ -369,11 +363,26 @@ class Turno extends Base {
   }
 
   /**
-   * Get all Donaciones from Gastos Caja Chica
+   * Get all Donaciones for this shift
    */
   public function getDonaciones() {
     if($this->id == "") return array();
-    return TurnoGastoCajaChica::getAll("WHERE id_turnos='".$this->id."' AND tipo='Donación' AND estado!='eliminado' ORDER BY id ASC");
+    return TurnoDonacion::getAll("WHERE id_turnos='".$this->id."' AND estado!='eliminado' ORDER BY id ASC");
+  }
+
+  /**
+   * Add a Donacion to this shift
+   */
+  public function addDonacion($data) {
+    if($this->id == "") return false;
+
+    $donacion = new TurnoDonacion();
+    $donacion->id_turnos = $this->id;
+    $donacion->setProperties($data);
+    $donacion->save();
+
+    $this->recalculateTotalDonaciones();
+    return $donacion;
   }
 
   /**
@@ -388,6 +397,14 @@ class Turno extends Base {
     $this->total_donaciones = $total;
     $this->save();
     return $total;
+  }
+
+  /**
+   * Get all Comisiones for this shift
+   */
+  public function getComisiones() {
+    if($this->id == "") return array();
+    return TurnoComision::getAll("WHERE id_turnos='".$this->id."' AND estado!='eliminado' ORDER BY id ASC");
   }
 
   /**
@@ -423,12 +440,14 @@ class Turno extends Base {
 
     $gastos = $this->getGastosCajaChica();
     $this->total_gastos_caja_chica = 0;
-    $this->total_donaciones = 0;
     foreach($gastos as $g) {
       $this->total_gastos_caja_chica += floatval($g->monto);
-      if($g->tipo == 'Donación') {
-        $this->total_donaciones += floatval($g->monto);
-      }
+    }
+
+    $donaciones = $this->getDonaciones();
+    $this->total_donaciones = 0;
+    foreach($donaciones as $d) {
+      $this->total_donaciones += floatval($d->monto);
     }
   }
 
@@ -442,8 +461,6 @@ class Turno extends Base {
       'turno' => array(
         'id' => $this->id,
         'fecha' => $this->fecha,
-        'hora_inicio' => $this->hora_inicio,
-        'hora_fin' => $this->hora_fin,
         'estado' => $this->estado
       ),
       'efectivo' => $this->getCashBreakdown(),
@@ -461,7 +478,9 @@ class Turno extends Base {
         'anticipos' => $this->getAnticipos(),
         'facturas_credito' => $this->getFacturasCredito(),
         'ingresos_prosegur' => $this->getIngresosProsegur(),
-        'gastos_caja_chica' => $this->getGastosCajaChica()
+        'gastos_caja_chica' => $this->getGastosCajaChica(),
+        'donaciones' => $this->getDonaciones(),
+        'comisiones' => $this->getComisiones()
       )
     );
   }
@@ -583,28 +602,6 @@ class Turno extends Base {
   }
 
   // ==========================================
-  // ATTENDANT METHODS
-  // ==========================================
-
-  /**
-   * Get the attendant for this shift
-   */
-  public function getAtendedor() {
-    if($this->id_atendedores == "" || $this->id_atendedores == 0) {
-      return null;
-    }
-    return new Atendedor($this->id_atendedores);
-  }
-
-  /**
-   * Set attendant for this shift
-   */
-  public function setAtendedor($id_atendedor) {
-    $this->id_atendedores = $id_atendedor;
-    return $this;
-  }
-
-  // ==========================================
   // STATIC QUERY METHODS
   // ==========================================
 
@@ -612,21 +609,14 @@ class Turno extends Base {
    * Get shifts by date range
    */
   public static function getByDateRange($startDate, $endDate) {
-    return self::getAll("WHERE fecha >= '".$startDate."' AND fecha <= '".$endDate."' ORDER BY fecha DESC, hora_inicio DESC");
-  }
-
-  /**
-   * Get shifts by attendant
-   */
-  public static function getByAtendedor($id_atendedor) {
-    return self::getAll("WHERE id_atendedores='".$id_atendedor."' ORDER BY fecha DESC, hora_inicio DESC");
+    return self::getAll("WHERE fecha >= '".$startDate."' AND fecha <= '".$endDate."' ORDER BY fecha DESC");
   }
 
   /**
    * Get shifts by state
    */
   public static function getByEstado($estado) {
-    return self::getAll("WHERE estado='".$estado."' ORDER BY fecha DESC, hora_inicio DESC");
+    return self::getAll("WHERE estado='".$estado."' ORDER BY fecha DESC");
   }
 
   /**
@@ -704,14 +694,5 @@ class Turno extends Base {
   public function getFormattedDate() {
     if($this->fecha == "" || $this->fecha == "0000-00-00") return "";
     return date('d-m-Y', strtotime($this->fecha));
-  }
-
-  /**
-   * Get formatted time range
-   */
-  public function getTimeRange() {
-    $inicio = $this->hora_inicio ? substr($this->hora_inicio, 0, 5) : '--:--';
-    $fin = $this->hora_fin ? substr($this->hora_fin, 0, 5) : '--:--';
-    return $inicio . ' - ' . $fin;
   }
 }

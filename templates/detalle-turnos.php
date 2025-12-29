@@ -15,11 +15,15 @@ $usuario = $GLOBALS['usuario'];
 
 // Get related data
 $atendedores = Atendedor::getAll("WHERE estado='Activo' ORDER BY nombre_completo ASC");
+$clientes = Cliente::getAll("ORDER BY nombre ASC");
+$tipos_de_gasto = TipoDeGasto::getActivos();
 $faltantes = $obj->id ? $obj->getFaltantes() : array();
 $anticipos = $obj->id ? $obj->getAnticipos() : array();
 $facturas_credito = $obj->id ? $obj->getFacturasCredito() : array();
 $ingresos_prosegur = $obj->id ? $obj->getIngresosProsegur() : array();
 $gastos_caja_chica = $obj->id ? $obj->getGastosCajaChica() : array();
+$donaciones = $obj->id ? $obj->getDonaciones() : array();
+$comisiones = $obj->id ? $obj->getComisiones() : array();
 
 $isEditable = $obj->id == "" || $obj->canEdit();
 
@@ -40,9 +44,9 @@ $isEditable = $obj->id == "" || $obj->canEdit();
         if($obj->id=="") {
           print '<i class="fas fa-fw fa-plus"></i> Nuevo';
         } else {
-          print '<i class="fas fa-fw fa-clock"></i> Detalle';
+          print '<i class="fas fa-fw fa-cash-register"></i>';
         }
-        ?> Turno
+        ?> Cierre de Turno
         <?php if($obj->id != "") { ?>
           <span class="badge <?= $obj->getStateBadgeClass(); ?>">
             <i class="fas <?= $obj->getStateIcon(); ?>"></i> <?= $obj->estado; ?>
@@ -59,15 +63,16 @@ $isEditable = $obj->id == "" || $obj->canEdit();
 <hr />
 
 <?php
-Msg::show(1,'Turno guardado con &eacute;xito.','info');
-Msg::show(2,'Turno cerrado con &eacute;xito.','success');
-Msg::show(3,'Turno aprobado con &eacute;xito.','success');
-Msg::show(4,'Turno reabierto con &eacute;xito.','warning');
+Msg::show(1,'Cierre de turno guardado con exito.','info');
+Msg::show(2,'Turno cerrado con exito.','success');
+Msg::show(3,'Turno aprobado con exito.','success');
+Msg::show(4,'Turno reabierto con exito.','warning');
 Msg::show(10,'Faltante agregado.','info');
 Msg::show(11,'Anticipo agregado.','info');
-Msg::show(12,'Factura a cr&eacute;dito agregada.','info');
+Msg::show(12,'Factura a credito agregada.','info');
 Msg::show(13,'Ingreso PROSEGUR agregado.','info');
 Msg::show(14,'Gasto caja chica agregado.','info');
+Msg::show(15,'Donacion agregada.','info');
 Msg::show(20,'Registro eliminado.','warning');
 ?>
 
@@ -95,23 +100,6 @@ Msg::show(20,'Registro eliminado.','warning');
             <div class="col-6 mb-2">Fecha:</div>
             <div class="col-6 mb-2">
               <input type="date" class="form-control form-control-sm" name="fecha" value="<?= $obj->fecha ?: date('Y-m-d'); ?>" <?= !$isEditable ? 'readonly' : '' ?>>
-            </div>
-            <div class="col-6 mb-2">Hora Inicio:</div>
-            <div class="col-6 mb-2">
-              <input type="time" class="form-control form-control-sm" name="hora_inicio" value="<?= $obj->hora_inicio; ?>" <?= !$isEditable ? 'readonly' : '' ?>>
-            </div>
-            <div class="col-6 mb-2">Hora Fin:</div>
-            <div class="col-6 mb-2">
-              <input type="time" class="form-control form-control-sm" name="hora_fin" value="<?= $obj->hora_fin; ?>" <?= !$isEditable ? 'readonly' : '' ?>>
-            </div>
-            <div class="col-6 mb-2">Atendedor:</div>
-            <div class="col-6 mb-2">
-              <select name="id_atendedores" class="form-control form-control-sm" <?= !$isEditable ? 'disabled' : '' ?>>
-                <option value="">Seleccionar...</option>
-                <?php foreach($atendedores as $a) { ?>
-                <option value="<?= $a->id; ?>" <?= ($obj->id_atendedores == $a->id) ? 'selected' : ''; ?>><?= htmlspecialchars($a->nombre_completo); ?></option>
-                <?php } ?>
-              </select>
             </div>
             <div class="col-12 mb-2">Observaciones:</div>
             <div class="col-12 mb-2">
@@ -248,17 +236,19 @@ Msg::show(20,'Registro eliminado.','warning');
         <table class="table table-sm mb-0">
           <thead class="table-light">
             <tr>
-              <th>Descripcion</th>
-              <th>Tipo</th>
+              <th>Atendedor</th>
+              <th>Motivo</th>
               <th class="text-end">Monto</th>
               <?php if($isEditable) { ?><th></th><?php } ?>
             </tr>
           </thead>
           <tbody id="faltantes-list">
-            <?php foreach($faltantes as $f) { ?>
+            <?php foreach($faltantes as $f) {
+              $atendedor_f = $f->getAtendedor();
+            ?>
             <tr class="item-row">
-              <td><?= htmlspecialchars($f->descripcion); ?></td>
-              <td><span class="badge bg-secondary"><?= $f->tipo; ?></span></td>
+              <td><?= $atendedor_f ? htmlspecialchars($atendedor_f->nombre_completo) : '-'; ?></td>
+              <td><?= htmlspecialchars($f->motivo); ?></td>
               <td class="text-end text-danger"><?= $f->getFormattedMonto(); ?></td>
               <?php if($isEditable) { ?>
               <td><button class="btn btn-sm btn-link text-danger delete-item-btn" data-tipo="faltante" data-id="<?= $f->id; ?>"><i class="fas fa-times"></i></button></td>
@@ -300,10 +290,10 @@ Msg::show(20,'Registro eliminado.','warning');
           </thead>
           <tbody id="anticipos-list">
             <?php foreach($anticipos as $a) {
-              $atendedor_anticipo = $a->getAtendedor();
+              $atendedor_a = $a->getAtendedor();
             ?>
             <tr class="item-row">
-              <td><?= $atendedor_anticipo ? htmlspecialchars($atendedor_anticipo->nombre_completo) : '-'; ?></td>
+              <td><?= $atendedor_a ? htmlspecialchars($atendedor_a->nombre_completo) : '-'; ?></td>
               <td><?= htmlspecialchars($a->motivo); ?></td>
               <td class="text-end text-warning"><?= $a->getFormattedMonto(); ?></td>
               <?php if($isEditable) { ?>
@@ -348,7 +338,7 @@ Msg::show(20,'Registro eliminado.','warning');
             <?php foreach($facturas_credito as $f) { ?>
             <tr class="item-row">
               <td><?= htmlspecialchars($f->numero_factura); ?></td>
-              <td><?= htmlspecialchars($f->nombre_cliente); ?></td>
+              <td><?= htmlspecialchars($f->getClienteNombre()); ?></td>
               <td class="text-end"><?= $f->getFormattedMonto(); ?></td>
               <?php if($isEditable) { ?>
               <td><button class="btn btn-sm btn-link text-danger delete-item-btn" data-tipo="factura" data-id="<?= $f->id; ?>"><i class="fas fa-times"></i></button></td>
@@ -382,17 +372,17 @@ Msg::show(20,'Registro eliminado.','warning');
         <table class="table table-sm mb-0">
           <thead class="table-light">
             <tr>
-              <th>N Boleta</th>
-              <th>Descripcion</th>
+              <th>Atendedor</th>
               <th class="text-end">Monto</th>
               <?php if($isEditable) { ?><th></th><?php } ?>
             </tr>
           </thead>
           <tbody id="prosegur-list">
-            <?php foreach($ingresos_prosegur as $i) { ?>
+            <?php foreach($ingresos_prosegur as $i) {
+              $atendedor_i = $i->getAtendedor();
+            ?>
             <tr class="item-row">
-              <td><?= htmlspecialchars($i->numero_boleta); ?></td>
-              <td><?= htmlspecialchars($i->descripcion); ?></td>
+              <td><?= $atendedor_i ? htmlspecialchars($atendedor_i->nombre_completo) : '-'; ?></td>
               <td class="text-end text-success"><?= $i->getFormattedMonto(); ?></td>
               <?php if($isEditable) { ?>
               <td><button class="btn btn-sm btn-link text-danger delete-item-btn" data-tipo="prosegur" data-id="<?= $i->id; ?>"><i class="fas fa-times"></i></button></td>
@@ -400,12 +390,12 @@ Msg::show(20,'Registro eliminado.','warning');
             </tr>
             <?php } ?>
             <?php if(count($ingresos_prosegur) == 0) { ?>
-            <tr><td colspan="4" class="text-center text-muted">Sin ingresos</td></tr>
+            <tr><td colspan="3" class="text-center text-muted">Sin ingresos</td></tr>
             <?php } ?>
           </tbody>
           <tfoot class="table-secondary">
             <tr>
-              <td colspan="2"><strong>Total</strong></td>
+              <td><strong>Total</strong></td>
               <td class="text-end text-success"><strong><?= Turno::formatMoney($obj->total_ingresos_prosegur); ?></strong></td>
               <?php if($isEditable) { ?><td></td><?php } ?>
             </tr>
@@ -417,7 +407,7 @@ Msg::show(20,'Registro eliminado.','warning');
     <!-- Gastos Caja Chica -->
     <div class="card shadow-sm section-card">
       <div class="card-header py-2 d-flex justify-content-between align-items-center">
-        <h6 class="m-0 font-weight-bold text-secondary"><i class="fas fa-fw fa-receipt"></i> Gastos Caja Chica / Donaciones</h6>
+        <h6 class="m-0 font-weight-bold text-secondary"><i class="fas fa-fw fa-receipt"></i> Gastos Caja Chica</h6>
         <?php if($isEditable) { ?>
         <button class="btn btn-sm btn-outline-secondary add-gasto-btn"><i class="fas fa-plus"></i></button>
         <?php } ?>
@@ -426,8 +416,8 @@ Msg::show(20,'Registro eliminado.','warning');
         <table class="table table-sm mb-0">
           <thead class="table-light">
             <tr>
-              <th>Descripcion</th>
               <th>Tipo</th>
+              <th>Descripcion</th>
               <th class="text-end">Monto</th>
               <?php if($isEditable) { ?><th></th><?php } ?>
             </tr>
@@ -435,8 +425,8 @@ Msg::show(20,'Registro eliminado.','warning');
           <tbody id="gastos-list">
             <?php foreach($gastos_caja_chica as $g) { ?>
             <tr class="item-row">
+              <td><?= htmlspecialchars($g->getTipoNombre()); ?></td>
               <td><?= htmlspecialchars($g->descripcion); ?></td>
-              <td><span class="badge <?= $g->getTipoBadgeClass(); ?>"><?= $g->tipo; ?></span></td>
               <td class="text-end"><?= $g->getFormattedMonto(); ?></td>
               <?php if($isEditable) { ?>
               <td><button class="btn btn-sm btn-link text-danger delete-item-btn" data-tipo="gasto" data-id="<?= $g->id; ?>"><i class="fas fa-times"></i></button></td>
@@ -454,6 +444,91 @@ Msg::show(20,'Registro eliminado.','warning');
               <?php if($isEditable) { ?><td></td><?php } ?>
             </tr>
           </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Donaciones -->
+    <div class="card shadow-sm section-card">
+      <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-fw fa-gift"></i> Donaciones</h6>
+        <?php if($isEditable) { ?>
+        <button class="btn btn-sm btn-outline-primary add-donacion-btn"><i class="fas fa-plus"></i></button>
+        <?php } ?>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Atendedor</th>
+              <th>Descripcion</th>
+              <th class="text-end">Monto</th>
+              <?php if($isEditable) { ?><th></th><?php } ?>
+            </tr>
+          </thead>
+          <tbody id="donaciones-list">
+            <?php foreach($donaciones as $d) {
+              $atendedor_d = $d->getAtendedor();
+            ?>
+            <tr class="item-row">
+              <td><?= $atendedor_d ? htmlspecialchars($atendedor_d->nombre_completo) : '-'; ?></td>
+              <td><?= htmlspecialchars($d->descripcion); ?></td>
+              <td class="text-end text-primary"><?= $d->getFormattedMonto(); ?></td>
+              <?php if($isEditable) { ?>
+              <td><button class="btn btn-sm btn-link text-danger delete-item-btn" data-tipo="donacion" data-id="<?= $d->id; ?>"><i class="fas fa-times"></i></button></td>
+              <?php } ?>
+            </tr>
+            <?php } ?>
+            <?php if(count($donaciones) == 0) { ?>
+            <tr><td colspan="4" class="text-center text-muted">Sin donaciones</td></tr>
+            <?php } ?>
+          </tbody>
+          <tfoot class="table-secondary">
+            <tr>
+              <td colspan="2"><strong>Total</strong></td>
+              <td class="text-end text-primary"><strong><?= Turno::formatMoney($obj->total_donaciones); ?></strong></td>
+              <?php if($isEditable) { ?><td></td><?php } ?>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Comisiones -->
+    <div class="card shadow-sm section-card">
+      <div class="card-header py-2 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-dark"><i class="fas fa-fw fa-percentage"></i> Comisiones</h6>
+        <?php if($isEditable) { ?>
+        <button class="btn btn-sm btn-outline-dark add-comision-btn"><i class="fas fa-plus"></i></button>
+        <?php } ?>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Atendedor</th>
+              <th>Descripcion</th>
+              <th class="text-end">Monto</th>
+              <?php if($isEditable) { ?><th></th><?php } ?>
+            </tr>
+          </thead>
+          <tbody id="comisiones-list">
+            <?php foreach($comisiones as $c) {
+              $atendedor_c = $c->getAtendedor();
+            ?>
+            <tr class="item-row">
+              <td><?= $atendedor_c ? htmlspecialchars($atendedor_c->nombre_completo) : '-'; ?></td>
+              <td><?= htmlspecialchars($c->descripcion); ?></td>
+              <td class="text-end"><?= $c->getFormattedMonto(); ?></td>
+              <?php if($isEditable) { ?>
+              <td><button class="btn btn-sm btn-link text-danger delete-item-btn" data-tipo="comision" data-id="<?= $c->id; ?>"><i class="fas fa-times"></i></button></td>
+              <?php } ?>
+            </tr>
+            <?php } ?>
+            <?php if(count($comisiones) == 0) { ?>
+            <tr><td colspan="4" class="text-center text-muted">Sin comisiones</td></tr>
+            <?php } ?>
+          </tbody>
         </table>
       </div>
     </div>
@@ -500,15 +575,12 @@ Msg::show(20,'Registro eliminado.','warning');
         <form id="faltante-form">
           <input type="hidden" name="id_turnos" value="<?= $obj->id; ?>">
           <div class="mb-3">
-            <label class="form-label">Descripcion</label>
-            <input type="text" class="form-control" name="descripcion" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Tipo</label>
-            <select class="form-control" name="tipo">
-              <option value="Efectivo">Efectivo</option>
-              <option value="Producto">Producto</option>
-              <option value="Otro">Otro</option>
+            <label class="form-label">Atendedor</label>
+            <select class="form-control" name="id_atendedores" required>
+              <option value="">Seleccionar...</option>
+              <?php foreach($atendedores as $a) { ?>
+              <option value="<?= $a->id; ?>"><?= htmlspecialchars($a->nombre_completo); ?></option>
+              <?php } ?>
             </select>
           </div>
           <div class="mb-3">
@@ -516,8 +588,8 @@ Msg::show(20,'Registro eliminado.','warning');
             <input type="number" class="form-control" name="monto" min="0" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Observaciones</label>
-            <textarea class="form-control" name="observaciones" rows="2"></textarea>
+            <label class="form-label">Motivo</label>
+            <input type="text" class="form-control" name="motivo" required>
           </div>
         </form>
       </div>
@@ -541,7 +613,7 @@ Msg::show(20,'Registro eliminado.','warning');
         <form id="anticipo-form">
           <input type="hidden" name="id_turnos" value="<?= $obj->id; ?>">
           <div class="mb-3">
-            <label class="form-label">Atendedor que recibe</label>
+            <label class="form-label">Atendedor</label>
             <select class="form-control" name="id_atendedores" required>
               <option value="">Seleccionar...</option>
               <?php foreach($atendedores as $a) { ?>
@@ -550,16 +622,12 @@ Msg::show(20,'Registro eliminado.','warning');
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Motivo</label>
-            <input type="text" class="form-control" name="motivo" required>
-          </div>
-          <div class="mb-3">
             <label class="form-label">Monto</label>
             <input type="number" class="form-control" name="monto" min="0" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Observaciones</label>
-            <textarea class="form-control" name="observaciones" rows="2"></textarea>
+            <label class="form-label">Motivo</label>
+            <input type="text" class="form-control" name="motivo" required>
           </div>
         </form>
       </div>
@@ -587,20 +655,17 @@ Msg::show(20,'Registro eliminado.','warning');
             <input type="text" class="form-control" name="numero_factura" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">RUT Cliente</label>
-            <input type="text" class="form-control" name="rut_cliente" placeholder="12.345.678-9">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Nombre Cliente</label>
-            <input type="text" class="form-control" name="nombre_cliente" required>
+            <label class="form-label">Cliente</label>
+            <select class="form-control" name="id_clientes" required>
+              <option value="">Seleccionar...</option>
+              <?php foreach($clientes as $c) { ?>
+              <option value="<?= $c->id; ?>"><?= htmlspecialchars($c->nombre); ?></option>
+              <?php } ?>
+            </select>
           </div>
           <div class="mb-3">
             <label class="form-label">Monto</label>
             <input type="number" class="form-control" name="monto" min="0" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Fecha Vencimiento</label>
-            <input type="date" class="form-control" name="fecha_vencimiento">
           </div>
         </form>
       </div>
@@ -624,24 +689,17 @@ Msg::show(20,'Registro eliminado.','warning');
         <form id="prosegur-form">
           <input type="hidden" name="id_turnos" value="<?= $obj->id; ?>">
           <div class="mb-3">
-            <label class="form-label">N Boleta</label>
-            <input type="text" class="form-control" name="numero_boleta" required>
+            <label class="form-label">Atendedor</label>
+            <select class="form-control" name="id_atendedores" required>
+              <option value="">Seleccionar...</option>
+              <?php foreach($atendedores as $a) { ?>
+              <option value="<?= $a->id; ?>"><?= htmlspecialchars($a->nombre_completo); ?></option>
+              <?php } ?>
+            </select>
           </div>
           <div class="mb-3">
             <label class="form-label">Monto</label>
             <input type="number" class="form-control" name="monto" min="0" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Fecha Ingreso</label>
-            <input type="date" class="form-control" name="fecha_ingreso" value="<?= date('Y-m-d'); ?>">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Hora Ingreso</label>
-            <input type="time" class="form-control" name="hora_ingreso">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Descripcion</label>
-            <textarea class="form-control" name="descripcion" rows="2"></textarea>
           </div>
         </form>
       </div>
@@ -666,43 +724,102 @@ Msg::show(20,'Registro eliminado.','warning');
           <input type="hidden" name="id_turnos" value="<?= $obj->id; ?>">
           <div class="mb-3">
             <label class="form-label">Tipo</label>
-            <select class="form-control" name="tipo">
-              <option value="Gasto">Gasto</option>
-              <option value="Donacion">Donacion</option>
+            <select class="form-control" name="id_tipos_de_gasto" required>
+              <option value="">Seleccionar...</option>
+              <?php foreach($tipos_de_gasto as $t) { ?>
+              <option value="<?= $t->id; ?>"><?= htmlspecialchars($t->nombre); ?></option>
+              <?php } ?>
             </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Categoria</label>
-            <select class="form-control" name="categoria">
-              <option value="Limpieza">Limpieza</option>
-              <option value="Oficina">Oficina</option>
-              <option value="Mantenimiento">Mantenimiento</option>
-              <option value="Transporte">Transporte</option>
-              <option value="Alimentacion">Alimentacion</option>
-              <option value="Otros">Otros</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Descripcion</label>
-            <input type="text" class="form-control" name="descripcion" required>
           </div>
           <div class="mb-3">
             <label class="form-label">Monto</label>
             <input type="number" class="form-control" name="monto" min="0" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">N Documento</label>
-            <input type="text" class="form-control" name="numero_documento">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Proveedor</label>
-            <input type="text" class="form-control" name="proveedor">
+            <label class="form-label">Descripcion</label>
+            <input type="text" class="form-control" name="descripcion" required>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-primary" id="guardar-gasto-btn">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Agregar Donacion -->
+<div class="modal fade" id="add-donacion-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-gift text-primary"></i> Agregar Donacion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="donacion-form">
+          <input type="hidden" name="id_turnos" value="<?= $obj->id; ?>">
+          <div class="mb-3">
+            <label class="form-label">Atendedor</label>
+            <select class="form-control" name="id_atendedores">
+              <option value="">Seleccionar...</option>
+              <?php foreach($atendedores as $a) { ?>
+              <option value="<?= $a->id; ?>"><?= htmlspecialchars($a->nombre_completo); ?></option>
+              <?php } ?>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Monto</label>
+            <input type="number" class="form-control" name="monto" min="0" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descripcion</label>
+            <input type="text" class="form-control" name="descripcion">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="guardar-donacion-btn">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Agregar Comision -->
+<div class="modal fade" id="add-comision-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-percentage text-dark"></i> Agregar Comision</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="comision-form">
+          <input type="hidden" name="id_turnos" value="<?= $obj->id; ?>">
+          <div class="mb-3">
+            <label class="form-label">Atendedor</label>
+            <select class="form-control" name="id_atendedores" required>
+              <option value="">Seleccionar...</option>
+              <?php foreach($atendedores as $a) { ?>
+              <option value="<?= $a->id; ?>"><?= htmlspecialchars($a->nombre_completo); ?></option>
+              <?php } ?>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Monto</label>
+            <input type="number" class="form-control" name="monto" min="0" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descripcion</label>
+            <input type="text" class="form-control" name="descripcion">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-dark" id="guardar-comision-btn">Guardar</button>
       </div>
     </div>
   </div>
@@ -788,9 +905,6 @@ $('#guardar-turno-btn').click(function(){
     id: $('input[name="id"]').val(),
     entidad: 'turnos',
     fecha: emptyToNull($('input[name="fecha"]').val()),
-    hora_inicio: emptyToNull($('input[name="hora_inicio"]').val()),
-    hora_fin: emptyToNull($('input[name="hora_fin"]').val()),
-    id_atendedores: emptyToNull($('select[name="id_atendedores"]').val()),
     observaciones: $('textarea[name="observaciones"]').val(),
     billetes_20000: $('input[name="billetes_20000"]').val() || 0,
     billetes_10000: $('input[name="billetes_10000"]').val() || 0,
@@ -903,6 +1017,8 @@ $('.add-anticipo-btn').click(function(){ $('#add-anticipo-modal').modal('show');
 $('.add-factura-btn').click(function(){ $('#add-factura-modal').modal('show'); });
 $('.add-prosegur-btn').click(function(){ $('#add-prosegur-modal').modal('show'); });
 $('.add-gasto-btn').click(function(){ $('#add-gasto-modal').modal('show'); });
+$('.add-donacion-btn').click(function(){ $('#add-donacion-modal').modal('show'); });
+$('.add-comision-btn').click(function(){ $('#add-comision-modal').modal('show'); });
 
 // Save items
 function saveItem(formId, endpoint, msgNum) {
@@ -933,6 +1049,8 @@ $('#guardar-anticipo-btn').click(function(){ saveItem('anticipo-form', 'ajax_gua
 $('#guardar-factura-btn').click(function(){ saveItem('factura-form', 'ajax_guardarTurnoFacturaCredito.php', 12); });
 $('#guardar-prosegur-btn').click(function(){ saveItem('prosegur-form', 'ajax_guardarTurnoIngresoProsegur.php', 13); });
 $('#guardar-gasto-btn').click(function(){ saveItem('gasto-form', 'ajax_guardarTurnoGastoCajaChica.php', 14); });
+$('#guardar-donacion-btn').click(function(){ saveItem('donacion-form', 'ajax_guardarTurnoDonacion.php', 15); });
+$('#guardar-comision-btn').click(function(){ saveItem('comision-form', 'ajax_guardarTurnoComision.php', 16); });
 
 // Delete items
 $('.delete-item-btn').click(function(e){
@@ -949,6 +1067,8 @@ $('.delete-item-btn').click(function(e){
     case 'factura': endpoint = 'ajax_eliminarTurnoFacturaCredito.php'; break;
     case 'prosegur': endpoint = 'ajax_eliminarTurnoIngresoProsegur.php'; break;
     case 'gasto': endpoint = 'ajax_eliminarTurnoGastoCajaChica.php'; break;
+    case 'donacion': endpoint = 'ajax_eliminarTurnoDonacion.php'; break;
+    case 'comision': endpoint = 'ajax_eliminarTurnoComision.php'; break;
   }
 
   $.ajax({

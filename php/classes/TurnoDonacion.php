@@ -1,25 +1,24 @@
 <?php
 /**
- * TurnoGastoCajaChica (Petty Cash Expense) Class
+ * TurnoDonacion (Donation) Class
  *
- * Tracks petty cash expenses (gastos caja chica) during a shift.
- *
- * Fields: id_tipos_de_gasto, monto, descripcion
+ * Tracks donations during a shift.
+ * Separate entity from gastos caja chica.
  */
-class TurnoGastoCajaChica extends Base {
+class TurnoDonacion extends Base {
 
   public $id = "";
   public $id_turnos = "";
-  public $id_tipos_de_gasto = "";
+  public $id_atendedores = "";
   public $monto = 0;
   public $descripcion = "";
-  public $estado = "activo";  // activo, eliminado
+  public $estado = "activo";
   public $creada = "";
   public $actualizada = "";
   public $creado_por = "";
 
   function __construct($id = null) {
-    $this->tableName("turnos_gastos_caja_chica");
+    $this->tableName("turnos_donaciones");
     if($id) {
       $this->id = $id;
       $this->getFromDB();
@@ -41,7 +40,7 @@ class TurnoGastoCajaChica extends Base {
    */
   public function save() {
     // Sanitize empty values
-    if($this->id_tipos_de_gasto === '' || $this->id_tipos_de_gasto === '0') $this->id_tipos_de_gasto = null;
+    if($this->id_atendedores === '' || $this->id_atendedores === '0') $this->id_atendedores = null;
 
     $this->actualizada = date('Y-m-d H:i:s');
     if($this->id == "") {
@@ -66,21 +65,13 @@ class TurnoGastoCajaChica extends Base {
   }
 
   /**
-   * Get the TipoDeGasto
+   * Get the Atendedor
    */
-  public function getTipoDeGasto() {
-    if($this->id_tipos_de_gasto == "" || $this->id_tipos_de_gasto == 0) {
+  public function getAtendedor() {
+    if($this->id_atendedores == "" || $this->id_atendedores == 0) {
       return null;
     }
-    return new TipoDeGasto($this->id_tipos_de_gasto);
-  }
-
-  /**
-   * Get tipo name (helper for display)
-   */
-  public function getTipoNombre() {
-    $tipo = $this->getTipoDeGasto();
-    return $tipo ? $tipo->nombre : '-';
+    return new Atendedor($this->id_atendedores);
   }
 
   /**
@@ -89,7 +80,7 @@ class TurnoGastoCajaChica extends Base {
   public function updateTurnoTotal() {
     $turno = $this->getTurno();
     if($turno) {
-      $turno->recalculateTotalGastosCajaChica();
+      $turno->recalculateTotalDonaciones();
     }
   }
 
@@ -132,7 +123,7 @@ class TurnoGastoCajaChica extends Base {
   }
 
   /**
-   * Get all gastos for a turno
+   * Get all donaciones for a turno
    */
   public static function getByTurno($id_turno) {
     return self::getAll("WHERE id_turnos='".$id_turno."' AND estado!='eliminado' ORDER BY id ASC");
@@ -142,18 +133,18 @@ class TurnoGastoCajaChica extends Base {
    * Get total amount for a turno
    */
   public static function getTotalByTurno($id_turno) {
-    $gastos = self::getByTurno($id_turno);
+    $donaciones = self::getByTurno($id_turno);
     $total = 0;
-    foreach($gastos as $g) {
-      $total += floatval($g->monto);
+    foreach($donaciones as $d) {
+      $total += floatval($d->monto);
     }
     return $total;
   }
 
   /**
-   * Get all gastos by tipo
+   * Get all donaciones for an atendedor
    */
-  public static function getByTipo($id_tipo) {
-    return self::getAll("WHERE id_tipos_de_gasto='".$id_tipo."' AND estado!='eliminado' ORDER BY creada DESC");
+  public static function getByAtendedor($id_atendedor) {
+    return self::getAll("WHERE id_atendedores='".$id_atendedor."' AND estado!='eliminado' ORDER BY creada DESC");
   }
 }

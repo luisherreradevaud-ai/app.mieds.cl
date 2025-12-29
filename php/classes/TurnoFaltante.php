@@ -3,17 +3,18 @@
  * TurnoFaltante (Shortage) Class
  *
  * Tracks shortages (faltantes) reported during a shift.
- * Each shortage is linked to a specific shift.
+ * Each shortage is linked to a specific shift and atendedor.
+ *
+ * Fields: id_atendedores, monto, motivo, descripcion
  */
 class TurnoFaltante extends Base {
 
   public $id = "";
   public $id_turnos = "";
-  public $descripcion = "";
+  public $id_atendedores = "";
   public $monto = 0;
-  public $tipo = "";  // Efectivo, Producto, Otro
-  public $codigo_producto = "";  // Optional: product code if applicable
-  public $cantidad = 0;  // Optional: quantity if product
+  public $motivo = "";
+  public $descripcion = "";
   public $observaciones = "";
   public $estado = "activo";  // activo, eliminado
   public $creada = "";
@@ -42,6 +43,9 @@ class TurnoFaltante extends Base {
    * Override save to update timestamps
    */
   public function save() {
+    // Sanitize empty values
+    if($this->id_atendedores === '' || $this->id_atendedores === '0') $this->id_atendedores = null;
+
     $this->actualizada = date('Y-m-d H:i:s');
     if($this->id == "") {
       $this->creada = date('Y-m-d H:i:s');
@@ -62,6 +66,16 @@ class TurnoFaltante extends Base {
       return null;
     }
     return new Turno($this->id_turnos);
+  }
+
+  /**
+   * Get the Atendedor
+   */
+  public function getAtendedor() {
+    if($this->id_atendedores == "" || $this->id_atendedores == 0) {
+      return null;
+    }
+    return new Atendedor($this->id_atendedores);
   }
 
   /**
@@ -132,13 +146,9 @@ class TurnoFaltante extends Base {
   }
 
   /**
-   * Get tipo options for dropdowns
+   * Get all faltantes for an atendedor
    */
-  public static function getTipos() {
-    return array(
-      'Efectivo' => 'Efectivo',
-      'Producto' => 'Producto',
-      'Otro' => 'Otro'
-    );
+  public static function getByAtendedor($id_atendedor) {
+    return self::getAll("WHERE id_atendedores='".$id_atendedor."' AND estado!='eliminado' ORDER BY creada DESC");
   }
 }

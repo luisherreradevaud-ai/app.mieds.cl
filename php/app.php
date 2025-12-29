@@ -543,7 +543,7 @@ function createObjFromTableName($table_name,$id){
   if($table_name=="gastos") {
     $obj = new Gasto($id);
   } else
-  if($table_name=="tipos_de_gastos") {
+  if($table_name=="tipos_de_gastos" || $table_name=="tipos_de_gasto") {
     $obj = new TipoDeGasto($id);
   } else
   if($table_name=="tareas") {

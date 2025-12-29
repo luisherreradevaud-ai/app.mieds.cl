@@ -4,17 +4,15 @@
  *
  * Tracks PROSEGUR MAE income during a shift.
  * PROSEGUR is a cash handling and security company.
+ *
+ * Fields: id_atendedores, monto
  */
 class TurnoIngresoProsegur extends Base {
 
   public $id = "";
   public $id_turnos = "";
-  public $numero_boleta = "";  // PROSEGUR receipt number
+  public $id_atendedores = "";
   public $monto = 0;
-  public $fecha_ingreso = "";
-  public $hora_ingreso = "";
-  public $descripcion = "";
-  public $observaciones = "";
   public $estado = "activo";  // activo, eliminado
   public $creada = "";
   public $actualizada = "";
@@ -42,6 +40,9 @@ class TurnoIngresoProsegur extends Base {
    * Override save to update timestamps
    */
   public function save() {
+    // Sanitize empty values
+    if($this->id_atendedores === '' || $this->id_atendedores === '0') $this->id_atendedores = null;
+
     $this->actualizada = date('Y-m-d H:i:s');
     if($this->id == "") {
       $this->creada = date('Y-m-d H:i:s');
@@ -62,6 +63,16 @@ class TurnoIngresoProsegur extends Base {
       return null;
     }
     return new Turno($this->id_turnos);
+  }
+
+  /**
+   * Get the Atendedor
+   */
+  public function getAtendedor() {
+    if($this->id_atendedores == "" || $this->id_atendedores == 0) {
+      return null;
+    }
+    return new Atendedor($this->id_atendedores);
   }
 
   /**
@@ -113,14 +124,6 @@ class TurnoIngresoProsegur extends Base {
   }
 
   /**
-   * Get formatted ingreso date
-   */
-  public function getFormattedFechaIngreso() {
-    if($this->fecha_ingreso == "" || $this->fecha_ingreso == "0000-00-00") return "";
-    return date('d-m-Y', strtotime($this->fecha_ingreso));
-  }
-
-  /**
    * Get all ingresos for a turno
    */
   public static function getByTurno($id_turno) {
@@ -140,21 +143,9 @@ class TurnoIngresoProsegur extends Base {
   }
 
   /**
-   * Get ingresos by date range
+   * Get all ingresos for an atendedor
    */
-  public static function getByDateRange($startDate, $endDate) {
-    return self::getAll("WHERE estado!='eliminado' AND fecha_ingreso >= '".$startDate."' AND fecha_ingreso <= '".$endDate."' ORDER BY fecha_ingreso DESC");
-  }
-
-  /**
-   * Get total by date range
-   */
-  public static function getTotalByDateRange($startDate, $endDate) {
-    $ingresos = self::getByDateRange($startDate, $endDate);
-    $total = 0;
-    foreach($ingresos as $i) {
-      $total += floatval($i->monto);
-    }
-    return $total;
+  public static function getByAtendedor($id_atendedor) {
+    return self::getAll("WHERE id_atendedores='".$id_atendedor."' AND estado!='eliminado' ORDER BY creada DESC");
   }
 }
