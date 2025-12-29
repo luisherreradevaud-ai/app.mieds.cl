@@ -81,6 +81,13 @@ class Turno extends Base {
    * Override save to calculate totals before saving
    */
   public function save() {
+    // Convertir strings vacíos a NULL para campos TIME/DATE/INT que no aceptan ''
+    if($this->hora_inicio === '') $this->hora_inicio = null;
+    if($this->hora_fin === '') $this->hora_fin = null;
+    if($this->id_atendedores === '' || $this->id_atendedores === '0') $this->id_atendedores = null;
+    if($this->cerrado_por === '') $this->cerrado_por = null;
+    if($this->aprobado_por === '') $this->aprobado_por = null;
+
     $this->calculateTotals();
     $this->actualizada = date('Y-m-d H:i:s');
     if($this->id == "") {

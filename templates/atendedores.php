@@ -69,7 +69,7 @@ if($msg == 2) {
 
 new DataTable('#objs-table', {
     language: {
-        url: '//cdn.datatables.net/plug-ins/2.1.3/i18n/es-CL.json'
+        url: 'https://cdn.datatables.net/plug-ins/2.1.3/i18n/es-CL.json'
     },
     pageLength: 50,
     stateSave: true

@@ -224,7 +224,6 @@ $(document).on('click','#guardar-btn',function(e){
   var data = getDataForm("atendedores");
 
   $.post(url, data, function(response){
-    response = JSON.parse(response);
     if(response.status != "OK") {
       alert("Algo fall&oacute;: " + response.mensaje);
       return false;

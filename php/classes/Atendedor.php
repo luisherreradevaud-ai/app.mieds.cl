@@ -24,7 +24,7 @@ class Atendedor extends Base {
     $this->tableName("atendedores");
     if($id) {
       $this->id = $id;
-      $this->getFromDB();
+      $this->getFromDatabase('id', $id);
     }
   }
 }

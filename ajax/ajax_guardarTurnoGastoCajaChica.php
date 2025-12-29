@@ -1,6 +1,14 @@
 <?php
 require_once("../php/app.php");
 
+// Inicializar sesión y usuario
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$usuario = new Usuario;
+$usuario->checkSession($_SESSION);
+$GLOBALS['usuario'] = $usuario;
+
 header('Content-Type: application/json');
 
 try {

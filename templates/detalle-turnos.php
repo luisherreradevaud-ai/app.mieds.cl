@@ -779,29 +779,35 @@ $('.cash-input').on('input', function(){
 
 // Save Turno
 $('#guardar-turno-btn').click(function(){
+  // Helper: convertir vacío a null para campos que no aceptan string vacío
+  function emptyToNull(val) {
+    return val === '' ? null : val;
+  }
+
   var data = {
     id: $('input[name="id"]').val(),
     entidad: 'turnos',
-    fecha: $('input[name="fecha"]').val(),
-    hora_inicio: $('input[name="hora_inicio"]').val(),
-    hora_fin: $('input[name="hora_fin"]').val(),
-    id_atendedores: $('select[name="id_atendedores"]').val(),
+    fecha: emptyToNull($('input[name="fecha"]').val()),
+    hora_inicio: emptyToNull($('input[name="hora_inicio"]').val()),
+    hora_fin: emptyToNull($('input[name="hora_fin"]').val()),
+    id_atendedores: emptyToNull($('select[name="id_atendedores"]').val()),
     observaciones: $('textarea[name="observaciones"]').val(),
-    billetes_20000: $('input[name="billetes_20000"]').val(),
-    billetes_10000: $('input[name="billetes_10000"]').val(),
-    billetes_5000: $('input[name="billetes_5000"]').val(),
-    billetes_2000: $('input[name="billetes_2000"]').val(),
-    billetes_1000: $('input[name="billetes_1000"]').val(),
-    monedas_500: $('input[name="monedas_500"]').val(),
-    monedas_100: $('input[name="monedas_100"]').val(),
-    monedas_50: $('input[name="monedas_50"]').val(),
-    monedas_10: $('input[name="monedas_10"]').val()
+    billetes_20000: $('input[name="billetes_20000"]').val() || 0,
+    billetes_10000: $('input[name="billetes_10000"]').val() || 0,
+    billetes_5000: $('input[name="billetes_5000"]').val() || 0,
+    billetes_2000: $('input[name="billetes_2000"]').val() || 0,
+    billetes_1000: $('input[name="billetes_1000"]').val() || 0,
+    monedas_500: $('input[name="monedas_500"]').val() || 0,
+    monedas_100: $('input[name="monedas_100"]').val() || 0,
+    monedas_50: $('input[name="monedas_50"]').val() || 0,
+    monedas_10: $('input[name="monedas_10"]').val() || 0
   };
 
   $.ajax({
     url: './ajax/ajax_guardarTurno.php',
     method: 'POST',
     data: data,
+    dataType: 'json',
     success: function(response){
       if(response.status == 'OK') {
         window.location.href = './?s=detalle-turnos&id=' + response.id + '&msg=1';
