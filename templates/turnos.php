@@ -18,12 +18,10 @@
   if($filter_fecha_inicio && $filter_fecha_fin) {
     $conditions .= " AND fecha >= '".$filter_fecha_inicio."' AND fecha <= '".$filter_fecha_fin."'";
   }
-  $conditions .= " ORDER BY fecha DESC, hora_inicio DESC";
+  $conditions .= " ORDER BY fecha DESC, id DESC";
 
-  $turnos = Turno::getAll($conditions);
-
-  // Get all atendedores for filter dropdown
-  $atendedores = Atendedor::getAll("ORDER BY nombre_completo ASC");
+  //$turnos = Turno::getAll($conditions);
+  $turnos = Turno::getAll("ORDER BY fecha DESC, id DESC");
 
   // Calculate summary totals
   $summary = array(
@@ -151,8 +149,6 @@
       <thead>
         <tr>
           <th>Fecha</th>
-          <th>Horario</th>
-          <th>Atendedor</th>
           <th class="text-end">Total Efectivo</th>
           <th class="text-end">Faltantes</th>
           <th class="text-end">Anticipos</th>
@@ -161,14 +157,9 @@
         </tr>
       </thead>
       <tbody>
-        <?php foreach($turnos as $turno) {
-          $atendedor = $turno->getAtendedor();
-          $atendedor_nombre = $atendedor ? $atendedor->nombre_completo : '(Sin asignar)';
-        ?>
+        <?php foreach($turnos as $turno) { ?>
         <tr class="tr-turnos" data-idturnos="<?= $turno->id; ?>">
           <td><?= $turno->getFormattedDate(); ?></td>
-          <td><?= $turno->getTimeRange(); ?></td>
-          <td><?= htmlspecialchars($atendedor_nombre); ?></td>
           <td class="text-end"><?= Turno::formatMoney($turno->total_efectivo); ?></td>
           <td class="text-end <?= ($turno->total_faltantes > 0) ? 'text-danger' : ''; ?>">
             <?= Turno::formatMoney($turno->total_faltantes); ?>
@@ -257,11 +248,11 @@ var turnoIdToProcess = null;
 
 new DataTable('#turnos-table', {
     language: {
-        url: '//cdn.datatables.net/plug-ins/2.1.3/i18n/es-CL.json'
+        url: 'https://cdn.datatables.net/plug-ins/2.1.3/i18n/es-CL.json'
     },
     pageLength: 50,
     stateSave: true,
-    order: [[0, 'desc'], [1, 'desc']]
+    order: [[0, 'desc']]
 });
 
 // Click on row to view detail
