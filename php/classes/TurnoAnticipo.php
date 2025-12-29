@@ -13,6 +13,9 @@ class TurnoAnticipo extends Base {
   public $descripcion = "";
   public $monto = 0;
   public $motivo = "";  // Reason for advance
+  public $numero_cuotas = 1;  // Number of installments
+  public $monto_cuota = 0;  // Amount per installment
+  public $mes_inicio = "";  // Starting month (YYYY-MM)
   public $autorizado_por = "";  // User ID who authorized
   public $observaciones = "";
   public $estado = "activo";  // activo, eliminado
@@ -158,5 +161,126 @@ class TurnoAnticipo extends Base {
       $total += floatval($a->monto);
     }
     return $total;
+  }
+
+  // ==========================================
+  // INSTALLMENT (CUOTA) METHODS
+  // ==========================================
+
+  /**
+   * Get all cuotas for this anticipo
+   */
+  public function getCuotas() {
+    if($this->id == "") return array();
+    return TurnoAnticipoCuota::getByAnticipo($this->id);
+  }
+
+  /**
+   * Get pending cuotas for this anticipo
+   */
+  public function getPendingCuotas() {
+    if($this->id == "") return array();
+    return TurnoAnticipoCuota::getPendingByAnticipo($this->id);
+  }
+
+  /**
+   * Calculate and set monto_cuota based on monto and numero_cuotas
+   */
+  public function calculateMontoCuota() {
+    if($this->numero_cuotas > 0) {
+      $this->monto_cuota = round($this->monto / $this->numero_cuotas, 0);
+    }
+    return $this->monto_cuota;
+  }
+
+  /**
+   * Generate cuotas based on numero_cuotas and mes_inicio
+   * Should be called after save when creating a new anticipo
+   */
+  public function generateCuotas() {
+    if($this->id == "" || $this->numero_cuotas < 1 || $this->mes_inicio == "") {
+      return false;
+    }
+
+    // Delete existing cuotas first
+    $existingCuotas = $this->getCuotas();
+    foreach($existingCuotas as $cuota) {
+      $cuota->delete();
+    }
+
+    // Calculate monto per cuota
+    $montoPorCuota = round($this->monto / $this->numero_cuotas, 0);
+    $montoRestante = $this->monto;
+
+    // Generate cuotas for each month
+    $mesActual = $this->mes_inicio;
+    for($i = 0; $i < $this->numero_cuotas; $i++) {
+      $cuota = new TurnoAnticipoCuota();
+      $cuota->id_anticipos = $this->id;
+      $cuota->mes = $mesActual;
+
+      // Last cuota gets the remaining amount to handle rounding
+      if($i == $this->numero_cuotas - 1) {
+        $cuota->monto = $montoRestante;
+      } else {
+        $cuota->monto = $montoPorCuota;
+        $montoRestante -= $montoPorCuota;
+      }
+
+      $cuota->estado = "pendiente";
+      $cuota->save();
+
+      // Move to next month
+      $mesActual = date('Y-m', strtotime($mesActual . '-01 +1 month'));
+    }
+
+    // Update monto_cuota field
+    $this->monto_cuota = $montoPorCuota;
+    parent::save();
+
+    return true;
+  }
+
+  /**
+   * Get total paid amount from cuotas
+   */
+  public function getTotalPaid() {
+    $cuotas = $this->getCuotas();
+    $total = 0;
+    foreach($cuotas as $cuota) {
+      if($cuota->estado == "pagado") {
+        $total += floatval($cuota->monto);
+      }
+    }
+    return $total;
+  }
+
+  /**
+   * Get total pending amount from cuotas
+   */
+  public function getTotalPending() {
+    return $this->monto - $this->getTotalPaid();
+  }
+
+  /**
+   * Get progress percentage
+   */
+  public function getProgressPercentage() {
+    if($this->monto <= 0) return 0;
+    return round(($this->getTotalPaid() / $this->monto) * 100, 0);
+  }
+
+  /**
+   * Check if fully paid
+   */
+  public function isFullyPaid() {
+    return $this->getTotalPending() <= 0;
+  }
+
+  /**
+   * Get formatted monto_cuota
+   */
+  public function getFormattedMontoCuota() {
+    return '$' . number_format($this->monto_cuota, 0, ',', '.');
   }
 }

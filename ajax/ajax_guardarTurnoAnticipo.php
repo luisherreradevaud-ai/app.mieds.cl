@@ -21,16 +21,31 @@ try {
     throw new Exception('El turno no puede ser modificado');
   }
 
+  $isNew = !isset($_POST['id']) || $_POST['id'] == '';
+
   $anticipo = new TurnoAnticipo($_POST['id'] ?? null);
   $anticipo->setPropertiesNoId($_POST);
   $anticipo->id_turnos = $_POST['id_turnos'];
 
-  if($anticipo->id == "") {
+  // Sanitize cuota fields
+  if(empty($anticipo->numero_cuotas) || $anticipo->numero_cuotas < 1) {
+    $anticipo->numero_cuotas = 1;
+  }
+  if(empty($anticipo->mes_inicio)) {
+    $anticipo->mes_inicio = date('Y-m');
+  }
+
+  if($isNew) {
     $anticipo->creado_por = $GLOBALS['usuario']->id;
     $anticipo->autorizado_por = $GLOBALS['usuario']->id;
   }
 
   $anticipo->save();
+
+  // Generate cuotas for new anticipos
+  if($isNew && $anticipo->numero_cuotas >= 1) {
+    $anticipo->generateCuotas();
+  }
 
   echo json_encode(array(
     'status' => 'OK',

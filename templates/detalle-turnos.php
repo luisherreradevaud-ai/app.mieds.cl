@@ -284,6 +284,7 @@ Msg::show(20,'Registro eliminado.','warning');
             <tr>
               <th>Atendedor</th>
               <th>Motivo</th>
+              <th class="text-center">Cuotas</th>
               <th class="text-end">Monto</th>
               <?php if($isEditable) { ?><th></th><?php } ?>
             </tr>
@@ -295,6 +296,15 @@ Msg::show(20,'Registro eliminado.','warning');
             <tr class="item-row">
               <td><?= $atendedor_a ? htmlspecialchars($atendedor_a->nombre_completo) : '-'; ?></td>
               <td><?= htmlspecialchars($a->motivo); ?></td>
+              <td class="text-center">
+                <?php if($a->numero_cuotas > 1) { ?>
+                <span class="badge bg-secondary" title="<?= $a->numero_cuotas; ?> cuotas de <?= $a->getFormattedMontoCuota(); ?> desde <?= $a->mes_inicio; ?>">
+                  <?= $a->numero_cuotas; ?>x <?= $a->getFormattedMontoCuota(); ?>
+                </span>
+                <?php } else { ?>
+                <span class="text-muted">1</span>
+                <?php } ?>
+              </td>
               <td class="text-end text-warning"><?= $a->getFormattedMonto(); ?></td>
               <?php if($isEditable) { ?>
               <td><button class="btn btn-sm btn-link text-danger delete-item-btn" data-tipo="anticipo" data-id="<?= $a->id; ?>"><i class="fas fa-times"></i></button></td>
@@ -302,12 +312,12 @@ Msg::show(20,'Registro eliminado.','warning');
             </tr>
             <?php } ?>
             <?php if(count($anticipos) == 0) { ?>
-            <tr><td colspan="4" class="text-center text-muted">Sin anticipos</td></tr>
+            <tr><td colspan="5" class="text-center text-muted">Sin anticipos</td></tr>
             <?php } ?>
           </tbody>
           <tfoot class="table-secondary">
             <tr>
-              <td colspan="2"><strong>Total</strong></td>
+              <td colspan="3"><strong>Total</strong></td>
               <td class="text-end text-warning"><strong><?= Turno::formatMoney($obj->total_anticipos); ?></strong></td>
               <?php if($isEditable) { ?><td></td><?php } ?>
             </tr>
@@ -622,12 +632,27 @@ Msg::show(20,'Registro eliminado.','warning');
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Monto</label>
-            <input type="number" class="form-control" name="monto" min="0" required>
+            <label class="form-label">Monto Total</label>
+            <input type="number" class="form-control" name="monto" id="anticipo-monto" min="0" required>
           </div>
           <div class="mb-3">
             <label class="form-label">Motivo</label>
             <input type="text" class="form-control" name="motivo" required>
+          </div>
+          <hr>
+          <h6 class="text-muted">Cuotas Mensuales</h6>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">N&uacute;mero de Cuotas</label>
+              <input type="number" class="form-control" name="numero_cuotas" id="anticipo-num-cuotas" min="1" max="24" value="1" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">Mes Inicio</label>
+              <input type="month" class="form-control" name="mes_inicio" id="anticipo-mes-inicio" value="<?= date('Y-m'); ?>" required>
+            </div>
+          </div>
+          <div class="alert alert-info mb-0" id="anticipo-cuota-preview">
+            <small><strong>Monto por cuota:</strong> <span id="monto-cuota-calc">$0</span></small>
           </div>
         </form>
       </div>
@@ -1045,6 +1070,17 @@ function saveItem(formId, endpoint, msgNum) {
 }
 
 $('#guardar-faltante-btn').click(function(){ saveItem('faltante-form', 'ajax_guardarTurnoFaltante.php', 10); });
+
+// Calculate anticipo cuota preview
+function updateAnticipoCuotaPreview() {
+  var monto = parseFloat($('#anticipo-monto').val()) || 0;
+  var numCuotas = parseInt($('#anticipo-num-cuotas').val()) || 1;
+  if(numCuotas < 1) numCuotas = 1;
+  var montoCuota = Math.round(monto / numCuotas);
+  $('#monto-cuota-calc').text('$' + montoCuota.toLocaleString('es-CL'));
+}
+$('#anticipo-monto, #anticipo-num-cuotas').on('input change', updateAnticipoCuotaPreview);
+
 $('#guardar-anticipo-btn').click(function(){ saveItem('anticipo-form', 'ajax_guardarTurnoAnticipo.php', 11); });
 $('#guardar-factura-btn').click(function(){ saveItem('factura-form', 'ajax_guardarTurnoFacturaCredito.php', 12); });
 $('#guardar-prosegur-btn').click(function(){ saveItem('prosegur-form', 'ajax_guardarTurnoIngresoProsegur.php', 13); });
