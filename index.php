@@ -3,13 +3,14 @@
 
 include("./php/app.php");
 
+
 $usuario = new Usuario;
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 $usuario->checkSession($_SESSION);
-$_SESSION['login'] = "cocholgue";
+$_SESSION['login'] = "mieds";
 
 if(!validaIdExists($_SESSION,'id')) {
     if($_SERVER['REQUEST_URI'] != '/') {  
@@ -23,7 +24,6 @@ if(!validaIdExists($_SESSION,'id')) {
     }
 }
 
-$registro_asistencia = RegistroAsistencia::getAsistencia($usuario->id,date('Y-m-d'));
 
 ?>
 <!DOCTYPE html>
@@ -39,9 +39,9 @@ $registro_asistencia = RegistroAsistencia::getAsistencia($usuario->id,date('Y-m-
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="description" content="Barril - Gestión Cervecera">
-	<meta name="author" content="Barril">
-	<title>Barril.cl</title>
+	<meta name="description" content="MiEDS - Software para Estaciones de Servicio">
+	<meta name="author" content="MiEDS">
+	<title>MiEDS</title>
 
 	<link rel="canonical" href="https://appstack.bootlab.io/dashboard-default.html" />
 	<link rel="shortcut icon" href="img/favicon.ico">
@@ -121,7 +121,7 @@ $registro_asistencia = RegistroAsistencia::getAsistencia($usuario->id,date('Y-m-
             <path d="M10,20c-0.1,0-0.3,0-0.4-0.1l-9-4c-0.5-0.2-0.7-0.8-0.5-1.3c0.2-0.5,0.8-0.7,1.3-0.5l8.6,3.8l8.6-3.8c0.5-0.2,1.1,0,1.3,0.5
               c0.2,0.5,0,1.1-0.5,1.3l-9,4C10.3,20,10.1,20,10,20z"/>
           </svg>
-          <span class="align-middle ms-1 me-3">Barril.CL</span>
+          <span class="align-middle ms-1 me-3">MiEDS</span>
         		</a>
 				<ul class="sidebar-nav">
 					<?php $usuario->renderMenu(); ?>
@@ -149,17 +149,16 @@ $registro_asistencia = RegistroAsistencia::getAsistencia($usuario->id,date('Y-m-
 				<div class="navbar-collapse collapse">
 					<ul class="navbar-nav navbar-align">
 
+						<!-- Herramientas - Por implementar
 						<li class="nav-item dropdown ms-3">
 							<a class="nav-link dropdown-toggle d-inline-block text-info" href="#" data-bs-toggle="dropdown">
 								<i class="align-middle" data-lucide="calculator"></i>
 							</a>
 							<div class="dropdown-menu dropdown-menu-end">
-								<a class="dropdown-item" href="./?s=calculadora-de-grado-alcoholico">Dilusión de Alcohol</a>
-								<a class="dropdown-item" href="./?s=calculadora-de-maceracion">Maceración</a>
-								<a class="dropdown-item" href="./?s=calculadora-de-perfil-de-agua">Perfil de Agua</a>
-								<a class="dropdown-item" href="./?s=calculadora-abv">ABV</a>
+								<a class="dropdown-item" href="./?s=reportes">Reportes</a>
 							</div>
 						</li>
+						-->
 
 						<li class="nav-item">
 							<div class="form-check form-switch mt-2" style="cursor: pointer">
@@ -284,7 +283,7 @@ $registro_asistencia = RegistroAsistencia::getAsistencia($usuario->id,date('Y-m-
 						</div>
 						<div class="col-6 text-end">
 							<p class="mb-0">
-								&copy; 2025 - <a href="./" class="text-muted">Barril</a>
+								&copy; 2025 - <a href="./" class="text-muted">MiEDS</a>
 							</p>
 						</div>
 					</div>
@@ -293,118 +292,7 @@ $registro_asistencia = RegistroAsistencia::getAsistencia($usuario->id,date('Y-m-
 		</div>
 	</div>
 
-	<div class="modal modal-fade" tabindex="-1" role="dialog" id="registro-asistencia-modal">
-		<div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-			<h5 class="modal-title">Registro de Asistencia</h5>
-			<div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
-				<i class="ki-duotone ki-cross fs-1">
-				<span class="path1"></span>
-				<span class="path2"></span>
-				</i>
-			</div>
-			</div>
-			<div class="modal-body">
-				<div class="mb-3" style="vertical-align: middle">
-					<i class="ki-duotone ki-calendar-8 fs-1 text-primary me-3 lh-0">
-						<span class="path1"></span>
-						<span class="path2"></span>
-						<span class="path3"></span>
-						<span class="path4"></span>
-						<span class="path5"></span>
-						<span class="path6"></span>
-					</i>
-					<?= date2fechaEscrita(date('Y-m-d')); ?>
-				</div>
-				<div class="separator mb-5">
-				</div>
-				<div class="mb-3 fw-bold" style="vertical-align: middle">
-					<i class="ki-duotone ki-time fs-1 text-primary me-3 lh-0">
-						<span class="path1"></span>
-						<span class="path2"></span>
-						<span class="path3"></span>
-						<span class="path4"></span>
-						<span class="path5"></span>
-						<span class="path6"></span>
-					</i>
-					Entrada:
-					<span class="ps-3" id="registro-asistencia-entrada-span">
-					<?php
-					if( $registro_asistencia->entrada == '' ) {
-						print 'Sin registrar.';
-					} else {
-						print $registro_asistencia->entrada;
-					}
-					?>
-					</span>
-				</div>
-				<div class="separator mb-5">
-				</div>
-				<div class="fw-bold" style="vertical-align: middle">
-					<i class="ki-duotone ki-time fs-1 text-primary me-3 lh-0">
-						<span class="path1"></span>
-						<span class="path2"></span>
-						<span class="path3"></span>
-						<span class="path4"></span>
-						<span class="path5"></span>
-						<span class="path6"></span>
-					</i>
-					Salida:
-					<span class="ps-3" id="registro-asistencia-salida-span">
-					<?php
-					if( $registro_asistencia->salida == '' ) {
-						print 'Sin registrar.';
-					} else {
-						print $registro_asistencia->salida;
-					}
-					?>
-					</span>
-				</div>
-			</div>
-			<div class="modal-footer">
-				<?php
-				if( $registro_asistencia->entrada == '' ) {
-				?>
-				<button class="btn btn-secondary registrar-asistencia-btn" data-modo="entrada" id="registro-asistencia-entrada-btn" data-bs-dismiss="modal">
-					<i class="ki-duotone ki-check-square fs-1 text-primary me-3 lh-0">
-						<span class="path1"></span>
-						<span class="path2"></span>
-						<span class="path3"></span>
-						<span class="path4"></span>
-						<span class="path5"></span>
-						<span class="path6"></span>
-					</i>
-					Registrar Entrada
-				</button>
-				<?php
-				} else
-				if( $registro_asistencia->salida == '' ) {
-				?>
-				<button class="btn btn-secondary registrar-asistencia-btn" data-modo="salida" id="registro-asistencia-salida-btn" data-bs-dismiss="modal">
-					<i class="ki-duotone ki-check-square fs-1 text-primary me-3 lh-0">
-						<span class="path1"></span>
-						<span class="path2"></span>
-						<span class="path3"></span>
-						<span class="path4"></span>
-						<span class="path5"></span>
-						<span class="path6"></span>
-					</i>
-					Registrar Salida
-				</button>
-				<?php
-				}
-				?>
-			</div>
-		</div>
-		</div>
-	</div>
-
-	
 	<script>
-
-	var registro_asistencia = <?= json_encode($registro_asistencia,JSON_PRETTY_PRINT); ?>;
-	var usuario_ra = '<?= $usuario->registro_asistencia; ?>';
 
 	$(document).ready(function(){
 		getNotificaciones();
@@ -428,7 +316,7 @@ $registro_asistencia = RegistroAsistencia::getAsistencia($usuario->id,date('Y-m-
       var url = "./ajax/ajax_setNotificado.php";
       $.get(url, function(data) {
         $('#cuentaNotificaciones').html('0');
-        document.title = "Barril";
+        document.title = "MiEDS";
       },"json");
     }
 
@@ -437,10 +325,10 @@ $registro_asistencia = RegistroAsistencia::getAsistencia($usuario->id,date('Y-m-
       document.getElementById('cuentaNotificaciones').innerHTML = notificaciones['sinleer'].length;
 
       if(notificaciones['sinleer'].length > 0) {
-        document.title = "(" + notificaciones['sinleer'].length + ") Barril";
+        document.title = "(" + notificaciones['sinleer'].length + ") MiEDS";
 		document.getElementById('tituloNotificaciones').innerHTML = notificaciones['sinleer'].length + " nuevas notificaciones";
       } else {
-        document.title = "Barril";
+        document.title = "MiEDS";
 		document.getElementById('tituloNotificaciones').innerHTML = "No hay nuevas notificaciones";
       }
 
@@ -525,44 +413,6 @@ $registro_asistencia = RegistroAsistencia::getAsistencia($usuario->id,date('Y-m-
 			.append( "<div style='background-color: white'>" + response['titulo'] + "</div>" )
 			.appendTo( ul );
 	};
-
-	$(document).on('click','.registrar-asistencia-btn',function(e){
-
-		e.preventDefault();
-
-		var url = "./ajax/ajax_registrarAsistencia.php";
-		var data = {
-			'modo': $(e.currentTarget).data('modo')
-		};
-		console.log(data);
-
-		$.post(url,data,function(raw){
-			console.log(raw);
-			var response = JSON.parse(raw);
-			if(response.status!="OK") {
-				alert("Algo fallo");
-				return false;
-			} else {
-				if( response.obj.entrada == '' ) {
-					$('#registro-asistencia-entrada-span').html('-');
-					$('#registro-asistencia-entrada-btn').attr('disabled',false);
-				} else {
-					$('#registro-asistencia-entrada-span').html(response.obj.entrada);
-					$('#registro-asistencia-entrada-btn').attr('disabled',true);
-				}
-				if( response.obj.salida == '' ) {
-					$('#registro-asistencia-salida-span').html('-');
-					$('#registro-asistencia-salida-btn').attr('disabled',false);
-				} else {
-					$('#registro-asistencia-salida-span').html(response.obj.salida);
-					$('#registro-asistencia-salida-btn').attr('disabled',true);
-				}
-				
-			}
-		}).fail(function(){
-			alert("No funciono");
-		});
-	});
 
 	$(document).on('click','.cliente-select',function(e) {
 

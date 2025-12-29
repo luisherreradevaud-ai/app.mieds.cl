@@ -18,10 +18,10 @@ if(isset($_GET['url'])) {
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="description" content="Mejora la eficacía de tu gestión con Barril.cl - Empieza ya en el link.">
-	<meta name="author" content="Bootlab">
+	<meta name="description" content="Mejora la eficacia de tu gestion con MiEDS - Software para Estaciones de Servicio">
+	<meta name="author" content="MiEDS">
 
-	<title>Login - Barril.cl Software Cervecero</title>
+	<title>Login - MiEDS Software para Estaciones de Servicio</title>
 
 	<link rel="canonical" href="https://appstack.bootlab.io/auth-sign-in-cover.html" />
 	<link rel="shortcut icon" href="img/favicon.ico">
@@ -44,32 +44,32 @@ if(isset($_GET['url'])) {
 		<div class="row g-0">
 			<div class="col-xl-6 d-none d-xl-flex">
 				<div class="auth-full-page position-relative">
-					<img src="img/photos/unsplash-1.jpg" class="auth-bg" alt="Unsplash">
+					<img src="img/gasolineras.jpg" class="auth-bg" alt="Unsplash">
 					<div class="auth-quote">
 						<i data-lucide="quote"></i>
 						<?php
 						$testimonios = [
-							["texto" => "Llevo casi seis meses utilizando Barril en mi cervecería artesanal y la diferencia es abismal.", "autor" => "Rodrigo, usuario de Barril"],
-							["texto" => "Desde que implementamos Barril, el control de inventario es mucho más eficiente y preciso.", "autor" => "Carolina, jefa de planta"],
-							["texto" => "La gestión de pedidos se simplificó enormemente, ahora todo está centralizado y organizado.", "autor" => "Andrés, gerente comercial"],
-							["texto" => "El módulo de producción nos permite optimizar tiempos y reducir desperdicios significativamente.", "autor" => "Martín, maestro cervecero"],
-							["texto" => "Barril transformó nuestra operación, ahora tenemos visibilidad total de nuestros procesos.", "autor" => "Francisca, administradora"],
-							["texto" => "La integración con Transbank facilitó enormemente el proceso de cobranza y pagos electrónicos.", "autor" => "Pablo, contador"],
-							["texto" => "El sistema de trazabilidad de barriles nos ha ahorrado horas de trabajo manual y errores humanos.", "autor" => "Claudia, supervisora de logística"],
-							["texto" => "Con Barril logramos escalar la producción sin perder el control de calidad ni inventarios.", "autor" => "Diego, dueño de cervecería"],
-							["texto" => "La facturación electrónica integrada nos permitió cumplir con el SII sin complicaciones adicionales.", "autor" => "Valentina, asistente contable"],
-							["texto" => "El seguimiento en tiempo real de entregas mejoró la satisfacción de nuestros clientes notablemente.", "autor" => "José, jefe de distribución"]
+							["texto" => "Llevo casi seis meses utilizando MiEDS en mi estacion de servicio y la diferencia es abismal.", "autor" => "Rodrigo, concesionario Copec"],
+							["texto" => "Desde que implementamos MiEDS, el control de turnos y arqueos es mucho mas eficiente y preciso.", "autor" => "Carolina, administradora de estacion"],
+							["texto" => "La gestion de faltantes y anticipos se simplifico enormemente, ahora todo esta centralizado.", "autor" => "Andres, jefe de operaciones"],
+							["texto" => "El modulo de conteo de efectivo nos permite cerrar turnos en minutos sin errores de calculo.", "autor" => "Martin, supervisor de turno"],
+							["texto" => "MiEDS transformo nuestra operacion, ahora tenemos visibilidad total de cada turno y atendedor.", "autor" => "Francisca, gerente de estacion"],
+							["texto" => "El registro de ingresos PROSEGUR y facturas a credito es automatico y sin complicaciones.", "autor" => "Pablo, contador"],
+							["texto" => "El sistema de comisiones mensuales nos ha ahorrado horas de trabajo manual y errores.", "autor" => "Claudia, jefa de RRHH"],
+							["texto" => "Con MiEDS logramos controlar multiples islas de despacho sin perder detalle de las operaciones.", "autor" => "Diego, dueno de estacion"],
+							["texto" => "El flujo de aprobacion de turnos nos da tranquilidad y control sobre las operaciones diarias.", "autor" => "Valentina, auditora interna"],
+							["texto" => "El seguimiento de gastos caja chica y donaciones mejoro nuestra rendicion de cuentas.", "autor" => "Jose, administrador regional"]
 						];
 						$testimonioAleatorio = $testimonios[array_rand($testimonios)];
 						?>
-						<figure>
+					<!--<figure>
 							<blockquote>
 								<p><?= $testimonioAleatorio['texto'] ?></p>
 							</blockquote>
 							<figcaption>
 								— <?= $testimonioAleatorio['autor'] ?>
 							</figcaption>
-						</figure>
+						</figure>-->
 					</div>
 				</div>
 			</div>
@@ -137,7 +137,7 @@ if(isset($_GET['url'])) {
 						</div>
 						<div class="text-center">
 							<p class="mb-0">
-								&copy; 2025 - <a href="index.html">Barril</a>
+								&copy; 2025 - <a href="index.php">MiEDS</a>
 							</p>
 						</div>
 
